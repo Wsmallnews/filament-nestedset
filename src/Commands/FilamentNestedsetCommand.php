@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Wsmallnews\FilamentNestedset\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class FilamentNestedsetCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'filament-nestedset';
 
     public $description = 'My command';
 

@@ -1,29 +1,27 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "wsmallnews/filament-nestedset",
+    "description": "Filament tree build on kalnoy/nestedset",
     "keywords": [
-        ":vendor_name",
+        "Wsmallnews",
         "laravel",
-        ":package_slug"
+        "filament-nestedset"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/wsmallnews/filament-nestedset",
     "support": {
-        "issues": "https://github.com/:vendor_slug/:package_slug/issues",
-        "source": "https://github.com/:vendor_slug/:package_slug"
+        "issues": "https://github.com/wsmallnews/filament-nestedset/issues",
+        "source": "https://github.com/wsmallnews/filament-nestedset"
     },
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "smallnews",
+            "email": "1371606921@qq.com",
             "role": "Developer"
         }
     ],
     "require": {
         "php": "^8.1",
         "filament/filament": "^3.0",
-        "filament/forms": "^3.0",
-        "filament/tables": "^3.0",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {
@@ -41,13 +39,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "Wsmallnews\\FilamentNestedset\\": "src/",
+            "Wsmallnews\\FilamentNestedset\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/"
+            "Wsmallnews\\FilamentNestedset\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -67,10 +65,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "Wsmallnews\\FilamentNestedset\\FilamentNestedsetServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "FilamentNestedset": "Wsmallnews\\FilamentNestedset\\Facades\\FilamentNestedset"
             }
         }
     },
