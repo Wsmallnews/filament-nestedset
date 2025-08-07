@@ -1,0 +1,60 @@
+@props(['item', 'level'])
+
+<div
+    x-data="{ open: $persist(true) }"
+    wire:key="tree-item-{{ $item->id }}"
+    data-id="{{ $item->id }}"
+    class=""
+    data-sortable-item
+>
+    <div class="flex justify-between relative group px-4 hover:bg-gray-50 dark:hover:bg-white/5">
+        <div class="flex gap-4">
+            <button type="button" @class([
+                'flex items-center ltr:rounded-l-lg rtl:rounded-r-lg',
+            ]) data-sortable-handle>
+                @svg('heroicon-m-bars-2', 'text-gray-400 w-5 h-5 cursor-move ltr:-mr-2 rtl:-ml-2')
+            </button>
+
+            <div class="appearance-none px-3 py-4 ltr:text-left rtl:text-right inline-block">
+                <span>{{ $item->name ?? '&nbsp;' }}</span>
+            </div>
+
+            @if($item->children->isNotEmpty())
+                <button type="button" x-on:click="open = !open" title="Toggle children" class="appearance-none text-gray-500">
+                    <svg class="w-5 h-5 transition ease-in-out duration-200" x-bind:class="{
+                        '-rotate-90': !open,
+                    }" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+            @endif
+        </div>
+
+        <div class="flex grow-0 gap-3">
+            {{-- 一级 depth = 0 --}}
+            @if($level > ($item->depth + 1))
+                {{ ($this->createChildAction)(['parentId' => $item->id]) }}
+            @endif
+
+            {{ ($this->editAction)(['id' => $item->id]) }}
+
+            @if($this->canBeDeleted($item))
+                {{ ($this->deleteAction)(['id' => $item->id]) }}
+            @endif
+        </div>
+    </div>
+
+    @if ($item->children->isNotEmpty())
+    <div x-show="open" x-collapse class="divide-y ltr:pl-6 rtl:pr-6">
+        <div
+            class=""
+            wire:key="tree-item-{{ $item->id }}-children"
+            x-data="treeManager({
+                parentId: {{ $item->id }}
+            })"
+        >
+            @foreach ($item->children as $childKey => $child)
+                <x-sn-filament-nestedset::tree-item :item="$child" key="tree-component-{{ $childKey }}" :level="$level" />
+            @endforeach
+        </div>
+    </div>
+    @endif
+</div>

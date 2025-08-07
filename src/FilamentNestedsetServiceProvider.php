@@ -18,9 +18,9 @@ use Wsmallnews\FilamentNestedset\Testing\TestsFilamentNestedset;
 
 class FilamentNestedsetServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'filament-nestedset';
+    public static string $name = 'sn-filament-nestedset';
 
-    public static string $viewNamespace = 'filament-nestedset';
+    public static string $viewNamespace = 'sn-filament-nestedset';
 
     public function configurePackage(Package $package): void
     {
@@ -34,8 +34,6 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('wsmallnews/filament-nestedset');
             });
 
@@ -43,10 +41,6 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
 
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile();
-        }
-
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
         }
 
         if (file_exists($package->basePath('/../resources/lang'))) {
@@ -101,8 +95,8 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
-            Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css'),
-            Js::make('filament-nestedset-scripts', __DIR__ . '/../resources/dist/filament-nestedset.js'),
+            // Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css'),
+            // Js::make('filament-nestedset-scripts', __DIR__ . '/../resources/dist/filament-nestedset.js'),
         ];
     }
 
