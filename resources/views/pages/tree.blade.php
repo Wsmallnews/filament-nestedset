@@ -1,14 +1,13 @@
 <x-filament-panels::page>
-    
     <x-filament-panels::resources.tabs />
-        
-    <div 
-        class="fi-sn-tree-container overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10" 
-        wire:key="tree-items-wrapper" 
+
+    <div
+        class="fi-sn-tree-container overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+        wire:key="tree-items-wrapper"
     >
         <div
             class="divide-y divide-gray-200 dark:divide-white/10"
-            x-data="treeManager()"
+            x-data="treeManager({})"
             data-sortable-container
         >
             @forelse($tree as $treeKey => $item)
@@ -47,8 +46,8 @@
                 })
             },
             sorted() {
-                this.$wire.mountAction('moveItem', {
-                    parentId: this.parentId, 
+                this.$wire.mountAction('moveNode', {
+                    parentId: this.parentId,
                     changeIds: this.sortable.toArray()
                 })
             }

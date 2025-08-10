@@ -1,3 +1,42 @@
+
+### 默认支持 tenancy
+
+如果不需要区分 tenancy, 只需要在 page 中设置
+
+```
+static::$isScopedToTenant = false       // 设置方法需要在查一下 filament 的
+```
+
+
+### 支持 tabs
+
+```
+protected string $tabFieldName = '';        // 关联的 tab 字段名
+
+```
+
+### 如果需要设置额外的 scope kalnoy/nestedset 的 scoping 参数
+
+定义 nestedScoped 方法
+
+```
+public function nestedScoped()
+{
+    return ['category_id' => 5];
+}
+```
+
+### 增加查询条件
+
+```
+public function getEloquentQuery($query)
+{
+    return $query->where('status', 'normal');
+}
+```
+
+
+
 # Filament tree build on kalnoy/nestedset
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)

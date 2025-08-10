@@ -64,14 +64,32 @@ abstract class TreePage extends Page
     {
         $model = static::getModel();
 
+        $scopes = [];
         if (static::isScopedToTenant() && ($tenant = Filament::getTenant())) {
-            $query = $model::scoped(['team_id' => Filament::getTenant()->id]);
+            $scopes['team_id'] = $tenant->id;
+        }
+
+        if ($this->getTabFieldName()) {
+            $scopes[$this->getTabFieldName()] = $this->activeTab;
+        }
+
+        // 自定义 scope
+        if (method_exists($this, 'nestedScoped')) {
+            $scopes = array_merge($scopes, $this->nestedScoped());
+        }
+
+        if ($scopes) {
+            $query = $model::scoped($scopes);
         } else {
             $query = (new $model)->newScopedQuery();
         }
 
-        $query = $query->defaultOrder();
+        // 自定义条件
+        if (method_exists($this, 'getEloquentQuery')) {
+            $query = $this->getEloquentQuery($query);
+        }
 
+        $query = $query->defaultOrder();
         return $query;
     }
 
@@ -106,20 +124,15 @@ abstract class TreePage extends Page
      */
     private function configureCreateAction(CreateAction $action): Action
     {
-        return $action->model(self::getModel())
+        return $action->model(self::getModel())     // Action 需要 model attribute is a string
             ->mutateFormDataUsing(function (array $data): array {
-                if ($this->getTabFieldName()) {
-                    $data[$this->getTabFieldName()] = $this->activeTab;
-                }
-
+                $model = $this->getQuery()->getModel();     // 这个获取的是包含 scopes 中的 attributes 数据的 model 实例
                 return [
                     ...$data,
-                    // ...self::getModel()->getAttributes(),          // 这里填充 team_id 么
+                    ...$model->getAttributes(),          // 这里填充 scoped 设置的数据
                 ];
             })
-            ->form(function (array $arguments) {
-                return $this->schema($arguments);
-            })
+            ->form(fn (array $arguments): array => method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments))
             ->using(function (array $data, array $arguments): Model {
                 // 优先使用表单中的 parent_id
                 $parentId = $data['parent_id'] ?? ($arguments['parentId'] ?? 0);
@@ -141,12 +154,9 @@ abstract class TreePage extends Page
         return EditAction::make()
             ->record(function (array $arguments) {
                 $id = $arguments['id'] ?? 0;
-
                 return $id ? $this->getQuery()->findOrFail($id) : null;
             })
-            ->form(function (array $arguments) {
-                return $this->schema($arguments);
-            })
+            ->form(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
             ->after(fn (): Event => $this->dispatch('filament-tree-updated'))
             ->icon('heroicon-m-pencil-square')->iconSize(IconSize::Small)
             ->link();
@@ -170,8 +180,7 @@ abstract class TreePage extends Page
             })
             ->record(function (array $arguments) {
                 $id = $arguments['id'] ?? 0;
-
-                return $id ? $this->getQuery()->findOrFail($id) : null;
+                return $id ? $this->getQuery()->find($id) : null;
             })
             ->after(fn (): Event => $this->dispatch('filament-tree-updated'))
             ->icon('heroicon-m-trash')->iconSize(IconSize::Small)
@@ -205,18 +214,52 @@ abstract class TreePage extends Page
 
                 $parent = $parentId ? $this->getQuery()->find($parentId) : null;
                 if (! $parent) {
-                    $changeNodes->map(function ($node, $key) {
-                        // 移动到根节点
-                        $node->saveAsRoot();
+                    $previous = null;
+                    $changeNodes->map(function ($node, $key) use (&$previous) {
+                        if (is_null($previous)) {
+                            // 获取当前树第一个节点
+                            $firstRoot = $this->getQuery()->roots()->orderBy('_lft')->first(); // 获取当前第一个根节点
+                            $node->makeRoot()->beforeNode($firstRoot)->save();          // 设置为根节点，并且设置到 firstRoot 之前
+                        } else {
+                            // 设为根节点，并且移动到指定节点之后
+                            $node->makeRoot()->afterNode($previous)->save();
+                        }
+                        $previous = $node;
                     });
                 } else {
-                    $changeNodes->map(function ($node, $key) use ($parent) {
-                        $node->appendToNode($parent)->save();
+                    $previous = null;
+                    $changeNodes->map(function ($node, $key) use ($parent, &$previous) {
+
+
+
+                        if (is_null($previous)) {
+                            // parent 的第一个节点
+                            $node->prependToNode($parent)->save();
+                        } else {
+                            // parent 下的节点，移动到指定节点之后
+                            $node->appendToNode($parent)->afterNode($previous)->save();
+                        }
+
+                        dd($node);
+
+                        $previous = $node;
+
+                        // if (is_null($previous)) {
+                        //     $parent->prependNode($node);        // 将 node 作为 parent 的第一个节点
+                        // } else {
+                        //     // parent 下的节点，移动到指定节点之后
+                        //     $parent->appendNode($node);
+
+                        //     dd($previous, $node);
+                        //     $node->afterNode($previous)->save();
+                        // }
+
+                        // $previous = $node;
                     });
+                    dd(11);
                 }
             })
-            ->color('danger')
-            ->requiresConfirmation();
+            ->color('danger');
     }
 
     public function fixTreeAction(): Action
@@ -230,7 +273,7 @@ abstract class TreePage extends Page
                 try {
                     $this->getQuery()->fixTree();
                 } catch (Throwable $e) {
-                    report($e);
+                    report($e);             // 记录错误，但不终止程序
 
                     Notification::make()
                         ->danger()
@@ -238,13 +281,12 @@ abstract class TreePage extends Page
                         ->send();
 
                     $action->failure();
-
                     return;
                 }
 
                 Notification::make()
                     ->success()
-                    ->title(__('filament-tree::translations.tree_fixed'))
+                    ->title('修复成功')
                     ->send();
 
                 $action->success();
@@ -283,9 +325,10 @@ abstract class TreePage extends Page
         return ! (config('sn-filament-nestedset.allow-delete-root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
 
+
     public function tabFieldName($tabFieldName): self
     {
-        $this->tabFieldName;
+        $this->tabFieldName = $tabFieldName;
 
         return $this;
     }
