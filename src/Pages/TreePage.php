@@ -90,6 +90,7 @@ abstract class TreePage extends Page
         }
 
         $query = $query->defaultOrder();
+
         return $query;
     }
 
@@ -127,6 +128,7 @@ abstract class TreePage extends Page
         return $action->model(self::getModel())     // Action 需要 model attribute is a string
             ->mutateFormDataUsing(function (array $data): array {
                 $model = $this->getQuery()->getModel();     // 这个获取的是包含 scopes 中的 attributes 数据的 model 实例
+
                 return [
                     ...$data,
                     ...$model->getAttributes(),          // 这里填充 scoped 设置的数据
@@ -154,6 +156,7 @@ abstract class TreePage extends Page
         return EditAction::make()
             ->record(function (array $arguments) {
                 $id = $arguments['id'] ?? 0;
+
                 return $id ? $this->getQuery()->findOrFail($id) : null;
             })
             ->form(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
@@ -180,6 +183,7 @@ abstract class TreePage extends Page
             })
             ->record(function (array $arguments) {
                 $id = $arguments['id'] ?? 0;
+
                 return $id ? $this->getQuery()->find($id) : null;
             })
             ->after(fn (): Event => $this->dispatch('filament-tree-updated'))
@@ -230,8 +234,6 @@ abstract class TreePage extends Page
                     $previous = null;
                     $changeNodes->map(function ($node, $key) use ($parent, &$previous) {
 
-
-
                         if (is_null($previous)) {
                             // parent 的第一个节点
                             $node->prependToNode($parent)->save();
@@ -281,6 +283,7 @@ abstract class TreePage extends Page
                         ->send();
 
                     $action->failure();
+
                     return;
                 }
 
@@ -324,7 +327,6 @@ abstract class TreePage extends Page
 
         return ! (config('sn-filament-nestedset.allow-delete-root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
-
 
     public function tabFieldName($tabFieldName): self
     {
