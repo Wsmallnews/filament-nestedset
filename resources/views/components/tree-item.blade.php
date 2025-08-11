@@ -2,8 +2,8 @@
 
 <div
     x-data="{ open: $persist(true) }"
-    wire:key="tree-item-{{ $item->id }}"
-    data-id="{{ $item->id }}"
+    wire:key="tree-item-{{ $item->getKey() }}"
+    data-id="{{ $item->getKey() }}"
     class=""
     data-sortable-item
 >
@@ -31,24 +31,27 @@
         <div class="flex grow-0 gap-3">
             {{-- 一级 depth = 0 --}}
             @if($level > ($item->depth + 1))
-                {{ ($this->createChildAction)(['parentId' => $item->id]) }}
+                {{ ($this->createChildAction)(['parentId' => $item->getKey()]) }}
             @endif
 
-            {{ ($this->editAction)(['id' => $item->id]) }}
+            {{ ($this->editAction)(['id' => $item->getKey()]) }}
 
             @if($this->canBeDeleted($item))
-                {{ ($this->deleteAction)(['id' => $item->id]) }}
+                {{ ($this->deleteAction)(['id' => $item->getKey()]) }}
             @endif
         </div>
     </div>
 
-    @if ($item->children->isNotEmpty())
     <div x-show="open" x-collapse class="divide-y ltr:pl-6 rtl:pr-6">
         <div
-            class=""
-            wire:key="tree-item-{{ $item->id }}-children"
+            @class([
+                'divide-y divide-gray-200 dark:divide-white/10',
+                'border-t border-gray-200 dark:border-white/10' => $item->children->isNotEmpty()
+            ])
+            wire:key="tree-item-{{ $item->getKey() }}-children"
+            data-id="{{ $item->getKey() }}"
             x-data="treeManager({
-                parentId: {{ $item->id }}
+                parentId: {{ $item->getKey() }}
             })"
         >
             @foreach ($item->children as $childKey => $child)
@@ -56,5 +59,4 @@
             @endforeach
         </div>
     </div>
-    @endif
 </div>

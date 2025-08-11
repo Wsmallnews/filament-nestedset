@@ -15,6 +15,7 @@ use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Support\Enums\IconSize;
 use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NestedSet;
 use Kalnoy\Nestedset\NodeTrait;
 use Livewire\Attributes\On;
 use Livewire\Features\SupportEvents\Event;
@@ -60,6 +61,7 @@ abstract class TreePage extends Page
         }
     }
 
+
     public function getQuery()
     {
         $model = static::getModel();
@@ -92,6 +94,7 @@ abstract class TreePage extends Page
         $query = $query->defaultOrder();
         return $query;
     }
+
 
     protected function getHeaderActions(): array
     {
@@ -187,6 +190,7 @@ abstract class TreePage extends Page
             ->link();
     }
 
+
     /**
      * 排序确认操作
      */
@@ -194,73 +198,57 @@ abstract class TreePage extends Page
     {
         return Action::make('moveNode')
             ->label('移动节点')
-            ->action(function (array $arguments) {
-                // parentId 和 changeIds 内容
-                // 1. 当同级节点之间调整顺序时，parentId 是自己的parentId, changeIds 是 parentId 下的所有节点的 id 数组
-                // 2. 当将节点移动到上级时，parentId 为要移动到的上级的 id, changeIds 为移动后的 parentId 下的所有节点的 id 数组
-                // 3. 当将节点移动到其他节点的下级时， parentId 为 要移动到节点的 id，changeIds 为移动后的 parentId 下的所有节点的 id 数组
+            ->action(function (Action $action, array $arguments) {
+                // 当前节点 id
+                $id = $arguments['id'] ?? 0;
+                // 移动到的 父节点 id
+                $parent = !isset($arguments['parent']) || empty($arguments['parent']) ? null : $arguments['parent'];
+                // 移动前的父节点 id
+                $ancestor = !isset($arguments['ancestor']) || empty($arguments['ancestor']) ? null : $arguments['ancestor'];
+                // 从哪里移动的索引
+                $from = $arguments['from'] ?? 0;
+                // 移动到的索引
+                $to = $arguments['to'] ?? 0;
 
-                $parentId = $arguments['parentId'] ?? null;
-                $changeIds = $arguments['changeIds'] ?? [];
-                $changeIdsOrder = array_flip($changeIds);
+                // 当前节点
+                $node = $this->getQuery()->findOrFail($id);
+                
+                if ($parent == $node->getAttribute(NestedSet::PARENT_ID)) {
+                    // 父级未改变，仅移动顺序
+                    if ($from == $to) return;
 
-                // 查询
-                $changeNodes = $this->getQuery()->whereIn('id', $changeIds)->orderByRaw('FIELD(id, ' . implode($changeIds) . ')')->get();
-                // 使用 sortBy 方法对 Collection 进行排序
-                $changeNodes = $changeNodes->sortBy(function ($node) use ($changeIdsOrder) {
-                    return $changeIdsOrder[$node->id] ?? PHP_INT_MAX; // 如果 id 不在数组中，将其放在最后
-                });
-                $changeNodes = $changeNodes->values();
-
-                $parent = $parentId ? $this->getQuery()->find($parentId) : null;
-                if (! $parent) {
-                    $previous = null;
-                    $changeNodes->map(function ($node, $key) use (&$previous) {
-                        if (is_null($previous)) {
-                            // 获取当前树第一个节点
-                            $firstRoot = $this->getQuery()->roots()->orderBy('_lft')->first(); // 获取当前第一个根节点
-                            $node->makeRoot()->beforeNode($firstRoot)->save();          // 设置为根节点，并且设置到 firstRoot 之前
-                        } else {
-                            // 设为根节点，并且移动到指定节点之后
-                            $node->makeRoot()->afterNode($previous)->save();
-                        }
-                        $previous = $node;
-                    });
+                    $shift = $from - $to;
+                    $shift > 0 ? $node->up($shift) : $node->down(abs($shift));
                 } else {
-                    $previous = null;
-                    $changeNodes->map(function ($node, $key) use ($parent, &$previous) {
-
-
-
-                        if (is_null($previous)) {
-                            // parent 的第一个节点
-                            $node->prependToNode($parent)->save();
-                        } else {
-                            // parent 下的节点，移动到指定节点之后
-                            $node->appendToNode($parent)->afterNode($previous)->save();
+                    if (is_null($parent)) {
+                        // 移动到根节点，并且调整顺序
+                        $node->saveAsRoot();
+    
+                        $siblingsCount = $node->refresh()->siblings()->count();
+                        $shift = $siblingsCount - $to;
+    
+                        $node->up($shift);
+                    } else {
+                        // 插入指定父级, 并调整顺序
+                        $parentNode = $node->query()->findOrFail($parent);
+                        $parentNode->prependNode($node);
+                        if ($to > 0) {
+                            $node->down($to);
                         }
-
-                        dd($node);
-
-                        $previous = $node;
-
-                        // if (is_null($previous)) {
-                        //     $parent->prependNode($node);        // 将 node 作为 parent 的第一个节点
-                        // } else {
-                        //     // parent 下的节点，移动到指定节点之后
-                        //     $parent->appendNode($node);
-
-                        //     dd($previous, $node);
-                        //     $node->afterNode($previous)->save();
-                        // }
-
-                        // $previous = $node;
-                    });
-                    dd(11);
+                    }
                 }
+
+                Notification::make()
+                    ->success()
+                    ->title('节点移动成功')
+                    ->send();
+
+                $action->success();
             })
             ->color('danger');
     }
+
+
 
     public function fixTreeAction(): Action
     {
@@ -293,6 +281,7 @@ abstract class TreePage extends Page
             });
     }
 
+
     protected function schema(array $arguments): array
     {
         return [];
@@ -316,13 +305,13 @@ abstract class TreePage extends Page
     public function canBeDeleted(Model $record): bool
     {
         if (
-            config('sn-filament-nestedset.allow-delete-parent') === false
+            config('sn-filament-nestedset.allow_delete_parent') === false
             && $record->children->isNotEmpty()
         ) {
             return false;
         }
 
-        return ! (config('sn-filament-nestedset.allow-delete-root') === false && $record->children->isNotEmpty() && $record->isRoot());
+        return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
 
 

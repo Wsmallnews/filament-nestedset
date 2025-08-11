@@ -7,11 +7,12 @@
     >
         <div
             class="divide-y divide-gray-200 dark:divide-white/10"
+            data-id
             x-data="treeManager({})"
             data-sortable-container
         >
             @forelse($tree as $treeKey => $item)
-                <x-sn-filament-nestedset::tree-item :item="$item" key="tree-component-{{ $item->id }}" :level="$level" />
+                <x-sn-filament-nestedset::tree-item :item="$item" key="tree-component-{{ $item->getKey() }}" :level="$level" />
             @empty
                 <div @class([
                     'w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-center',
@@ -40,17 +41,22 @@
                     swapThreshold: 0.50,
                     draggable: '[data-sortable-item]',
                     handle: '[data-sortable-handle]',
-                    onSort: () => {
-                        this.sorted()
+                    onEnd: (evt) => {
+                        console.log(evt, 'onEnd');
+                        let info = {
+                            id: evt.item.dataset.id,
+                            ancestor: evt.from.dataset.id,
+                            parent: evt.to.dataset.id,
+                            from: evt.oldIndex,
+                            to: evt.newIndex
+                        }
+
+                        if (info.parent !== info.ancestor || info.from !== info.to) {
+                            this.$wire.mountAction('moveNode', info)
+                        }
                     }
                 })
             },
-            sorted() {
-                this.$wire.mountAction('moveNode', {
-                    parentId: this.parentId,
-                    changeIds: this.sortable.toArray()
-                })
-            }
         }
     }
 </script>
