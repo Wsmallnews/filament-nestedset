@@ -16,5 +16,5 @@ return [
 
         'fix_nestedset' => '修复嵌套集合',
         'fix_nestedset_success' => '嵌套集合修复成功',
-    ]
+    ],
 ];

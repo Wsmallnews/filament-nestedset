@@ -72,14 +72,10 @@ abstract class TreePage extends Page
         }
     }
 
-
     /**
      * 覆盖 hasTabs 中的 updatedActiveTab 方法
-     *
-     * @return void
      */
     public function updatedActiveTab(): void {}
-
 
     public function getQuery()
     {
@@ -114,7 +110,6 @@ abstract class TreePage extends Page
 
         return $query;
     }
-
 
     protected function getHeaderActions(): array
     {
@@ -228,7 +223,6 @@ abstract class TreePage extends Page
             ->link();
     }
 
-
     /**
      * 排序确认操作
      */
@@ -240,9 +234,9 @@ abstract class TreePage extends Page
                 // 当前节点 id
                 $id = $arguments['id'] ?? 0;
                 // 移动到的 父节点 id
-                $parent = !isset($arguments['parent']) || empty($arguments['parent']) ? null : $arguments['parent'];
+                $parent = ! isset($arguments['parent']) || empty($arguments['parent']) ? null : $arguments['parent'];
                 // 移动前的父节点 id
-                $ancestor = !isset($arguments['ancestor']) || empty($arguments['ancestor']) ? null : $arguments['ancestor'];
+                $ancestor = ! isset($arguments['ancestor']) || empty($arguments['ancestor']) ? null : $arguments['ancestor'];
                 // 从哪里移动的索引
                 $from = $arguments['from'] ?? 0;
                 // 移动到的索引
@@ -250,10 +244,12 @@ abstract class TreePage extends Page
 
                 // 当前节点
                 $node = $this->getQuery()->findOrFail($id);
-                
+
                 if ($parent == $node->getAttribute(NestedSet::PARENT_ID)) {
                     // 父级未改变，仅移动顺序
-                    if ($from == $to) return;
+                    if ($from == $to) {
+                        return;
+                    }
 
                     $shift = $from - $to;
                     $shift > 0 ? $node->up($shift) : $node->down(abs($shift));
@@ -261,10 +257,10 @@ abstract class TreePage extends Page
                     if (is_null($parent)) {
                         // 移动到根节点，并且调整顺序
                         $node->saveAsRoot();
-    
+
                         $siblingsCount = $node->refresh()->siblings()->count();
                         $shift = $siblingsCount - $to;
-    
+
                         $node->up($shift);
                     } else {
                         // 插入指定父级, 并调整顺序
@@ -285,8 +281,6 @@ abstract class TreePage extends Page
             })
             ->color('danger');
     }
-
-
 
     public function fixTreeAction(): Action
     {
@@ -320,7 +314,6 @@ abstract class TreePage extends Page
             });
     }
 
-
     protected function schema(array $arguments): array
     {
         return [];
@@ -353,15 +346,12 @@ abstract class TreePage extends Page
         return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
 
-
-
     // protected function hasFormParentSelect(): bool
     // {
     //     $childrenAddMethod = config('sn-filament-nestedset.children_add_method') ?? 'both';
 
     //     return in_array($childrenAddMethod, ['both', 'form']);
     // }
-
 
     // protected function getParentSelect(): array | Field
     // {
@@ -375,7 +365,6 @@ abstract class TreePage extends Page
     //         ->emptyLabel('未搜索到父节点')
     //         ->treeKey('NestedParentId');
     // }
-
 
     public function tabFieldName($tabFieldName): self
     {

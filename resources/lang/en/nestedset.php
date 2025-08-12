@@ -16,5 +16,5 @@ return [
 
         'fix_nestedset' => 'Fix nested set',
         'fix_nestedset_success' => 'Nested set fixed successfully',
-    ]
+    ],
 ];
