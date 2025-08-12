@@ -18,7 +18,7 @@
                     'w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-center',
                     'dark:bg-gray-700 dark:border-gray-600',
                 ])>
-                    没有数据
+                    {{ $emptyLabel ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
                 </div>
             @endforelse
         </div>

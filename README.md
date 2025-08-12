@@ -1,5 +1,28 @@
+### 支持多语言
+
+#### 发布语言包
+```
+php artisan vendor:publish --tag=sn-filament-nestedset-lang
+```
+
+
+### 定义 tree 为空时候的提示文字
+
+```
+public string $emptyLabel = '没有导航数据';
+```
+
 
 ### 默认支持 tenancy
+
+需添加 tenancy field
+
+```
+public function getScopeAttributes(): array
+{
+    return ['team_id', ...];
+}
+```
 
 如果不需要区分 tenancy, 只需要在 page 中设置
 
@@ -11,9 +34,29 @@ static::$isScopedToTenant = false       // 设置方法需要在查一下 filame
 ### 支持 tabs
 
 ```
-protected string $tabFieldName = '';        // 关联的 tab 字段名
+protected string $tabFieldName = 'type';        // 关联的 tab 字段名
+```
+
+设置 tabs, 不需要在 tab 上增加当前tab 条件，tab 条件会自动附加到 kalnoy/nestedset 的 scoping 参数中
+```
+public function getTabs(): array
+{
+    return [
+        'web' => Tab::make()->label('Website Navigation'),
+        'shop' => Tab::make()->label('Shop Navigation')
+    ];
+}
+```
+
+model 的 getScopeAttributes 方法增加 tabField 字段
 
 ```
+public function getScopeAttributes(): array
+{
+    return ['type', ...];
+}
+```
+
 
 ### 如果需要设置额外的 scope kalnoy/nestedset 的 scoping 参数
 

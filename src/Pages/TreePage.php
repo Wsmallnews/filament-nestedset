@@ -21,6 +21,7 @@ use Illuminate\Support\Arr;
 use Kalnoy\Nestedset\NestedSet;
 use Kalnoy\Nestedset\NodeTrait;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Features\SupportEvents\Event;
 use Throwable;
 use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
@@ -35,6 +36,11 @@ abstract class TreePage extends Page
     use InteractsWithFormActions;
 
     public $level = 2;
+
+    public string $emptyLabel = '';
+
+    #[Url]
+    public ?string $activeTab = null;
 
     protected static ?string $model = null;
 
@@ -53,6 +59,8 @@ abstract class TreePage extends Page
      */
     public function mount(): void
     {
+        $this->loadDefaultActiveTab();
+
         $model = static::getModel();
 
         $concerns = class_uses($model);
@@ -63,6 +71,14 @@ abstract class TreePage extends Page
             );
         }
     }
+
+
+    /**
+     * 覆盖 hasTabs 中的 updatedActiveTab 方法
+     *
+     * @return void
+     */
+    public function updatedActiveTab(): void {}
 
 
     public function getQuery()
@@ -119,7 +135,7 @@ abstract class TreePage extends Page
     {
         return $this->configureCreateAction(
             CreateAction::make('createChild')
-                ->label('创建子节点')
+                ->label(__('sn-filament-nestedset::nestedset.action.create_child_node'))
                 ->link()
                 ->icon('heroicon-o-plus-circle'),
             'createChild'
@@ -166,7 +182,7 @@ abstract class TreePage extends Page
                     parent: $parent,
                 );
             })
-            ->after(fn (): Event => $this->dispatch('filament-tree-updated'))
+            ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->createAnother(false);
     }
 
@@ -178,7 +194,7 @@ abstract class TreePage extends Page
                 return $id ? $this->getQuery()->findOrFail($id) : null;
             })
             ->form(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
-            ->after(fn (): Event => $this->dispatch('filament-tree-updated'))
+            ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-pencil-square')->iconSize(IconSize::Small)
             ->link();
     }
@@ -191,8 +207,8 @@ abstract class TreePage extends Page
                 if (! $this->canBeDeleted($record)) {
                     Notification::make()
                         ->danger()
-                        ->title('删除失败')
-                        ->body('存在子级节点，无法删除。')
+                        ->title(__('sn-filament-nestedset::nestedset.action.delete_failed_title'))
+                        ->body(__('sn-filament-nestedset::nestedset.action.delete_failed_body_has_child'))
                         ->send();
 
                     $action->cancel();
@@ -203,7 +219,7 @@ abstract class TreePage extends Page
                 $id = $arguments['id'] ?? 0;
                 return $id ? $this->getQuery()->find($id) : null;
             })
-            ->after(fn (): Event => $this->dispatch('filament-tree-updated'))
+            ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-trash')->iconSize(IconSize::Small)
             ->link();
     }
@@ -215,7 +231,7 @@ abstract class TreePage extends Page
     public function moveNodeAction(): Action
     {
         return Action::make('moveNode')
-            ->label('移动节点')
+            ->label(__('sn-filament-nestedset::nestedset.action.move_node'))
             ->action(function (Action $action, array $arguments) {
                 // 当前节点 id
                 $id = $arguments['id'] ?? 0;
@@ -258,7 +274,7 @@ abstract class TreePage extends Page
 
                 Notification::make()
                     ->success()
-                    ->title('节点移动成功')
+                    ->title(__('sn-filament-nestedset::nestedset.action.move_node_success'))
                     ->send();
 
                 $action->success();
@@ -270,11 +286,11 @@ abstract class TreePage extends Page
 
     public function fixTreeAction(): Action
     {
-        return Action::make('fixTree')
-            ->label('修复树')
+        return Action::make('fixNestedset')
+            ->label(__('sn-filament-nestedset::nestedset.action.fix_nestedset'))
             ->icon('heroicon-s-wrench')
             ->action(function (Action $action): void {
-                $this->dispatch('filament-tree-updated');
+                $this->dispatch('filament-nestedset-updated');
 
                 try {
                     $this->getQuery()->fixTree();
@@ -292,7 +308,7 @@ abstract class TreePage extends Page
 
                 Notification::make()
                     ->success()
-                    ->title('修复成功')
+                    ->title(__('sn-filament-nestedset::nestedset.action.fix_nestedset_success'))
                     ->send();
 
                 $action->success();
@@ -314,7 +330,7 @@ abstract class TreePage extends Page
         ];
     }
 
-    #[On('filament-tree-updated')]
+    #[On('filament-nestedset-updated')]
     public function refresh(): void
     {
         // Re-render component
