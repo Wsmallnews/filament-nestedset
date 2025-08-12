@@ -2,11 +2,13 @@
 
 namespace Wsmallnews\FilamentNestedset\Pages;
 
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Field;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -15,6 +17,7 @@ use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Support\Enums\IconSize;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Kalnoy\Nestedset\NestedSet;
 use Kalnoy\Nestedset\NodeTrait;
 use Livewire\Attributes\On;
@@ -118,14 +121,15 @@ abstract class TreePage extends Page
             CreateAction::make('createChild')
                 ->label('创建子节点')
                 ->link()
-                ->icon('heroicon-o-plus-circle')
+                ->icon('heroicon-o-plus-circle'),
+            'createChild'
         );
     }
 
     /**
      * 配置 createAction 操作
      */
-    private function configureCreateAction(CreateAction $action): Action
+    private function configureCreateAction(CreateAction $action, $type = 'create'): Action
     {
         return $action->model(self::getModel())     // Action 需要 model attribute is a string
             ->mutateFormDataUsing(function (array $data): array {
@@ -136,6 +140,20 @@ abstract class TreePage extends Page
                 ];
             })
             ->form(fn (array $arguments): array => method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments))
+
+            // ->form(function (array $arguments) use ($type) {
+            //     $schema = method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments);
+
+            //     if ($type == 'create' && $this->hasFormParentSelect()) {
+            //         $parentSelect = Arr::wrap($this->getParentSelect());
+
+            //         $schema = array_merge([
+            //             ...$parentSelect
+            //         ], $schema);
+            //     }
+
+            //     return $schema;
+            // })
             ->using(function (array $data, array $arguments): Model {
                 // 优先使用表单中的 parent_id
                 $parentId = $data['parent_id'] ?? ($arguments['parentId'] ?? 0);
@@ -313,6 +331,29 @@ abstract class TreePage extends Page
 
         return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
+
+
+
+    // protected function hasFormParentSelect(): bool
+    // {
+    //     $childrenAddMethod = config('sn-filament-nestedset.children_add_method') ?? 'both';
+
+    //     return in_array($childrenAddMethod, ['both', 'form']);
+    // }
+
+
+    // protected function getParentSelect(): array | Field
+    // {
+    //     return SelectTree::make('parent_id')->label('父节点')
+    //         ->relationship(relationship: 'parent', titleAttribute: 'name', parentAttribute: NestedSet::PARENT_ID)
+    //         ->searchable()
+    //         ->enableBranchNode()     // 可以选择非根节点
+    //         ->withCount()
+    //         ->required()
+    //         ->placeholder('请选择父节点')
+    //         ->emptyLabel('未搜索到父节点')
+    //         ->treeKey('NestedParentId');
+    // }
 
 
     public function tabFieldName($tabFieldName): self
