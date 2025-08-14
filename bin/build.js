@@ -45,6 +45,6 @@ const defaultOptions = {
 
 compile({
     ...defaultOptions,
-    entryPoints: ['./resources/js/index.js'],
-    outfile: './resources/dist/filament-nestedset.js',
+    entryPoints: ['./resources/js/components/filament-nestedset.js'],
+    outfile: './resources/dist/components/filament-nestedset.js',
 })

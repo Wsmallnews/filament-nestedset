@@ -67,12 +67,9 @@
         "laravel": {
             "providers": [
                 "Wsmallnews\\FilamentNestedset\\FilamentNestedsetServiceProvider"
-            ],
-            "aliases": {
-                "FilamentNestedset": "Wsmallnews\\FilamentNestedset\\Facades\\FilamentNestedset"
-            }
+            ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

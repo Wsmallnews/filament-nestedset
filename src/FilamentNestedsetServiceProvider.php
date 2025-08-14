@@ -94,9 +94,8 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
-            // Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css'),
-            // Js::make('filament-nestedset-scripts', __DIR__ . '/../resources/dist/filament-nestedset.js'),
+            AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
+            Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css')->loadedOnRequest(),
         ];
     }
 
