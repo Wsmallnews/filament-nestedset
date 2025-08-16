@@ -1,9 +1,49 @@
-### 支持多语言
+# Filament tree build on kalnoy/nestedset
 
-#### 发布语言包
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
+
+
+
+This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+
+## Installation
+
+You can install the package via composer:
+
+```bash
+composer require wsmallnews/filament-nestedset
 ```
+
+You can publish the config file with:
+
+```bash
+php artisan vendor:publish --tag="filament-nestedset-config"
+```
+
+Optionally, you can publish the views using
+
+```bash
+php artisan vendor:publish --tag="filament-nestedset-views"
+```
+
+Multi language support, you can publish the language files using
+
+```bash
 php artisan vendor:publish --tag=sn-filament-nestedset-lang
 ```
+
+
+This is the contents of the published config file:
+
+```php
+return [
+];
+```
+
+## Usage
 
 
 ### 定义 tree 为空时候的提示文字
@@ -13,11 +53,45 @@ public string $emptyLabel = '没有导航数据';
 ```
 
 
-### 默认支持 tenancy
-
-需添加 tenancy field
+### 定义 form schema
 
 ```
+protected function schema(array $arguments): array
+{
+    return [
+        //
+    ];
+}
+```
+
+```
+protected function createSchema(array $arguments): array
+{
+    return [
+        //
+    ];
+}
+protected function editSchema(array $arguments): array
+{
+    return [
+        //
+    ];
+}
+```
+
+
+
+
+
+## Advanced features
+
+### Multi-tenancy support
+
+默认支持多租户，如果你的 `filament panel` 支持多租户，你需要在 `model` 中添加 `getScopeAttributes` 方法并且添加 team_id 字段。
+
+Multi-tenancy 是基于 kalnoy/nestedset 的 scoped 实现的，你可以点击 [查看详细文档](https://github.com/lazychaser/laravel-nestedset?tab=readme-ov-file#scoping)
+
+```php
 public function getScopeAttributes(): array
 {
     return ['team_id', ...];
@@ -29,7 +103,6 @@ public function getScopeAttributes(): array
 ```
 static::$isScopedToTenant = false       // 设置方法需要在查一下 filament 的
 ```
-
 
 ### 支持 tabs
 
@@ -80,57 +153,6 @@ public function getEloquentQuery($query)
 
 
 
-# Filament tree build on kalnoy/nestedset
-
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
-
-
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Installation
-
-You can install the package via composer:
-
-```bash
-composer require wsmallnews/filament-nestedset
-```
-
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="filament-nestedset-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="filament-nestedset-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="filament-nestedset-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
-## Usage
-
-```php
-$filamentNestedset = new Wsmallnews\FilamentNestedset();
-echo $filamentNestedset->echoPhrase('Hello, Wsmallnews!');
-```
 
 ## Testing
 

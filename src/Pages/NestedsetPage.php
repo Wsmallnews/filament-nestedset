@@ -28,7 +28,7 @@ use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
 
 use function Filament\Support\get_model_label;
 
-abstract class TreePage extends Page
+abstract class NestedsetPage extends Page
 {
     use CanUseDatabaseTransactions;
     use HasTabs;

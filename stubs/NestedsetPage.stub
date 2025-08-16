@@ -1,0 +1,29 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ clusterImport }}use Kalnoy\Nestedset\QueryBuilder;
+use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+
+class {{ class }} extends NestedsetPage
+{
+
+    public $level = 2;
+
+    protected static ?string $model = {{ model }};
+
+    protected function schema(array $arguments): array
+    {
+        return [
+            // 
+        ];
+    }
+
+
+    public static function getInfolistColumns(): array
+    {
+        return [
+            //
+        ];
+    }
+}
