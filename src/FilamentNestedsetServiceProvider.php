@@ -13,7 +13,6 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand;
-use Wsmallnews\FilamentNestedset\Testing\TestsFilamentNestedset;
 
 class FilamentNestedsetServiceProvider extends PackageServiceProvider
 {
@@ -77,9 +76,6 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
                 ], 'filament-nestedset-stubs');
             }
         }
-
-        // Testing
-        Testable::mixin(new TestsFilamentNestedset);
     }
 
     protected function getAssetPackageName(): ?string

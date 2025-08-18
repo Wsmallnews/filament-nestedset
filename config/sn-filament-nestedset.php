@@ -3,12 +3,12 @@
 // config for Wsmallnews/FilamentNestedset
 return [
     /**
-     * 限制删除带有子项的节点
+     * Restrict deletion of nodes with children.
      */
     'allow_delete_parent' => false,
 
     /*
-     * 限制删除根节点，即使 'allow_delete_parent' 为 true，也可以删除根节点。
+     * Restrict deletion of root nodes, even if 'allow_delete_parent' is true, root nodes can be deleted.
      */
     'allow_delete_root' => false,
 

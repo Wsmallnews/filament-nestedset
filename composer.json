@@ -1,10 +1,16 @@
 {
     "name": "wsmallnews/filament-nestedset",
-    "description": "Filament tree build on kalnoy/nestedset",
+    "description": "Filament nestedset build on kalnoy/nestedset",
     "keywords": [
-        "Wsmallnews",
         "laravel",
-        "filament-nestedset"
+        "filament",
+        "filament-nestedset",
+        "filament-plugin",
+        "filament-tree",
+        "nestedset",
+        "tree",
+        "smallnews",
+        "Wsmallnews"
     ],
     "homepage": "https://github.com/wsmallnews/filament-nestedset",
     "support": {

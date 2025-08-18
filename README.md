@@ -40,20 +40,97 @@ This is the contents of the published config file:
 ```php
 return [
     /**
-     * 限制删除带有子项的节点
+     * Restrict deletion of nodes with children
      */
     'allow_delete_parent' => false,
 
     /*
-     * 限制删除根节点，即使 'allow_delete_parent' 为 true，也可以删除根节点。
+     * Restrict deletion of root nodes, even if 'allow_delete_parent' is true, root nodes can be deleted.
      */
     'allow_delete_root' => false,
 ];
 ```
 
+## Prepare your model
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NodeTrait;
+...
+
+class YouModel extends Model
+{
+    use NodeTrait;
+
+    ...
+}
+
+```
+
+You should add fields to your model. replacing `your_model_table` with the name of your model table
+
+Add fields in the new model
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('your_model_table', function (Blueprint $table) {
+            ...
+            $table->nestedSet();
+            ...
+        });
+    }
+};
+```
+
+Add fields to an existing model
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('your_model_table', function (Blueprint $table) {
+            $table->nestedSet();
+        });
+    }
+};
+```
+
+And run the migration
+
+```bash
+php artisan migrate
+```
+
+
 ## Usage
 
-### Please define attribute name of the nodes in your tree, eg. title or title
+### Create the nestedset page
+
+```bash
+php artisan make:filament-nestedset-page
+```
+
+### Please define attribute name of the nodes in your tree, eg. title or name
 
 ```php
 <?php
@@ -72,9 +149,9 @@ class Test extends NestedsetPage
 }
 ```
 
-### 定义 form schema
+### Define form schema
 
-如果 create 和 edit 的 schema 一样，可以定义 schema 方法
+If the schema for create and edit are the same, you can define the schema method.
 
 ```php
 <?php
@@ -97,7 +174,7 @@ class Test extends NestedsetPage
 }
 ```
 
-如果 create 和 edit 的 schema 不一样，可以分别定义 createSchema 和 editSchema 方法
+If the schema for create and edit are different, you can define createSchema and editSchema methods separately.
 
 
 ```php
@@ -129,7 +206,7 @@ class Test extends NestedsetPage
 ```
 
 
-### 定义 tree 为空时候的提示文字
+### Define the prompt text when the tree is empty
 
 ```php
 <?php
@@ -142,13 +219,14 @@ class Test extends NestedsetPage
 {
     ...
 
-    public string $emptyLabel = '没有导航数据';
+    public string $emptyLabel = 'no test data';
+
     ...
 
 }
 ```
 
-### 其他可以自定义的属性
+### Other customizable properties
 
 ```php
 <?php
@@ -163,19 +241,19 @@ class Test extends NestedsetPage
 
     protected static ?string $model = NavigationModel::class;
     
-    protected static ?string $modelLabel = '测试管理';
+    protected static ?string $modelLabel = 'Test Management';
 
-    protected static ?string $title = '页面标题';
+    protected static ?string $title = 'Page Title';
 
-    protected static ?string $navigationLabel = '导航标题';
+    protected static ?string $navigationLabel = 'Test Navigation';
 
-    protected static ?string $navigationGroup = '导航分组';
+    protected static ?string $navigationGroup = 'Test Group';
 
     protected static ?string $slug = 'tests';
 
     protected static string $recordTitleAttribute = 'name';
 
-    protected static ?string $pluralModelLabel = '测试管理';
+    protected static ?string $pluralModelLabel = 'Test Management';
 
     protected static ?int $navigationSort = 1;
 
@@ -183,9 +261,9 @@ class Test extends NestedsetPage
 }
 ```
 
-### 展示额外属性
+### Display additional attributes
 
-通过 infolistSchema 方法可以定义每行展示额外属性
+You can define additional attributes to display in each row through the infolistSchema method
 
 ```php
 <?php
@@ -205,7 +283,7 @@ class Test extends NestedsetPage
 }
 ```
 
-默认情况下, infolist 将会在 md 及以上断点展示, 你可以通过设置 `$infolistHiddenEndpoint` 来改变展示断点。
+By default, the infolist will be displayed at the `md` breakpoint and above. You can change the display breakpoint by setting `$infolistHiddenEndpoint`.
 
 ```php
 <?php
@@ -222,7 +300,7 @@ class Test extends NestedsetPage
 }
 ```
 
-默认情况下, infolist 将会右对齐, 你可以通过设置 `$infolistAlignment` 来改变对齐方式。
+By default, the infolist will be right-aligned. You can change the alignment by setting `$infolistAlignment`.
 
 ```php
 <?php
@@ -245,9 +323,9 @@ class Test extends NestedsetPage
 
 ### Multi-tenancy support
 
-默认支持多租户，如果你的 `filament panel` 支持多租户，你需要在 `model` 中添加 `getScopeAttributes` 方法并且添加 team_id 字段。
+Multi-tenancy features is supported by default. If your filament panel supports multi-tenancy, you need to add the getScopeAttributes method to your model and add the team_id field.
 
-Multi-tenancy 是基于 kalnoy/nestedset 的 scoped 实现的，你可以点击 [查看详细文档](https://github.com/lazychaser/laravel-nestedset?tab=readme-ov-file#scoping)
+Multi-tenancy features is implemented based on `kalnoy/nestedset` scoped feature. You can [view detailed documentation here](https://github.com/lazychaser/laravel-nestedset?tab=readme-ov-file#scoping)
 
 ```php
 <?php
@@ -270,8 +348,7 @@ class YouModel extends Model
 }
 ```
 
-如果你的 `filament panel` 支持多租户, 但是当前 page 不需要区分 tenancy, 只需要在 page 中设置 $isScopedToTenant = false 即可。
-
+If your filament panel supports multi-tenancy, but the current page doesn't need to distinguish tenancy, just set `$isScopedToTenant = false` in the page.
 
 ```php
 <?php
@@ -288,11 +365,11 @@ class Test extends NestedsetPage
 }
 ```
 
-### 支持 tabs
+### Tabs support
 
-tabs 是基于 kalnoy/nestedset 的 scoped 实现的，你可以点击 [查看详细文档](https://github.com/lazychaser/laravel-nestedset?tab=readme-ov-file#scoping)
+Tabs are implemented based on `kalnoy/nestedset` scoped feature. You can [view detailed documentation here](https://github.com/lazychaser/laravel-nestedset?tab=readme-ov-file#scoping)
 
-通过 tabFieldName 设置关联的 tab 字段名，设置 tabs, 不需要在 tab 上增加当前tab 条件，tab 条件会自动附加到 kalnoy/nestedset 的 scoping 参数中
+Set the associated tab field name using tabFieldName. And setting tabs array, you don't need to add the current tab condition on the tab, as the tab condition will be automatically appended to `kalnoy/nestedset` scoping parameters.
 
 
 ```php
@@ -306,7 +383,7 @@ class Test extends NestedsetPage
 {
     ...
 
-    protected static ?string $tabFieldName = 'type';        // 关联的 tab 字段名
+    protected static ?string $tabFieldName = 'type';
 
     public function getTabs(): array
     {
@@ -320,8 +397,7 @@ class Test extends NestedsetPage
 }
 ```
 
-你需要在 `model` 中添加 `getScopeAttributes` 方法并且添加 tabFieldName 设置的字段 type。
-
+You need to add the getScopeAttributes method to your model and add the field set by tabFieldName (`type` in this case).
 
 ```php
 <?php
@@ -344,9 +420,11 @@ class YouModel extends Model
 }
 ```
 
-### 如果需要设置额外的 scope kalnoy/nestedset 的 scoping 参数
+### Additional scope parameters
 
-定义 nestedScoped 方法
+If you need to set additional scope parameters for `kalnoy/nestedset` scoping
+
+Define the `nestedScoped` method
 
 ```php
 <?php
@@ -367,7 +445,31 @@ class Test extends NestedsetPage
 }
 ```
 
-### 增加自定义查询条件
+You need to add the getScopeAttributes method to your model and add the field set.
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+...
+
+class YouModel extends Model
+{
+    ...
+
+    public function getScopeAttributes(): array
+    {
+        return ['category_id', ...];
+    }
+
+    ...
+}
+```
+
+
+### Add custom eloquent query conditions
 
 ```php
 <?php
@@ -386,13 +488,6 @@ class Test extends NestedsetPage
     }
     ...
 }
-```
-
-
-## Testing
-
-```bash
-composer test
 ```
 
 ## Changelog
