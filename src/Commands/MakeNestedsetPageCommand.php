@@ -47,7 +47,7 @@ class MakeNestedsetPageCommand extends Command
             ->replace('//', '/')
             ->append('.php');
 
-        if (!$this->option('force') && $this->checkForCollision([$path])) {
+        if (! $this->option('force') && $this->checkForCollision([$path])) {
             return self::INVALID;
         }
 
@@ -120,7 +120,7 @@ class MakeNestedsetPageCommand extends Command
         $panelIndex = select(
             label: 'Which panel would you like to create this in?',
             options: array_map(
-                static fn(Panel $panel): string => $panel->getId(),
+                static fn (Panel $panel): string => $panel->getId(),
                 $panels,
             ),
             default: Filament::getDefaultPanel()->getId(),
@@ -213,7 +213,7 @@ class MakeNestedsetPageCommand extends Command
 
         $modelClass = $this->parseModel($modelName);
 
-        if (!class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             $this->warn("Model '{$modelClass}' not found");
 
             return $placeholder;
