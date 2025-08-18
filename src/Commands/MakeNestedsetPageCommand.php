@@ -73,11 +73,8 @@ class MakeNestedsetPageCommand extends Command
         return self::SUCCESS;
     }
 
-
     /**
      * 解析页面名称
-     *
-     * @return string
      */
     public function parsePage(): string
     {
@@ -97,11 +94,8 @@ class MakeNestedsetPageCommand extends Command
             ->replace('/', '\\');
     }
 
-
     /**
      * 获取选择的 panel
-     *
-     * @return Panel
      */
     private function getPanel(): Panel
     {
@@ -129,14 +123,12 @@ class MakeNestedsetPageCommand extends Command
         return $panels[$panelIndex];
     }
 
-
     /**
      * 获取要创建的页面所在的 命名空间 和 目录
      *
-     * @param Panel $panel
      * @return array
      */
-    private function getPanelNamespaceAndPath(Panel $panel) 
+    private function getPanelNamespaceAndPath(Panel $panel)
     {
         $pageDirectories = $panel->getPageDirectories();
         $pageNamespaces = $panel->getPageNamespaces();
@@ -159,17 +151,16 @@ class MakeNestedsetPageCommand extends Command
             ? $pageDirectories[array_search($namespace, $pageNamespaces, true)]
             : (Arr::first($pageDirectories) ?? app_path('Filament/Pages/'));
 
-        return compact("namespace", "path");
+        return compact('namespace', 'path');
     }
-
 
     /**
      * 获取 cluster 需要填充的内容
      *
-     * @param string $namespace
+     * @param  string  $namespace
      * @return array
      */
-    private function getPotentialCluster($namespace) 
+    private function getPotentialCluster($namespace)
     {
         $potentialCluster = (string) str($namespace)->beforeLast('\Pages');
         $clusterAssignment = null;
@@ -192,11 +183,8 @@ class MakeNestedsetPageCommand extends Command
         return compact('clusterAssignment', 'clusterImport');
     }
 
-
     /**
      * 获取 mdoel 需要填充的 代码
-     *
-     * @return string
      */
     private function getModelStmt(): string
     {
@@ -222,12 +210,8 @@ class MakeNestedsetPageCommand extends Command
         return "{$modelClass}::class;";
     }
 
-
     /**
      * 格式化 model
-     *
-     * @param string $model
-     * @return string
      */
     private function parseModel(string $model): string
     {
@@ -246,7 +230,6 @@ class MakeNestedsetPageCommand extends Command
         return '\\' . $rootNamespace . 'Models\\' . $model;
     }
 
-
     private function copyStub(
         Filesystem $filesystem,
         string $targetPath,
@@ -254,7 +237,7 @@ class MakeNestedsetPageCommand extends Command
     ): void {
         $stubPath = base_path('stubs/NestedsetPage.stub');
 
-        if (!$this->fileExists($stubPath)) {
+        if (! $this->fileExists($stubPath)) {
             $stubPath = $this->getDefaultStubPath() . '/NestedsetPage.stub';
         }
 

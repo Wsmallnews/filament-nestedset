@@ -15,8 +15,8 @@ use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
-use Filament\Support\Enums\IconSize;
 use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\IconSize;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Kalnoy\Nestedset\NestedSet;
@@ -287,7 +287,6 @@ abstract class NestedsetPage extends Page
             });
     }
 
-
     #[On('filament-nestedset-updated')]
     public function refresh(): void
     {
@@ -336,7 +335,6 @@ abstract class NestedsetPage extends Page
         return static::$tabFieldName;
     }
 
-
     public function isScopedToTenant(): bool
     {
         return static::$isScopedToTenant;
@@ -345,6 +343,7 @@ abstract class NestedsetPage extends Page
     public function hasInfolist(): bool
     {
         $infolistSchema = $this->infolistSchema();
+
         return $infolistSchema && count($infolistSchema) > 0 ? true : false;
     }
 
@@ -367,7 +366,6 @@ abstract class NestedsetPage extends Page
     {
         return static::$modelLabel ?? get_model_label($this->getModel());
     }
-
 
     protected function getQuery()
     {
