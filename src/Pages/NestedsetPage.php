@@ -16,6 +16,7 @@ use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Support\Enums\IconSize;
+use Filament\Support\Enums\Alignment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Kalnoy\Nestedset\NestedSet;
@@ -50,9 +51,15 @@ abstract class NestedsetPage extends Page
 
     protected static bool $isScopedToTenant = true;
 
+    protected static string $recordTitleAttribute = 'name';
+
     protected static string $view = 'sn-filament-nestedset::pages.tree';
 
-    protected string $tabFieldName = '';
+    protected static ?string $tabFieldName = null;
+
+    protected static Alignment $infolistAlignment = Alignment::Right;
+
+    protected static string $infolistHiddenEndpoint = 'md';
 
     /**
      * @throws NestedsetException
@@ -61,7 +68,7 @@ abstract class NestedsetPage extends Page
     {
         $this->loadDefaultActiveTab();
 
-        $model = static::getModel();
+        $model = $this->getModel();
 
         $concerns = class_uses($model);
 
@@ -77,40 +84,6 @@ abstract class NestedsetPage extends Page
      */
     public function updatedActiveTab(): void {}
 
-    public function getQuery()
-    {
-        $model = static::getModel();
-
-        $scopes = [];
-        if (static::isScopedToTenant() && ($tenant = Filament::getTenant())) {
-            $scopes['team_id'] = $tenant->id;
-        }
-
-        if ($this->getTabFieldName()) {
-            $scopes[$this->getTabFieldName()] = $this->activeTab;
-        }
-
-        // 自定义 scope
-        if (method_exists($this, 'nestedScoped')) {
-            $scopes = array_merge($scopes, $this->nestedScoped());
-        }
-
-        if ($scopes) {
-            $query = $model::scoped($scopes);
-        } else {
-            $query = (new $model)->newScopedQuery();
-        }
-
-        // 自定义条件
-        if (method_exists($this, 'getEloquentQuery')) {
-            $query = $this->getEloquentQuery($query);
-        }
-
-        $query = $query->defaultOrder();
-
-        return $query;
-    }
-
     protected function getHeaderActions(): array
     {
         return [
@@ -123,7 +96,7 @@ abstract class NestedsetPage extends Page
     {
         return $this->configureCreateAction(
             CreateAction::make()
-                ->modelLabel(self::getModelLabel())
+                ->modelLabel($this->getModelLabel())
         );
     }
 
@@ -314,19 +287,6 @@ abstract class NestedsetPage extends Page
             });
     }
 
-    protected function schema(array $arguments): array
-    {
-        return [];
-    }
-
-    protected function getViewData(): array
-    {
-        $tree = $this->getQuery()->withDepth()->get()->toTree();
-
-        return [
-            'tree' => $tree,
-        ];
-    }
 
     #[On('filament-nestedset-updated')]
     public function refresh(): void
@@ -366,35 +326,99 @@ abstract class NestedsetPage extends Page
     //         ->treeKey('NestedParentId');
     // }
 
-    public function tabFieldName($tabFieldName): self
+    public function getRecordTitleAttribute(): string
     {
-        $this->tabFieldName = $tabFieldName;
-
-        return $this;
+        return static::$recordTitleAttribute;
     }
 
-    public function getTabFieldName(): string
+    public function getTabFieldName(): ?string
     {
-        return $this->tabFieldName;
+        return static::$tabFieldName;
     }
 
-    public static function scopeToTenant(bool $condition = true): void
-    {
-        static::$isScopedToTenant = $condition;
-    }
 
-    public static function isScopedToTenant(): bool
+    public function isScopedToTenant(): bool
     {
         return static::$isScopedToTenant;
     }
 
-    public static function getModel()
+    public function hasInfolist(): bool
+    {
+        $infolistSchema = $this->infolistSchema();
+        return $infolistSchema && count($infolistSchema) > 0 ? true : false;
+    }
+
+    public function getInfolistAlignment(): Alignment
+    {
+        return static::$infolistAlignment;
+    }
+
+    public function getInfolistHiddenEndpoint(): string
+    {
+        return static::$infolistHiddenEndpoint;
+    }
+
+    public function getModel()
     {
         return static::$model;
     }
 
-    public static function getModelLabel(): string
+    public function getModelLabel(): string
     {
-        return static::$modelLabel ?? get_model_label(static::getModel());
+        return static::$modelLabel ?? get_model_label($this->getModel());
+    }
+
+
+    protected function getQuery()
+    {
+        $model = $this->getModel();
+
+        $scopes = [];
+        if ($this->isScopedToTenant() && ($tenant = Filament::getTenant())) {
+            $scopes['team_id'] = $tenant->id;
+        }
+
+        if ($this->getTabFieldName()) {
+            $scopes[$this->getTabFieldName()] = $this->activeTab;
+        }
+
+        // 自定义 scope
+        if (method_exists($this, 'nestedScoped')) {
+            $scopes = array_merge($scopes, $this->nestedScoped());
+        }
+
+        if ($scopes) {
+            $query = $model::scoped($scopes);
+        } else {
+            $query = (new $model)->newScopedQuery();
+        }
+
+        // 自定义条件
+        if (method_exists($this, 'getEloquentQuery')) {
+            $query = $this->getEloquentQuery($query);
+        }
+
+        $query = $query->defaultOrder();
+
+        return $query;
+    }
+
+    protected function schema(array $arguments): array
+    {
+        return [];
+    }
+
+    protected function infolistSchema(): array
+    {
+        return [];
+    }
+
+    protected function getViewData(): array
+    {
+        $tree = $this->getQuery()->withDepth()->get()->toTree();
+
+        return [
+            'tree' => $tree,
+        ];
     }
 }

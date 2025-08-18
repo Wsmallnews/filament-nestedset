@@ -10,7 +10,9 @@ class {{ class }} extends NestedsetPage
 
     public $level = 2;
 
-    protected static ?string $model = {{ model }};
+    protected static ?string $model = {{ model }}{{ clusterAssignment }}
+
+    protected static string $recordTitleAttribute = 'name';
 
     protected function schema(array $arguments): array
     {
@@ -20,7 +22,7 @@ class {{ class }} extends NestedsetPage
     }
 
 
-    public static function getInfolistColumns(): array
+    public function infolistSchema(): array
     {
         return [
             //

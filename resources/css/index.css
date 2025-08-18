@@ -1,1 +1,8 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+.fi-sn-tree-infolist .fi-in-entry-wrp > div {
+    @apply !flex items-center gap-x-2;
+}
+.fi-sn-tree-infolist .fi-in-entry-wrp .fi-in-entry-wrp-label span {
+    @apply text-gray-400;
+}

@@ -7,7 +7,7 @@
         x-load-css="[@js(\Filament\Support\Facades\FilamentAsset::getStyleHref('filament-nestedset-styles', package: 'wsmallnews/filament-nestedset'))]"
     >
         <div
-            class="divide-y divide-gray-200 dark:divide-white/10"
+            class="fi-sn-tree divide-y divide-gray-200 dark:divide-white/10"
             data-id
             data-sortable-container
             @if (\Filament\Support\Facades\FilamentView::hasSpaMode())
@@ -22,7 +22,7 @@
                 <x-sn-filament-nestedset::tree-item :item="$item" key="tree-component-{{ $item->getKey() }}" :level="$level" />
             @empty
                 <div @class([
-                    'w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-center',
+                    'fi-sn-tree-empty w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-center',
                     'dark:bg-gray-700 dark:border-gray-600',
                 ])>
                     {{ $emptyLabel ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}

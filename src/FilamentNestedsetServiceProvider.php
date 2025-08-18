@@ -12,7 +12,7 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Wsmallnews\FilamentNestedset\Commands\FilamentNestedsetCommand;
+use Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand;
 use Wsmallnews\FilamentNestedset\Testing\TestsFilamentNestedset;
 
 class FilamentNestedsetServiceProvider extends PackageServiceProvider
@@ -104,7 +104,7 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            FilamentNestedsetCommand::class,
+            MakeNestedsetPageCommand::class,
         ];
     }
 
@@ -137,8 +137,6 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
      */
     protected function getMigrations(): array
     {
-        return [
-            'create_filament-nestedset_table',
-        ];
+        return [];
     }
 }
