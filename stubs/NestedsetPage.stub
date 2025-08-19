@@ -8,8 +8,6 @@ use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
 class {{ class }} extends NestedsetPage
 {
 
-    public $level = 2;
-
     protected static ?string $model = {{ model }}{{ clusterAssignment }}
 
     protected static string $recordTitleAttribute = 'name';

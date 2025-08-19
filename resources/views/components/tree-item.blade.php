@@ -5,6 +5,11 @@
     use Filament\Infolists\Infolist;
 
     $infolistAlignment = $this->getInfolistAlignment();
+
+    $canHasChildren = false;
+    if (is_null($level) || $level > ($item->depth + 1)) {
+        $canHasChildren = true;
+    }
 @endphp
 
 <div
@@ -54,7 +59,7 @@
 
         <div class="flex grow-0 gap-3">
             {{-- 一级 depth = 0 --}}
-            @if($level > ($item->depth + 1))
+            @if($canHasChildren)
                 {{ ($this->createChildAction)(['parentId' => $item->getKey()]) }}
             @endif
 

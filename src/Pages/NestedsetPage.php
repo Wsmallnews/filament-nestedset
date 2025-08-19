@@ -36,7 +36,7 @@ abstract class NestedsetPage extends Page
     use HasUnsavedDataChangesAlert;
     use InteractsWithFormActions;
 
-    public $level = 2;
+    public ?int $level = null;
 
     public string $emptyLabel = '';
 
