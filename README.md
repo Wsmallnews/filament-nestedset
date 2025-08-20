@@ -8,6 +8,19 @@
 
 Filament tree build on kalnoy/nestedset, support multi language. support Multi-tenancy
 
+## Overview
+
+* Elegant UI, consistent with the default style of the filament page
+* The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/kalnoy/nestedset)
+* Support multi-tenancy, you can easily create nestedset pages among multiple tenants
+* Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
+* Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
+
+## Screenshots
+
+![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/main/assets/dark.jpg?raw=true)  
+![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/main/assets/light.jpg?raw=true)
+![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/main/assets/create.jpg?raw=true)
 
 ## Installation
 
@@ -225,6 +238,29 @@ class Test extends NestedsetPage
 
 }
 ```
+
+### Limit nestedset level
+
+Nestedset level is unlimited by default, you can limit the nestedset levels by: 
+
+```php
+<?php
+
+namespace App\Filament\Pages;
+
+use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+
+class Test extends NestedsetPage
+{
+    ...
+
+    public ?int $level = 3;
+
+    ...
+
+}
+```
+
 
 ### Other customizable properties
 
