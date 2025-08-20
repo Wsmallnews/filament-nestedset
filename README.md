@@ -18,9 +18,9 @@ Filament tree build on kalnoy/nestedset, support multi language. support Multi-t
 
 ## Screenshots
 
-![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/main/assets/dark.jpg?raw=true)  
-![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/main/assets/light.jpg?raw=true)
-![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/main/assets/create.jpg?raw=true)
+![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/main/assets/dark.jpg?raw=true)  
+![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/main/assets/light.jpg?raw=true)
+![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/main/assets/create.jpg?raw=true)
 
 ## Installation
 
