@@ -4,21 +4,18 @@ namespace Wsmallnews\FilamentNestedset\Forms\Fields;
 
 use Closure;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class KalnoyNestedsetSelectTree extends SelectTree
 {
-
     protected ?int $level = null;
 
     protected ?Closure $buildQuery = null;
 
-
     protected function buildTree(): Collection
     {
         $buildQuery = $this->getBuildQuery();
-        if (!$buildQuery) {
+        if (! $buildQuery) {
             return parent::buildTree();
         }
 
@@ -51,7 +48,6 @@ class KalnoyNestedsetSelectTree extends SelectTree
 
         return $this->buildTreeFromResults($combinedResults);
     }
-
 
     private function buildTreeFromResults($results, $parent = null): Collection
     {
@@ -124,7 +120,6 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $node;
     }
 
-
     public function buildQuery(?Closure $buildQuery = null): static
     {
         $this->buildQuery = $buildQuery;
@@ -132,12 +127,10 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $this;
     }
 
-
     public function getBuildQuery()
     {
         return $this->buildQuery;
     }
-
 
     public function level(?int $level = null): static
     {
@@ -145,7 +138,6 @@ class KalnoyNestedsetSelectTree extends SelectTree
 
         return $this;
     }
-
 
     public function getLevel()
     {

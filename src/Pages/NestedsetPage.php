@@ -16,7 +16,6 @@ use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\IconSize;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Kalnoy\Nestedset\NestedSet;
@@ -133,7 +132,7 @@ abstract class NestedsetPage extends Page
                     $parentSelect = Arr::wrap($this->getParentSelect());
 
                     $schema = array_merge([
-                        ...$parentSelect
+                        ...$parentSelect,
                     ], $schema);
                 }
 
