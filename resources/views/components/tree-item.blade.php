@@ -5,6 +5,7 @@
     use Filament\Infolists\Infolist;
 
     $infolistAlignment = $this->getInfolistAlignment();
+    $infoListHiddenEndpoint = $this->getInfolistHiddenEndpoint();
 
     $canHasChildren = false;
     if (is_null($level) || $level > ($item->depth + 1)) {
@@ -42,7 +43,13 @@
             @if ($this->hasInfolist())
                 <div @class([
                     'fi-sn-tree-infolist hidden grow gap-x-4 px-4 items-center',
-                    $this->getInfolistHiddenEndpoint() . ':flex',
+                    match ($infoListHiddenEndpoint) {
+                        'sm' => 'sm:flex',
+                        'md' => 'md:flex',
+                        'lg' => 'lg:flex',
+                        'xl' => 'xl:flex',
+                        '2xl' => '2xl:flex',
+                    },
                     match ($infolistAlignment) {
                         Alignment::Left, Alignment::Start => 'justify-start',
                         Alignment::Center => 'justify-center',
