@@ -2,6 +2,7 @@
 
 namespace Wsmallnews\FilamentNestedset\Pages;
 
+use BackedEnum;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -15,6 +16,8 @@ use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
+use Filament\Schemas\Components\RenderHook;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\IconSize;
 use Illuminate\Database\Eloquent\Model;
@@ -47,13 +50,13 @@ abstract class NestedsetPage extends Page
 
     protected static ?string $modelLabel = null;
 
-    protected static ?string $navigationIcon = 'heroicon-o-bars-3-bottom-right';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-bars-3-bottom-right';
 
     protected static bool $isScopedToTenant = true;
 
     protected static string $recordTitleAttribute = 'name';
 
-    protected static string $view = 'sn-filament-nestedset::pages.tree';
+    protected string $view = 'sn-filament-nestedset::pages.tree';
 
     protected static ?string $tabFieldName = null;
 
@@ -117,7 +120,7 @@ abstract class NestedsetPage extends Page
     private function configureCreateAction(CreateAction $action, $type = 'create'): Action
     {
         return $action->model(self::getModel())     // Action 需要 model attribute is a string
-            ->mutateFormDataUsing(function (array $data): array {
+            ->mutateDataUsing(function (array $data): array {
                 $model = $this->getQuery()->getModel();     // 这个获取的是包含 scopes 中的 attributes 数据的 model 实例
 
                 return [
@@ -125,7 +128,7 @@ abstract class NestedsetPage extends Page
                     ...$model->getAttributes(),          // 这里填充 scoped 设置的数据
                 ];
             })
-            ->form(fn (array $arguments): array => method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments))
+            ->schema(fn (array $arguments): array => method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments))
 
             // ->form(function (array $arguments) use ($type) {
             //     $schema = method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments);
@@ -164,7 +167,7 @@ abstract class NestedsetPage extends Page
 
                 return $id ? $this->getQuery()->findOrFail($id) : null;
             })
-            ->form(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
+            ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
             ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-pencil-square')->iconSize(IconSize::Small)
             ->link();
@@ -365,6 +368,15 @@ abstract class NestedsetPage extends Page
     public function getModelLabel(): string
     {
         return static::$modelLabel ?? get_model_label($this->getModel());
+    }
+
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getTabsContentComponent(),
+            ]);
     }
 
     protected function getQuery()
