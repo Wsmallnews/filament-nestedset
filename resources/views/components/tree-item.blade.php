@@ -2,7 +2,7 @@
 
 @php
     use Filament\Support\Enums\Alignment;
-    use Filament\Infolists\Infolist;
+    use Filament\Schemas\Schema;
 
     $infolistAlignment = $this->getInfolistAlignment();
     $infoListHiddenEndpoint = $this->getInfolistHiddenEndpoint();
@@ -56,9 +56,9 @@
                         Alignment::Right, Alignment::End => 'justify-end',
                     },
                 ])>
-                    {{ Infolist::make()
+                    {{ Schema::make($this)
                         ->record($item)
-                        ->schema($this->infolistSchema())
+                        ->components($this->infolistSchema())
                         ->view('sn-filament-nestedset::components.infolist'); }}
                 </div>
             @endif

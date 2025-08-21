@@ -1,8 +1,10 @@
-@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import "tailwindcss";
 
-.fi-sn-tree-infolist .fi-in-entry-wrp > div {
+@source '../views';
+
+.fi-sn-tree-infolist .fi-in-entry {
     @apply !flex items-center gap-x-2;
 }
-.fi-sn-tree-infolist .fi-in-entry-wrp .fi-in-entry-wrp-label span {
+.fi-sn-tree-infolist .fi-in-entry .fi-in-entry-label-col .fi-in-entry-label {
     @apply text-gray-400;
 }

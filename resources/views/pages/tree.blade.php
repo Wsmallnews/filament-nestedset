@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <x-filament-panels::resources.tabs />
+    {{ $this->content }}
 
     <div
         class="fi-sn-tree-container overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
