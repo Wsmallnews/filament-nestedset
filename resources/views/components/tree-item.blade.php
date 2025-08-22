@@ -7,9 +7,9 @@
     $infolistAlignment = $this->getInfolistAlignment();
     $infoListHiddenEndpoint = $this->getInfolistHiddenEndpoint();
 
-    $canHasChildren = false;
-    if (is_null($level) || $level > ($item->depth + 1)) {
-        $canHasChildren = true;
+    $canCreateChildren = false;
+    if ($this->showCreateChildNodeActionInRow() && (is_null($level) || $level > ($item->depth + 1))) {
+        $canCreateChildren = true;
     }
 @endphp
 
@@ -66,7 +66,7 @@
 
         <div class="flex grow-0 gap-3">
             {{-- 一级 depth = 0 --}}
-            @if($canHasChildren)
+            @if($canCreateChildren)
                 {{ ($this->createChildAction)(['parentId' => $item->getKey()]) }}
             @endif
 

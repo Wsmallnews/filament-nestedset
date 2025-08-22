@@ -12,6 +12,8 @@ Filament tree build on kalnoy/nestedset, support multi language. support Multi-t
 
 * Elegant UI, consistent with the default style of the filament page
 * The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/kalnoy/nestedset)
+* ParentSelect field depends on [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
+* Some features are borrowed from [15web/filament-tree](https://github.com/15web/filament-tree)
 * Support multi-tenancy, you can easily create nestedset pages among multiple tenants
 * Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
 * Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
@@ -61,6 +63,16 @@ return [
      * Restrict deletion of root nodes, even if 'allow_delete_parent' is true, root nodes can be deleted.
      */
     'allow_delete_root' => false,
+
+    /**
+     * create action show parent select field
+     */
+    'create_action_modal_show_parent_select' => true,
+
+    /**
+     * Display the "Create Child Node" action in each row (if 'create_action_modal_show_parent_select' is false, This field should be set to true)
+     */
+    'show_create_child_node_action_in_row' => true,
 ];
 ```
 
@@ -542,6 +554,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 - [smallnews](https://github.com/Wsmallnews)
 - [kalnoy/nestedset](https://github.com/lazychaser/laravel-nestedset)
+- [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
 - [15web/filament-tree](https://github.com/15web/filament-tree)
 - [All Contributors](../../contributors)
 

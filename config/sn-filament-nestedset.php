@@ -12,19 +12,14 @@ return [
      */
     'allow_delete_root' => false,
 
-/**
- * 添加子节点的方式
- *
- * form: 添加时，通过 select 选择父级节点
- * node: 在节点上点击 添加子节点 action
- * both: 两种方式同时存在
- */
-    // 'children_add_method' => 'form'
-
-    /*
-     * If you want to see edit form as compact one,
-     * you able to remove parent's select from it.
-     * You still can drag'n'drop the nodes.
+    /**
+     * create action show parent select field
      */
-    // 'show-parent-select-while-edit' => true,
+    'create_action_modal_show_parent_select' => true,
+
+    /**
+     * Display the "Create Child Node" action in each row (if 'create_action_modal_show_parent_select' is false, This field should be set to true)
+     */
+    'show_create_child_node_action_in_row' => true,
+    
 ];

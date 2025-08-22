@@ -303,11 +303,9 @@ abstract class NestedsetPage extends Page
         return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
 
-    protected function hasFormParentSelect(): bool
+    public function hasFormParentSelect(): bool
     {
-        $childrenAddMethod = config('sn-filament-nestedset.children_add_method') ?? 'both';
-
-        return in_array($childrenAddMethod, ['both', 'form']);
+        return config('sn-filament-nestedset.create_action_modal_show_parent_select') ?? false;
     }
 
     protected function getParentSelect(): array | Field
@@ -321,10 +319,15 @@ abstract class NestedsetPage extends Page
             })
             ->enableBranchNode()     // 可以选择非根节点
             ->withCount()
-            ->required()
             ->placeholder('请选择父节点')
             ->emptyLabel('未搜索到父节点')
             ->treeKey('NestedParentId');
+    }
+
+
+    public function showCreateChildNodeActionInRow(): bool
+    {
+        return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
     }
 
     public function getRecordTitleAttribute(): string
