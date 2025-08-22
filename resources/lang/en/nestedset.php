@@ -20,5 +20,5 @@ return [
 
     'field' => [
         'parent_select_field' => 'Parent node',
-    ]
+    ],
 ];
