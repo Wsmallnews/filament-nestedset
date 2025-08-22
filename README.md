@@ -29,7 +29,7 @@ Filament tree build on kalnoy/nestedset, support multi language. support Multi-t
 You can install the package via composer:
 
 ```bash
-composer require wsmallnews/filament-nestedset
+composer require wsmallnews/filament-nestedset:^1.0
 ```
 
 You can publish the config file with:
