@@ -324,7 +324,6 @@ abstract class NestedsetPage extends Page
             ->treeKey('NestedParentId');
     }
 
-
     public function showCreateChildNodeActionInRow(): bool
     {
         return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;

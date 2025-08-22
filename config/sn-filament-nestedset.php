@@ -21,5 +21,5 @@ return [
      * Display the "Create Child Node" action in each row (if 'create_action_modal_show_parent_select' is false, This field should be set to true)
      */
     'show_create_child_node_action_in_row' => true,
-    
+
 ];
