@@ -5,6 +5,7 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
 
+**Support Filament v3, If you are currently using Filament v4, please refer to this link [here](https://github.com/Wsmallnews/filament-nestedset/tree/v2)**
 
 Filament tree build on kalnoy/nestedset, support multi language. support Multi-tenancy
 

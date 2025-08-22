@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class KalnoyNestedsetSelectTree extends SelectTree
 {
-    protected ?int $level = null;
+    protected int | Closure | null $level = null;
 
     protected ?Closure $buildQuery = null;
 
@@ -29,13 +29,15 @@ class KalnoyNestedsetSelectTree extends SelectTree
 
         $nullParentResults = $nullParentQuery->get();
         $nonNullParentResults = collect([]);
-        if ($this->level > 1) {
+        if ($this->hasChildren()) {
             $nonNullParentResults = $nonNullParentQuery->get();
 
-            // 只保留需要的层级
-            $nonNullParentResults = $nonNullParentResults->filter(function ($item) {
-                return $item->depth < $this->level;
-            });
+            if (!is_null($this->getLevel())) {
+                // 只保留需要的层级
+                $nonNullParentResults = $nonNullParentResults->filter(function ($item) {
+                    return $item->depth < $this->getLevel();
+                });
+            }
         }
 
         // Combine the results from both queries
@@ -132,7 +134,7 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $this->buildQuery;
     }
 
-    public function level(?int $level = null): static
+    public function level(int | Closure | null $level = null): static
     {
         $this->level = $level;
 
@@ -141,6 +143,14 @@ class KalnoyNestedsetSelectTree extends SelectTree
 
     public function getLevel()
     {
-        return $this->level;
+        return $this->evaluate($this->level);
     }
+
+
+    protected function hasChildren()
+    {
+        $level = $this->getLevel();
+
+        return is_null($level) || $level > 1;
+    } 
 }
