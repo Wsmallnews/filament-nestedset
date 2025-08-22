@@ -15,7 +15,6 @@ use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Resources\Concerns\HasTabs;
-use Filament\Schemas\Components\RenderHook;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\IconSize;
@@ -373,7 +372,6 @@ abstract class NestedsetPage extends Page
     {
         return static::$modelLabel ?? get_model_label($this->getModel());
     }
-
 
     public function content(Schema $schema): Schema
     {
