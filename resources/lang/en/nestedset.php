@@ -17,4 +17,8 @@ return [
         'fix_nestedset' => 'Fix nested set',
         'fix_nestedset_success' => 'Nested set fixed successfully',
     ],
+
+    'field' => [
+        'parent_select_field' => 'Parent node',
+    ]
 ];

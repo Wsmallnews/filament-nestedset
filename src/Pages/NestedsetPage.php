@@ -310,7 +310,7 @@ abstract class NestedsetPage extends Page
 
     protected function getParentSelect(): array | Field
     {
-        return KalnoyNestedsetSelectTree::make('parent_id')->label('父节点')
+        return KalnoyNestedsetSelectTree::make('parent_id')->label(__('sn-filament-nestedset::nestedset.field.parent_select_field'))
             ->level($this->level - 1)      // 能让用户选择的层级，需要 -1
             ->relationship(relationship: 'parent', titleAttribute: 'name', parentAttribute: NestedSet::PARENT_ID)
             ->searchable()
