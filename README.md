@@ -5,6 +5,7 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
 
+**Support Filament v4, If you are currently using Filament v3, please refer to this link [here](https://github.com/Wsmallnews/filament-nestedset/tree/v1)**
 
 Filament tree build on kalnoy/nestedset, support multi language. support Multi-tenancy
 
@@ -12,22 +13,25 @@ Filament tree build on kalnoy/nestedset, support multi language. support Multi-t
 
 * Elegant UI, consistent with the default style of the filament page
 * The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/kalnoy/nestedset)
+* ParentSelect field depends on [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
+* Some features are borrowed from [15web/filament-tree](https://github.com/15web/filament-tree)
 * Support multi-tenancy, you can easily create nestedset pages among multiple tenants
 * Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
 * Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
 
 ## Screenshots
 
-![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/main/assets/dark.jpg?raw=true)  
-![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/main/assets/light.jpg?raw=true)
-![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/main/assets/create.jpg?raw=true)
+![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/light.png)
+![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/dark.png)  
+![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/create.png)
+![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/hasparentselect.png)
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require wsmallnews/filament-nestedset
+composer require wsmallnews/filament-nestedset:^2.0
 ```
 
 You can publish the config file with:
@@ -61,6 +65,16 @@ return [
      * Restrict deletion of root nodes, even if 'allow_delete_parent' is true, root nodes can be deleted.
      */
     'allow_delete_root' => false,
+
+    /**
+     * create action show parent select field
+     */
+    'create_action_modal_show_parent_select' => true,
+
+    /**
+     * Display the "Create Child Node" action in each row (if 'create_action_modal_show_parent_select' is false, This field should be set to true)
+     */
+    'show_create_child_node_action_in_row' => true,
 ];
 ```
 
@@ -542,6 +556,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 - [smallnews](https://github.com/Wsmallnews)
 - [kalnoy/nestedset](https://github.com/lazychaser/laravel-nestedset)
+- [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
 - [15web/filament-tree](https://github.com/15web/filament-tree)
 - [All Contributors](../../contributors)
 

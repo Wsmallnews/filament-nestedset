@@ -17,4 +17,8 @@ return [
         'fix_nestedset' => '修复嵌套集合',
         'fix_nestedset_success' => '嵌套集合修复成功',
     ],
+
+    'field' => [
+        'parent_select_field' => '父节点',
+    ]
 ];

@@ -3,7 +3,6 @@
 namespace Wsmallnews\FilamentNestedset\Pages;
 
 use BackedEnum;
-use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -29,6 +28,7 @@ use Livewire\Attributes\Url;
 use Livewire\Features\SupportEvents\Event;
 use Throwable;
 use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
+use Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree;
 
 use function Filament\Support\get_model_label;
 
@@ -128,21 +128,19 @@ abstract class NestedsetPage extends Page
                     ...$model->getAttributes(),          // 这里填充 scoped 设置的数据
                 ];
             })
-            ->schema(fn (array $arguments): array => method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments))
+            ->schema(function (array $arguments) use ($type) {
+                $schema = method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments);
 
-            // ->form(function (array $arguments) use ($type) {
-            //     $schema = method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments);
+                if ($type == 'create' &&  (is_null($this->level) || $this->level >= 2) && $this->hasFormParentSelect()) {       // 创建，并且 nesetdset level 至少两级才可以选择上级
+                    $parentSelect = Arr::wrap($this->getParentSelect());
 
-            //     if ($type == 'create' && $this->hasFormParentSelect()) {
-            //         $parentSelect = Arr::wrap($this->getParentSelect());
+                    $schema = array_merge([
+                        ...$parentSelect,
+                    ], $schema);
+                }
 
-            //         $schema = array_merge([
-            //             ...$parentSelect
-            //         ], $schema);
-            //     }
-
-            //     return $schema;
-            // })
+                return $schema;
+            })
             ->using(function (array $data, array $arguments): Model {
                 // 优先使用表单中的 parent_id
                 $parentId = $data['parent_id'] ?? ($arguments['parentId'] ?? 0);
@@ -308,25 +306,31 @@ abstract class NestedsetPage extends Page
         return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
 
-    // protected function hasFormParentSelect(): bool
-    // {
-    //     $childrenAddMethod = config('sn-filament-nestedset.children_add_method') ?? 'both';
+    public function hasFormParentSelect(): bool
+    {
+        return config('sn-filament-nestedset.create_action_modal_show_parent_select') ?? false;
+    }
 
-    //     return in_array($childrenAddMethod, ['both', 'form']);
-    // }
+    protected function getParentSelect(): array | Field
+    {
+        return KalnoyNestedsetSelectTree::make('parent_id')->label(__('sn-filament-nestedset::nestedset.field.parent_select_field'))
+            ->level(is_null($this->level) ? null : ($this->level - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
+            ->relationship(relationship: 'parent', titleAttribute: 'name', parentAttribute: NestedSet::PARENT_ID)
+            ->searchable()
+            ->buildQuery(function () {
+                return $this->getQuery();
+            })
+            ->enableBranchNode()     // 可以选择非根节点
+            ->withCount()
+            ->placeholder('请选择父节点')
+            ->emptyLabel('未搜索到父节点')
+            ->treeKey('NestedParentId');
+    }
 
-    // protected function getParentSelect(): array | Field
-    // {
-    //     return SelectTree::make('parent_id')->label('父节点')
-    //         ->relationship(relationship: 'parent', titleAttribute: 'name', parentAttribute: NestedSet::PARENT_ID)
-    //         ->searchable()
-    //         ->enableBranchNode()     // 可以选择非根节点
-    //         ->withCount()
-    //         ->required()
-    //         ->placeholder('请选择父节点')
-    //         ->emptyLabel('未搜索到父节点')
-    //         ->treeKey('NestedParentId');
-    // }
+    public function showCreateChildNodeActionInRow(): bool
+    {
+        return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
+    }
 
     public function getRecordTitleAttribute(): string
     {
