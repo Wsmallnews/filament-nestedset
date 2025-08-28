@@ -89,7 +89,7 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     {
         return [
             AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
-            Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css')->loadedOnRequest(),
+            Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css'),
         ];
     }
 

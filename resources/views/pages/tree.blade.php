@@ -4,7 +4,6 @@
     <div
         class="fi-sn-tree-container overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
         wire:key="tree-items-wrapper"
-        x-load-css="[@js(\Filament\Support\Facades\FilamentAsset::getStyleHref('filament-nestedset-styles', package: 'wsmallnews/filament-nestedset'))]"
     >
         <div
             class="fi-sn-tree divide-y divide-gray-200 dark:divide-white/10"
@@ -21,10 +20,9 @@
             @forelse($tree as $treeKey => $item)
                 <x-sn-filament-nestedset::tree-item :item="$item" key="tree-component-{{ $item->getKey() }}" :level="$level" />
             @empty
-                <div @class([
-                    'fi-sn-tree-empty w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-center',
-                    'dark:bg-gray-700 dark:border-gray-600',
-                ])>
+                <div 
+                    class="fi-sn-tree-empty w-full px-3 py-2 text-center"
+                >
                     {{ $emptyLabel ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
                 </div>
             @endforelse

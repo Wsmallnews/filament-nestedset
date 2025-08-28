@@ -22,9 +22,11 @@
 >
     <div class="fi-sn-tree-item-rowinfo flex justify-between relative group px-4 gap-4 hover:bg-gray-50 dark:hover:bg-white/5">
         <div class="flex gap-4 grow">
-            <button type="button" @class([
-                'flex items-center ltr:rounded-l-lg rtl:rounded-r-lg',
-            ]) data-sortable-handle>
+            <button 
+                class="fi-sn-tree-item-handle flex items-center ltr:rounded-l-lg rtl:rounded-r-lg"
+                type="button" 
+                data-sortable-handle
+            >
                 @svg('heroicon-m-bars-2', 'text-gray-400 w-5 h-5 cursor-move ltr:-mr-2 rtl:-ml-2')
             </button>
 
