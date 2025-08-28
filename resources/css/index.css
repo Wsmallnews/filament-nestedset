@@ -2,6 +2,8 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+@source '../views/**/*';
+
 .fi-sn-tree-infolist .fi-in-entry {
     @apply !flex items-center gap-x-2;
 }

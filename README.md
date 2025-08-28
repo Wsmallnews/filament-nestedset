@@ -24,7 +24,7 @@ Filament tree build on kalnoy/nestedset, support multi language. support Multi-t
 ![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/light.png)
 ![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/dark.png)  
 ![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/create.png)
-![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/hasparentselect.png)
+![Hasparentselect](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/hasparentselect.png)
 
 ## Installation
 
@@ -75,6 +75,11 @@ return [
      * Display the "Create Child Node" action in each row (if 'create_action_modal_show_parent_select' is false, This field should be set to true)
      */
     'show_create_child_node_action_in_row' => true,
+
+    /**
+     * By default, the CSS file will be automatically loaded globally. If you use a filament custom theme, you can disable the automatic loading of the CSS file
+     */
+    'autoload_assets' => true,
 ];
 ```
 
@@ -538,6 +543,27 @@ class Test extends NestedsetPage
     }
     ...
 }
+```
+
+### Custom theme
+
+By default, the CSS file will be automatically loaded globally. If you use a [filament custom theme](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme), you can disable the automatic loading of the CSS file
+
+Disable the automatic loading of the CSS file
+
+```php
+<?php
+return [
+    ...
+    
+    'autoload_assets' => false,
+];
+```
+
+You should add the following code to your custom theme file. If you custom theme file is `/resources/css/filament/admin/theme.css`
+
+```css
+@import '../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css';
 ```
 
 ## Changelog

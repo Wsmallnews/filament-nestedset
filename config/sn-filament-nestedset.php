@@ -22,4 +22,8 @@ return [
      */
     'show_create_child_node_action_in_row' => true,
 
+    /**
+     * By default, the CSS file will be automatically loaded globally. If you use a filament custom theme, you can disable the automatic loading of the CSS file
+     */
+    'autoload_assets' => true,
 ];
