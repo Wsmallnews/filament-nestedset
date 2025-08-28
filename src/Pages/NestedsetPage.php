@@ -130,7 +130,7 @@ abstract class NestedsetPage extends Page
             ->schema(function (array $arguments) use ($type) {
                 $schema = method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments);
 
-                if ($type == 'create' &&  (is_null($this->level) || $this->level >= 2) && $this->hasFormParentSelect()) {       // 创建，并且 nesetdset level 至少两级才可以选择上级
+                if ($type == 'create' && (is_null($this->level) || $this->level >= 2) && $this->hasFormParentSelect()) {       // 创建，并且 nesetdset level 至少两级才可以选择上级
                     $parentSelect = Arr::wrap($this->getParentSelect());
 
                     $schema = array_merge([
