@@ -20,5 +20,5 @@ return [
 
     'field' => [
         'parent_select_field' => '父节点',
-    ]
+    ],
 ];

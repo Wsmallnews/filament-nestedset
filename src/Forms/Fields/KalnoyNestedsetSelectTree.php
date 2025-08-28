@@ -32,7 +32,7 @@ class KalnoyNestedsetSelectTree extends SelectTree
         if ($this->hasChildren()) {
             $nonNullParentResults = $nonNullParentQuery->get();
 
-            if (!is_null($this->getLevel())) {
+            if (! is_null($this->getLevel())) {
                 // 只保留需要的层级
                 $nonNullParentResults = $nonNullParentResults->filter(function ($item) {
                     return $item->depth < $this->getLevel();
@@ -145,7 +145,6 @@ class KalnoyNestedsetSelectTree extends SelectTree
     {
         return $this->evaluate($this->level);
     }
-
 
     protected function hasChildren()
     {
