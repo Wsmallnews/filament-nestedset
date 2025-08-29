@@ -37,19 +37,19 @@ composer require wsmallnews/filament-nestedset:^1.0
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag="filament-nestedset-config"
+php artisan vendor:publish --tag="sn-filament-nestedset-config"
 ```
 
 Optionally, you can publish the views using
 
 ```bash
-php artisan vendor:publish --tag="filament-nestedset-views"
+php artisan vendor:publish --tag="sn-filament-nestedset-views"
 ```
 
 Multi language support, you can publish the language files using
 
 ```bash
-php artisan vendor:publish --tag=sn-filament-nestedset-lang
+php artisan vendor:publish --tag="sn-filament-nestedset-translations"
 ```
 
 This is the contents of the published config file:
