@@ -20,5 +20,7 @@ return [
 
     'field' => [
         'parent_select_field' => 'Parent node',
+        'parent_select_field_placeholder' => 'Please select a parent node',
+        'parent_select_field_empty_label' => 'No parent node found',
     ],
 ];

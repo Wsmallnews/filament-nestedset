@@ -319,8 +319,8 @@ abstract class NestedsetPage extends Page
             })
             ->enableBranchNode()     // 可以选择非根节点
             ->withCount()
-            ->placeholder('请选择父节点')
-            ->emptyLabel('未搜索到父节点')
+            ->placeholder(__('sn-filament-nestedset::nestedset.field.parent_select_field_placeholder'))
+            ->emptyLabel(__('sn-filament-nestedset::nestedset.field.parent_select_field_empty_label'))
             ->treeKey('NestedParentId');
     }
 

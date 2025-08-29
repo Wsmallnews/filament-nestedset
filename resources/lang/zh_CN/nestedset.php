@@ -20,5 +20,7 @@ return [
 
     'field' => [
         'parent_select_field' => '父节点',
+        'parent_select_field_placeholder' => '请选择父节点',
+        'parent_select_field_empty_label' => '未搜索到父节点',
     ],
 ];
