@@ -314,11 +314,10 @@ abstract class NestedsetPage extends Page
     {
         return KalnoyNestedsetSelectTree::make('parent_id')->label(__('sn-filament-nestedset::nestedset.field.parent_select_field'))
             ->level(is_null($this->level) ? null : ($this->level - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
-            ->relationship(relationship: 'parent', titleAttribute: 'name', parentAttribute: NestedSet::PARENT_ID)
             ->searchable()
-            ->buildQuery(function () {
+            ->query(function () {
                 return $this->getQuery();
-            })
+            }, titleAttribute: 'name', parentAttribute: NestedSet::PARENT_ID)
             ->enableBranchNode()     // 可以选择非根节点
             ->withCount()
             ->placeholder(__('sn-filament-nestedset::nestedset.field.parent_select_field_placeholder'))

@@ -10,17 +10,10 @@ class KalnoyNestedsetSelectTree extends SelectTree
 {
     protected int | Closure | null $level = null;
 
-    protected ?Closure $buildQuery = null;
-
     protected function buildTree(): Collection
     {
-        $buildQuery = $this->getBuildQuery();
-        if (! $buildQuery) {
-            return parent::buildTree();
-        }
-
-        $nullParentQuery = $buildQuery()->whereIsRoot();
-        $nonNullParentQuery = $buildQuery()->hasParent()->withDepth();
+        $nullParentQuery = $this->getQuery()->clone()->whereIsRoot();
+        $nonNullParentQuery = $this->getQuery()->clone()->hasParent()->withDepth();
 
         if ($this->withTrashed) {
             $nullParentQuery->withTrashed($this->withTrashed);
@@ -122,17 +115,6 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $node;
     }
 
-    public function buildQuery(?Closure $buildQuery = null): static
-    {
-        $this->buildQuery = $buildQuery;
-
-        return $this;
-    }
-
-    public function getBuildQuery()
-    {
-        return $this->buildQuery;
-    }
 
     public function level(int | Closure | null $level = null): static
     {
