@@ -115,7 +115,6 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $node;
     }
 
-
     public function level(int | Closure | null $level = null): static
     {
         $this->level = $level;
