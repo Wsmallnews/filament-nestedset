@@ -40,10 +40,10 @@ abstract class NestedsetPage extends Page
 
     public ?int $level = null;
 
-    public string $emptyLabel = '';
-
     #[Url]
     public ?string $activeTab = null;
+
+    protected static ?string $emptyLabel = '';
 
     protected static ?string $model = null;
 
@@ -70,7 +70,7 @@ abstract class NestedsetPage extends Page
     {
         $this->loadDefaultActiveTab();
 
-        $model = $this->getModel();
+        $model = static::getModel();
 
         $concerns = class_uses($model);
 
@@ -98,7 +98,7 @@ abstract class NestedsetPage extends Page
     {
         return $this->configureCreateAction(
             CreateAction::make()
-                ->modelLabel($this->getModelLabel())
+                ->modelLabel(self::getModelLabel())
         );
     }
 
@@ -147,7 +147,7 @@ abstract class NestedsetPage extends Page
                 $parent = $this->getQuery()->find($parentId);
                 unset($data['parent_id']);
 
-                return $this->getModel()::create(
+                return static::getModel()::create(
                     attributes: $data,
                     parent: $parent,
                 );
@@ -330,7 +330,12 @@ abstract class NestedsetPage extends Page
         return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
     }
 
-    public function getRecordTitleAttribute(): string
+    public function getEmptyLabel(): ?string
+    {
+        return static::$emptyLabel;
+    }
+
+    public static function getRecordTitleAttribute(): ?string
     {
         return static::$recordTitleAttribute;
     }
@@ -340,7 +345,12 @@ abstract class NestedsetPage extends Page
         return static::$tabFieldName;
     }
 
-    public function isScopedToTenant(): bool
+    public static function scopeToTenant(bool $condition = true): void
+    {
+        static::$isScopedToTenant = $condition;
+    }
+
+    public static function isScopedToTenant(): bool
     {
         return static::$isScopedToTenant;
     }
@@ -362,14 +372,14 @@ abstract class NestedsetPage extends Page
         return static::$infolistHiddenEndpoint;
     }
 
-    public function getModel()
+    public static function getModel()
     {
         return static::$model;
     }
 
-    public function getModelLabel(): string
+    public static function getModelLabel(): string
     {
-        return static::$modelLabel ?? get_model_label($this->getModel());
+        return static::$modelLabel ?? get_model_label(static::getModel());
     }
 
     public function content(Schema $schema): Schema
@@ -382,10 +392,10 @@ abstract class NestedsetPage extends Page
 
     protected function getQuery()
     {
-        $model = $this->getModel();
+        $model = static::getModel();
 
         $scopes = [];
-        if ($this->isScopedToTenant() && ($tenant = Filament::getTenant())) {
+        if (self::isScopedToTenant() && ($tenant = Filament::getTenant())) {
             $scopes['team_id'] = $tenant->id;
         }
 

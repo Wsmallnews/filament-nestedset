@@ -23,7 +23,7 @@
                 <div 
                     class="fi-sn-tree-empty w-full px-3 py-2 text-center"
                 >
-                    {{ $emptyLabel ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
+                    {{ $this->getEmptyLabel() ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
                 </div>
             @endforelse
         </div>

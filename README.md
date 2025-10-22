@@ -251,7 +251,7 @@ class Test extends NestedsetPage
 {
     ...
 
-    public string $emptyLabel = 'no test data';
+    protected static ?string $emptyLabel = 'no test data';
 
     ...
 
