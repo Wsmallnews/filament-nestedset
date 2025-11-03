@@ -38,10 +38,10 @@ abstract class NestedsetPage extends Page
     use HasUnsavedDataChangesAlert;
     use InteractsWithFormActions;
 
-    public ?int $level = null;
-
     #[Url]
     public ?string $activeTab = null;
+
+    protected static ?int $level = null;
 
     protected static ?string $emptyLabel = '';
 
@@ -130,7 +130,7 @@ abstract class NestedsetPage extends Page
             ->schema(function (array $arguments) use ($type) {
                 $schema = method_exists($this, 'createSchema') ? $this->createSchema($arguments) : $this->schema($arguments);
 
-                if ($type == 'create' && (is_null($this->level) || $this->level >= 2) && $this->hasFormParentSelect()) {       // 创建，并且 nesetdset level 至少两级才可以选择上级
+                if ($type == 'create' && (is_null($this->getLevel()) || $this->getLevel() >= 2) && $this->hasFormParentSelect()) {       // 创建，并且 nesetdset level 至少两级才可以选择上级
                     $parentSelect = Arr::wrap($this->getParentSelect());
 
                     $schema = array_merge([
@@ -313,7 +313,7 @@ abstract class NestedsetPage extends Page
     protected function getParentSelect(): array | Field
     {
         return KalnoyNestedsetSelectTree::make('parent_id')->label(__('sn-filament-nestedset::nestedset.field.parent_select_field'))
-            ->level(is_null($this->level) ? null : ($this->level - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
+            ->level(is_null($this->getLevel()) ? null : ($this->getLevel() - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
             ->searchable()
             ->query(function () {
                 return $this->getQuery();
@@ -328,6 +328,11 @@ abstract class NestedsetPage extends Page
     public function showCreateChildNodeActionInRow(): bool
     {
         return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
+    }
+
+    public function getLevel(): ?int
+    {
+        return static::$level;
     }
 
     public function getEmptyLabel(): ?string

@@ -273,7 +273,14 @@ class Test extends NestedsetPage
 {
     ...
 
-    public ?int $level = 3;
+    protected static ?int $level = 3;
+
+    // Alternatively, you may use the getLevel() to define a dynamic level
+
+    public function getLevel(): ?int
+    {
+        return static::$level;
+    }
 
     ...
 

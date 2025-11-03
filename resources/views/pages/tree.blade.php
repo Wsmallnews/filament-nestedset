@@ -1,3 +1,7 @@
+@php
+    $level = $this->getLevel();
+@endphp
+
 <x-filament-panels::page>
     {{ $this->content }}
 
