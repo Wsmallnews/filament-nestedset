@@ -98,7 +98,7 @@ abstract class NestedsetPage extends Page
     {
         return $this->configureCreateAction(
             CreateAction::make()
-                ->modelLabel(self::getModelLabel())
+                ->modelLabel(static::getModelLabel())
         );
     }
 
@@ -118,7 +118,7 @@ abstract class NestedsetPage extends Page
      */
     private function configureCreateAction(CreateAction $action, $type = 'create'): Action
     {
-        return $action->model(self::getModel())     // Action 需要 model attribute is a string
+        return $action->model(static::getModel())     // Action 需要 model attribute is a string
             ->mutateDataUsing(function (array $data): array {
                 $model = $this->getQuery()->getModel();     // 这个获取的是包含 scopes 中的 attributes 数据的 model 实例
 
@@ -400,7 +400,7 @@ abstract class NestedsetPage extends Page
         $model = static::getModel();
 
         $scopes = [];
-        if (self::isScopedToTenant() && ($tenant = Filament::getTenant())) {
+        if (static::isScopedToTenant() && ($tenant = Filament::getTenant())) {
             $scopes['team_id'] = $tenant->id;
         }
 
