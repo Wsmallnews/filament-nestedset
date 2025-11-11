@@ -181,6 +181,29 @@ class Test extends NestedsetPage
 }
 ```
 
+By default, the plugin will use the `recordTitleAttribute` attribute to display the node name in the tree. If you want to use another attribute, you can define the `getRecordLabel` method, Support `HtmlString`.
+
+```php
+<?php
+
+namespace App\Filament\Pages;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
+use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+
+class Test extends NestedsetPage
+{
+    ...
+
+    public function getRecordLabel(Model $item): HtmlString | string
+    {
+        return $item->{static::getRecordTitleAttribute()} ?? ' ';
+    }
+    ...
+}
+```
+
 ### Define form schema
 
 If the schema for create and edit are the same, you can define the schema method.

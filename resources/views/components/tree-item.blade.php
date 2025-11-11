@@ -31,7 +31,7 @@
             </button>
 
             <div class="appearance-none px-3 py-4 ltr:text-left rtl:text-right inline-block">
-                <span>{{ $item->{$this->getRecordTitleAttribute()} ?? ' ' }}</span>
+                <span>{{ $this->getRecordLabel($item) }}</span>
             </div>
 
             @if($item->children->isNotEmpty())

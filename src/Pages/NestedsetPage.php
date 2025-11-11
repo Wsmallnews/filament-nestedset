@@ -20,6 +20,7 @@ use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\IconSize;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
 use Kalnoy\Nestedset\NestedSet;
 use Kalnoy\Nestedset\NodeTrait;
 use Livewire\Attributes\On;
@@ -343,6 +344,11 @@ abstract class NestedsetPage extends Page
     public static function getRecordTitleAttribute(): ?string
     {
         return static::$recordTitleAttribute;
+    }
+
+    public function getRecordLabel(Model $item): HtmlString | string
+    {
+        return $item->{static::getRecordTitleAttribute()} ?? ' ';
     }
 
     public function getTabFieldName(): ?string
