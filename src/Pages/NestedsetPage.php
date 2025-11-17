@@ -217,7 +217,7 @@ abstract class NestedsetPage extends Page
                 $to = $arguments['to'] ?? 0;
 
                 // 当前节点
-                $node = $this->newScopedQuery()->findOrFail($id);
+                $node = $this->getQuery()->findOrFail($id);
 
                 if ($parent == $node->getAttribute(NestedSet::PARENT_ID)) {
                     // 父级未改变，仅移动顺序
