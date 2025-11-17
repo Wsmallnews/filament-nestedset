@@ -13,6 +13,8 @@ return [
 
         'move_node' => '移动节点',
         'move_node_success' => '节点移动成功',
+        'move_node_failed' => '节点移动失败',
+        'move_node_failed_body_depth' => '节点移动失败, 目标节点层级不能超过支持节点层级 :level.',
 
         'fix_nestedset' => '修复嵌套集合',
         'fix_nestedset_success' => '嵌套集合修复成功',

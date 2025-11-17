@@ -217,7 +217,7 @@ abstract class NestedsetPage extends Page
                 $to = $arguments['to'] ?? 0;
 
                 // 当前节点
-                $node = $this->getQuery()->findOrFail($id);
+                $node = $this->newScopedQuery()->findOrFail($id);
 
                 if ($parent == $node->getAttribute(NestedSet::PARENT_ID)) {
                     // 父级未改变，仅移动顺序
@@ -238,7 +238,17 @@ abstract class NestedsetPage extends Page
                         $node->up($shift);
                     } else {
                         // 插入指定父级, 并调整顺序
-                        $parentNode = $node->query()->findOrFail($parent);
+                        $parentNode = $node->newScopedQuery()->withDepth()->findOrFail($parent);
+                        if ($parentNode->depth >= $this->getLevel() - 1) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('sn-filament-nestedset::nestedset.action.move_node_failed'))
+                                ->body(__('sn-filament-nestedset::nestedset.action.move_node_failed_body_depth', ['level' => $this->getLevel()]))
+                                ->send();
+
+                            $action->cancel();
+                            $action->halt();
+                        }
                         $parentNode->prependNode($node);
                         if ($to > 0) {
                             $node->down($to);
@@ -346,9 +356,9 @@ abstract class NestedsetPage extends Page
         return static::$recordTitleAttribute;
     }
 
-    public function getRecordLabel(Model $item): HtmlString | string
+    public function getRecordLabel(Model $record): HtmlString | string
     {
-        return $item->{static::getRecordTitleAttribute()} ?? ' ';
+        return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }
 
     public function getTabFieldName(): ?string

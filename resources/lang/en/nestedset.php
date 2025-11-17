@@ -13,6 +13,8 @@ return [
 
         'move_node' => 'Move node',
         'move_node_success' => 'Node moved successfully',
+        'move_node_failed' => 'Move node failed',
+        'move_node_failed_body_depth' => 'Move node failed, the target node level cannot exceed the supported node level :level.',
 
         'fix_nestedset' => 'Fix nested set',
         'fix_nestedset_success' => 'Nested set fixed successfully',
