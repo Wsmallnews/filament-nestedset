@@ -19,7 +19,7 @@ class Nestedset extends Component
     protected static ?string $showLevel = null;
 
     protected static ?string $emptyLabel = '';
-    
+
     protected static ?string $model = null;
 
     public function getShowLevel(): ?int
@@ -51,7 +51,6 @@ class Nestedset extends Component
     {
         return $this->itemView;
     }
-
 
     protected function getQuery()
     {
@@ -91,7 +90,6 @@ class Nestedset extends Component
 
         return $nestedset->toTree();
     }
-
 
     public function render()
     {
