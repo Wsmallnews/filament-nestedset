@@ -1,12 +1,13 @@
-@props(['record', 'level', 'first', 'last', 'style', 'current-level'])
+@props(['record', 'first', 'last', 'style', 'current-level'])
 
 @php
     $hasChild = $record->children->count() > 0;
+    $hasActive = {{ $this->getHasActive($record) }};
 @endphp
 
 <li
     @if ($hasChild)
-        x-data="{ isExpanded: {{ $record->has_active ? 'true' : 'false' }} }"
+        x-data="{ isExpanded: {{ $hasActive ? 'true' : 'false' }} }"
         aria-controls="accordionItem{{$record->id}}"
         :aria-expanded="isExpanded ? 'true' : 'false'"
         aria-haspopup="true"
@@ -16,9 +17,9 @@
     <a @class([
             'flex w-full h-14 justify-between items-center pr-4 font-bold gap-2',
             'text-white pl-' . $currentLevel * 4 => $style === 'vivid',
-            'bg-primary-600' => ($style === 'vivid' && $record->has_active),
+            'bg-primary-600' => ($style === 'vivid' && $hasActive),
             'text-gray-800' => $style === 'simple',
-            'text-primary-600' => $style === 'simple' && $record->has_active,
+            'text-primary-600' => $style === 'simple' && $hasActive,
         ])
         @if ($hasChild)
             @click="isExpanded = ! isExpanded"
@@ -73,10 +74,9 @@
                     @class([
                         'w-full',
                     ]) 
-                    :component="$this->getItemView()" 
+                    :component="$this->getRecordView()" 
                     key="categories-component-{{ $child->getKey() }}" 
                     :record="$child" 
-                    :level="$level" 
                     :first="$loop->first" 
                     :last="$loop->last" 
                     :style="$style" 

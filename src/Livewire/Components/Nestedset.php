@@ -8,54 +8,69 @@ use Livewire\Component;
 
 class Nestedset extends Component
 {
-    public ?string $view = 'sn-filament-nestedset::livewire.components.categories';
+    public ?string $showLevel = null;
 
-    public ?string $itemView = 'sn-filament-nestedset::category';
-
-    public ?string $style = 'simple';        // vivid=鲜明的, simple=简单的
+    public ?string $emptyLabel = '';
 
     public string $recordTitleAttribute = 'name';
 
-    protected static ?string $showLevel = null;
+    public ?string $view = 'sn-filament-nestedset::livewire.components.categories';
 
-    protected static ?string $emptyLabel = '';
-    
+    public ?string $recordView = 'sn-filament-nestedset::category';
+
+    public ?string $style = 'simple';        // vivid=鲜明的, simple=简单的
+
     protected static ?string $model = null;
 
-    public function getShowLevel(): ?int
-    {
-        return static::$showLevel;
-    }
-
-    public function getEmptyLabel(): ?string
-    {
-        return static::$emptyLabel;
-    }
-
-    public static function getModel()
+    protected static function getModel(): ?string
     {
         return static::$model;
     }
 
-    public static function getRecordTitleAttribute(): ?string
+    public function getShowLevel(): ?string
     {
-        return static::$recordTitleAttribute;
+        return $this->showLevel;
+    }
+
+    public function getEmptyLabel(): ?string
+    {
+        return $this->emptyLabel;
+    }
+
+    public function getRecordTitleAttribute(): ?string
+    {
+        return $this->recordTitleAttribute;
     }
 
     public function getRecordLabel(Model $record): HtmlString | string
     {
-        return $record->{static::getRecordTitleAttribute()} ?? ' ';
+        return $record->{$this->getRecordTitleAttribute()} ?? ' ';
     }
 
-    public function getItemView(): string
+    public function getHasActive(Model $record): bool
     {
-        return $this->itemView;
+        return false;
     }
 
+    public function getNestedset()
+    {
+        $nestedset = $this->getQuery()->withDepth()->get();
+
+        if (! is_null($this->getShowLevel())) {
+            $nestedset = $nestedset->filter(function ($record) {
+                return $record->depth <= $this->getShowLevel();
+            });
+        }
+
+        return $nestedset->toTree();
+    }
 
     protected function getQuery()
     {
         $model = static::getModel();
+        if (is_null($model)) {
+            throw new \Exception('Please set the model or custom `getNesteds` method in the nestedset component.');
+        }
 
         $scopes = [];
         // 自定义 scope
@@ -79,22 +94,23 @@ class Nestedset extends Component
         return $query;
     }
 
-    public function getNestedset()
+    public function getStyle(): string
     {
-        $nestedset = $this->getQuery()->withDepth()->get();
-
-        if (static::getShowLevel() !== null) {
-            $nestedset = $nestedset->filter(function ($record) {
-                return $record->depth <= static::getShowLevel();
-            });
-        }
-
-        return $nestedset->toTree();
+        return $this->style;
     }
 
+    public function getView(): string
+    {
+        return $this->view;
+    }
+
+    public function getRecordView(): string
+    {
+        return $this->recordView;
+    }
 
     public function render()
     {
-        return view($this->view);
+        return view($this->getView());
     }
 }

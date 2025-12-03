@@ -1,6 +1,5 @@
 @php
-    $level = $this->getLevel();
-    $nestedset = $this->getCategories();
+    $nestedset = $this->getNestedset();
 @endphp
 
 <ul
@@ -10,25 +9,22 @@
     ])
     role="menu"
 >
-    @forelse($categories as $treeKey => $record)
+    @forelse($nestedset as $treeKey => $record)
         <x-dynamic-component 
             @class([
                 'w-full',
             ]) 
-            :component="$this->getItemView()" 
+            :component="$this->getRecordView()" 
             key="categories-component-{{ $record->getKey() }}" 
             :record="$record" 
-            :level="$level" 
             :first="$loop->first" 
             :last="$loop->last" 
             :style="$style" 
             :current-level="1" 
         />
     @empty
-        <li 
-            class="w-full px-3 py-2 text-center"
-        >
-            {{ $this->getEmptyLabel() ?: '未获取到分类数据' }}
+        <li class="w-full px-3 py-2 text-center">
+            {{ $this->getEmptyLabel() ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
         </li>
     @endforelse
 </ul>
