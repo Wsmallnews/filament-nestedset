@@ -4,8 +4,7 @@
 
 <ul
     @class([
-        'w-full flex flex-col',
-        'bg-primary-500 divide-y divide-primary-400' => $style === 'vivid',
+        'w-full flex flex-col gap-2',
     ])
     role="menu"
 >
@@ -19,7 +18,6 @@
             :record="$record" 
             :first="$loop->first" 
             :last="$loop->last" 
-            :style="$style" 
             :current-level="1" 
         />
     @empty

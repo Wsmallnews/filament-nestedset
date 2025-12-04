@@ -14,11 +14,9 @@ class Nestedset extends Component
 
     public string $recordTitleAttribute = 'name';
 
-    public ?string $view = 'sn-filament-nestedset::livewire.components.categories';
+    public ?string $view = 'sn-filament-nestedset::livewire.components.nestedset';
 
-    public ?string $recordView = 'sn-filament-nestedset::category';
-
-    public ?string $style = 'simple';        // vivid=鲜明的, simple=简单的
+    public ?string $recordView = 'sn-filament-nestedset::components.nestedset-record';
 
     protected static ?string $model = null;
 
@@ -45,6 +43,11 @@ class Nestedset extends Component
     public function getRecordLabel(Model $record): HtmlString | string
     {
         return $record->{$this->getRecordTitleAttribute()} ?? ' ';
+    }
+
+    public function getRecordUrl(Model $record): string
+    {
+        return 'javascript:;';
     }
 
     public function getHasActive(Model $record): bool
