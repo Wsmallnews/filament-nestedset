@@ -21,8 +21,8 @@
             x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-nestedset', 'wsmallnews/filament-nestedset') }}"
             x-data="treeManager({})"
         >
-            @forelse($tree as $treeKey => $item)
-                <x-sn-filament-nestedset::tree-item :item="$item" key="tree-component-{{ $item->getKey() }}" :level="$level" />
+            @forelse($nestedset as $treeKey => $record)
+                <x-sn-filament-nestedset::pages.nestedset-record :record="$record" key="tree-component-{{ $record->getKey() }}" :level="$level" />
             @empty
                 <div 
                     class="fi-sn-tree-empty w-full px-3 py-2 text-center"

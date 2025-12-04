@@ -56,7 +56,7 @@ abstract class NestedsetPage extends Page
 
     protected static string $recordTitleAttribute = 'name';
 
-    protected string $view = 'sn-filament-nestedset::pages.tree';
+    protected string $view = 'sn-filament-nestedset::pages.nestedset';
 
     protected static ?string $tabFieldName = null;
 
@@ -457,10 +457,10 @@ abstract class NestedsetPage extends Page
 
     protected function getViewData(): array
     {
-        $tree = $this->getQuery()->withDepth()->get()->toTree();
+        $nestedset = $this->getQuery()->withDepth()->get()->toTree();
 
         return [
-            'tree' => $tree,
+            'nestedset' => $nestedset,
         ];
     }
 }

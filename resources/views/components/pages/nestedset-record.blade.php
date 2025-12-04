@@ -1,4 +1,4 @@
-@props(['item', 'level'])
+@props(['record', 'level'])
 
 @php
     use Filament\Support\Enums\Alignment;
@@ -8,15 +8,15 @@
     $infoListHiddenEndpoint = $this->getInfolistHiddenEndpoint();
 
     $canCreateChildren = false;
-    if ($this->showCreateChildNodeActionInRow() && (is_null($level) || $level > ($item->depth + 1))) {
+    if ($this->showCreateChildNodeActionInRow() && (is_null($level) || $level > ($record->depth + 1))) {
         $canCreateChildren = true;
     }
 @endphp
 
 <div
     x-data="{ open: $persist(true) }"
-    wire:key="tree-item-{{ $item->getKey() }}"
-    data-id="{{ $item->getKey() }}"
+    wire:key="tree-item-{{ $record->getKey() }}"
+    data-id="{{ $record->getKey() }}"
     class="fi-sn-tree-item"
     data-sortable-item
 >
@@ -31,10 +31,10 @@
             </button>
 
             <div class="appearance-none px-3 py-4 ltr:text-left rtl:text-right inline-block">
-                <span>{{ $this->getRecordLabel($item) }}</span>
+                <span>{{ $this->getRecordLabel($record) }}</span>
             </div>
 
-            @if($item->children->isNotEmpty())
+            @if($record->children->isNotEmpty())
                 <button type="button" x-on:click="open = !open" title="Toggle children" class="appearance-none text-gray-500">
                     <svg class="w-5 h-5 transition ease-in-out duration-200" x-bind:class="{
                         '-rotate-90': !open,
@@ -59,9 +59,9 @@
                     },
                 ])>
                     {{ Schema::make($this)
-                        ->record($item)
+                        ->record($record)
                         ->components($this->infolistSchema())
-                        ->view('sn-filament-nestedset::components.infolist'); }}
+                        ->view('sn-filament-nestedset::components.pages.nestedset-infolist'); }}
                 </div>
             @endif
         </div>
@@ -69,13 +69,13 @@
         <div class="flex grow-0 gap-3">
             {{-- 一级 depth = 0 --}}
             @if($canCreateChildren)
-                {{ ($this->createChildAction)(['parentId' => $item->getKey()]) }}
+                {{ ($this->createChildAction)(['parentId' => $record->getKey()]) }}
             @endif
 
-            {{ ($this->editAction)(['id' => $item->getKey()]) }}
+            {{ ($this->editAction)(['id' => $record->getKey()]) }}
 
-            @if($this->canBeDeleted($item))
-                {{ ($this->deleteAction)(['id' => $item->getKey()]) }}
+            @if($this->canBeDeleted($record))
+                {{ ($this->deleteAction)(['id' => $record->getKey()]) }}
             @endif
         </div>
     </div>
@@ -84,16 +84,16 @@
         <div
             @class([
                 'fi-sn-child-tree divide-y divide-gray-200 dark:divide-white/10',
-                'border-t border-gray-200 dark:border-white/10' => $item->children->isNotEmpty()
+                'border-t border-gray-200 dark:border-white/10' => $record->children->isNotEmpty()
             ])
-            wire:key="tree-item-{{ $item->getKey() }}-children"
-            data-id="{{ $item->getKey() }}"
+            wire:key="tree-item-{{ $record->getKey() }}-children"
+            data-id="{{ $record->getKey() }}"
             x-data="treeManager({
-                parentId: {{ $item->getKey() }}
+                parentId: {{ $record->getKey() }}
             })"
         >
-            @foreach ($item->children as $childKey => $child)
-                <x-sn-filament-nestedset::tree-item :item="$child" key="tree-component-{{ $childKey }}" :level="$level" />
+            @foreach ($record->children as $childKey => $child)
+                <x-sn-filament-nestedset::pages.nestedset-record :record="$child" key="tree-component-{{ $childKey }}" :level="$level" />
             @endforeach
         </div>
     </div>
