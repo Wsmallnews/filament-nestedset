@@ -12,7 +12,7 @@ Filament tree build on kalnoy/nestedset, support multi language. support Multi-t
 ## Overview
 
 * Elegant UI, consistent with the default style of the filament page
-* The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/kalnoy/nestedset)
+* The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/lazychaser/laravel-nestedset)
 * ParentSelect field depends on [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
 * Some features are borrowed from [15web/filament-tree](https://github.com/15web/filament-tree)
 * Support multi-tenancy, you can easily create nestedset pages among multiple tenants
@@ -573,6 +573,49 @@ class Test extends NestedsetPage
     }
     ...
 }
+```
+
+### Nestedset Livewire component
+
+#### Overview
+
+* The property `showLevel` can be set to nestedset show level
+* The property `emptyLabel` can be set to nestedset empty state
+* The method `getRecordLabel` custom nestedset node label
+* The method `getHasActive` mark active status
+* You can customize the view by using the `view` and `recordView` properties
+
+#### Example
+
+```php
+<?php
+
+namespace App\Livewire\Components;
+
+use App\Models\Category;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
+use Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset;
+
+class Categories extends Nestedset
+{
+    public function getRecordLabel(Model $record): HtmlString | string
+    {
+        return $record->name_label;
+    }
+
+    public function getHasActive(Model $record): bool
+    {
+        return $record->has_active;
+    }
+
+    public function getNestedset()
+    {
+        return Category::normal()->defaultOrder()
+            ->get()->toTree();
+    }
+}
+
 ```
 
 ### Custom theme

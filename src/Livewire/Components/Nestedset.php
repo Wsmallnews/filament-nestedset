@@ -45,11 +45,6 @@ class Nestedset extends Component
         return $record->{$this->getRecordTitleAttribute()} ?? ' ';
     }
 
-    public function getRecordUrl(Model $record): string
-    {
-        return 'javascript:;';
-    }
-
     public function getHasActive(Model $record): bool
     {
         return false;
@@ -95,11 +90,6 @@ class Nestedset extends Component
         $query = $query->defaultOrder();
 
         return $query;
-    }
-
-    public function getStyle(): string
-    {
-        return $this->style;
     }
 
     public function getView(): string
