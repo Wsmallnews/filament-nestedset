@@ -584,6 +584,8 @@ class Test extends NestedsetPage
 * The method `getRecordLabel` custom nestedset node label
 * The method `getHasActive` mark active status
 * You can customize the view by using the `view` and `recordView` properties
+* When clicking on the nestedset leaf node, a `sn-filament-nestedset-leaf-click` event will be triggered
+* When clicking on nestedset non leaf nodes, a `sn-filament-nestedset-node-click` event will be triggered
 
 #### Example
 
