@@ -6,7 +6,7 @@
 @endphp
 
 <li
-    class="flex flex-col gap-2"
+    class="flex flex-col"
     @if ($hasChild)
         x-data="{ isExpanded: {{ $hasActive ? 'true' : 'false' }} }"
         aria-controls="accordionItem{{$record->id}}"
@@ -16,15 +16,17 @@
     role="menuitem"
 >
     <a @class([
-            'flex w-full h-10 justify-between items-center px-2 font-bold gap-2 rounded-md group hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-800',
+            'flex w-full h-10 justify-between items-center px-2 gap-2 rounded-md group hover:text-primary-500 dark:hover:text-primary-600 hover:bg-gray-200 dark:hover:bg-gray-800',
             'text-gray-700 dark:text-white' => !$hasActive,
-            'text-primary-500' => $hasActive,
+            'text-primary-500 dark:text-primary-600' => $hasActive,
         ])
         @if ($hasChild)
             @click="isExpanded = ! isExpanded"
+            wire:click="$dispatch('sn-filament-nestedset-node-click', { categoryId: {{ $record->id }} })"
             href="javascript:;"
         @else
-            href="{{ $this->getRecordUrl($record) }}"
+            wire:click="$dispatch('sn-filament-nestedset-leaf-click', { categoryId: {{ $record->id }} })"
+            href="javascript:;"
         @endif
     >
         <div class="flex items-center gap-1">
@@ -64,7 +66,7 @@
             $currentLevel++;
         @endphp
         <ul @class([
-            'w-full flex flex-col gap-2',
+            'w-full flex flex-col',
         ])
             id="accordionItemCategory{{$record->id}}"
             x-cloak x-show="isExpanded"

@@ -4,7 +4,7 @@
 
 <ul
     @class([
-        'w-full flex flex-col gap-2',
+        'w-full flex flex-col',
     ])
     role="menu"
 >
