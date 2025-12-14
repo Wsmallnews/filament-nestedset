@@ -584,8 +584,10 @@ class Test extends NestedsetPage
 * The method `getRecordLabel` custom nestedset node label
 * The method `getHasActive` mark active status
 * You can customize the view by using the `view` and `recordView` properties
+* You can use the `getRecordUrl` method to customize the href jump link, which defaults to inserting `href="JavaScript:;"`
 * When clicking on the nestedset leaf node, a `sn-filament-nestedset-leaf-click` event will be triggered
 * When clicking on nestedset non leaf nodes, a `sn-filament-nestedset-node-click` event will be triggered
+* Suggest choosing between `event` and `getRecordUrl`
 
 #### Example
 
@@ -597,7 +599,10 @@ namespace App\Livewire\Components;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\On;
 use Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset;
+
+use function Filament\Support\generate_href_html;
 
 class Categories extends Nestedset
 {
@@ -610,6 +615,18 @@ class Categories extends Nestedset
     {
         return $record->has_active;
     }
+
+    #[On('sn-filament-nestedset-leaf-click')]
+    public function clickCategory($recordId)
+    {
+        $this->categoryId = $recordId;
+    }
+    // ... or
+    public function getRecordUrl(Model $record): string | HtmlString | null
+    {
+        return generate_href_html(route('categories.show', $record->id), false);
+    }
+
 
     public function getNestedset()
     {

@@ -45,6 +45,11 @@ class Nestedset extends Component
         return $record->{$this->getRecordTitleAttribute()} ?? ' ';
     }
 
+    public function getRecordUrl(Model $record): string | HtmlString | null
+    {
+        return null;
+    }
+
     public function getHasActive(Model $record): bool
     {
         return false;
