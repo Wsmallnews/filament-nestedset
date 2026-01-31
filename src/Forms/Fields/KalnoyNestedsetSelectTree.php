@@ -122,7 +122,7 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $this;
     }
 
-    public function getLevel(): int | null
+    public function getLevel(): ?int
     {
         return $this->evaluate($this->level);
     }
