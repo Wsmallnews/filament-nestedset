@@ -157,7 +157,6 @@ class MakeNestedsetPageCommand extends Command
     /**
      * 获取 cluster 需要填充的内容
      *
-     * @param  string  $namespace
      * @return array{clusterAssignment: string|null, clusterImport: string|null}
      */
     private function getPotentialCluster(string $namespace): array
