@@ -5,9 +5,9 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/wsmallnews/filament-nestedset/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/wsmallnews/filament-nestedset/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/wsmallnews/filament-nestedset.svg?style=flat-square)](https://packagist.org/packages/wsmallnews/filament-nestedset)
 
-**Support Filament v4, If you are currently using Filament v3, please refer to this link [here](https://github.com/Wsmallnews/filament-nestedset/tree/v1)**
+**Supports Filament v4 and v5. If you are currently using Filament v3, please refer to this link [here](https://github.com/Wsmallnews/filament-nestedset/tree/v1)**
 
-Filament tree build on kalnoy/nestedset, support multi language. support Multi-tenancy
+Filament nestedset tree build on kalnoy/nestedset, support multi language. support Multi-tenancy
 
 ## Overview
 
@@ -33,6 +33,8 @@ You can install the package via composer:
 ```bash
 composer require wsmallnews/filament-nestedset:^2.0
 ```
+
+The current release is compatible with both Filament v4 and v5.
 
 You can publish the config file with:
 

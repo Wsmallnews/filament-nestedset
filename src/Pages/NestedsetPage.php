@@ -18,6 +18,7 @@ use Filament\Resources\Concerns\HasTabs;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\IconSize;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
@@ -378,9 +379,7 @@ abstract class NestedsetPage extends Page
 
     public function hasInfolist(): bool
     {
-        $infolistSchema = $this->infolistSchema();
-
-        return $infolistSchema && count($infolistSchema) > 0 ? true : false;
+        return count($this->infolistSchema()) > 0;
     }
 
     public function getInfolistAlignment(): Alignment
@@ -393,7 +392,7 @@ abstract class NestedsetPage extends Page
         return static::$infolistHiddenEndpoint;
     }
 
-    public static function getModel()
+    public static function getModel(): ?string
     {
         return static::$model;
     }
@@ -411,7 +410,7 @@ abstract class NestedsetPage extends Page
             ]);
     }
 
-    protected function getQuery()
+    protected function getQuery(): Builder
     {
         $model = static::getModel();
 

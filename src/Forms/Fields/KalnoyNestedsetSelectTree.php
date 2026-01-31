@@ -44,7 +44,7 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $this->buildTreeFromResults($combinedResults);
     }
 
-    private function buildTreeFromResults($results, $parent = null): Collection
+    private function buildTreeFromResults(Collection $results, int | string | null $parent = null): Collection
     {
         // Assign the parent's null value to the $parent variable if it's not null
         if ($parent == null || $parent == $this->getParentNullValue()) {
@@ -83,7 +83,7 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $tree;
     }
 
-    private function buildNode($result, $resultMap, $disabledOptions, $hiddenOptions): array
+    private function buildNode($result, array $resultMap, array $disabledOptions, array $hiddenOptions): array
     {
         $key = $this->getCustomKey($result);
 
@@ -122,12 +122,12 @@ class KalnoyNestedsetSelectTree extends SelectTree
         return $this;
     }
 
-    public function getLevel()
+    public function getLevel(): int | null
     {
         return $this->evaluate($this->level);
     }
 
-    protected function hasChildren()
+    protected function hasChildren(): bool
     {
         $level = $this->getLevel();
 

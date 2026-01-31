@@ -2,8 +2,11 @@
 
 namespace Wsmallnews\FilamentNestedset\Livewire\Components;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class Nestedset extends Component
@@ -55,7 +58,7 @@ class Nestedset extends Component
         return false;
     }
 
-    public function getNestedset()
+    public function getNestedset(): Collection
     {
         $nestedset = $this->getQuery()->withDepth()->get();
 
@@ -68,11 +71,11 @@ class Nestedset extends Component
         return $nestedset->toTree();
     }
 
-    protected function getQuery()
+    protected function getQuery(): Builder
     {
         $model = static::getModel();
         if (is_null($model)) {
-            throw new \Exception('Please set the model or custom `getNesteds` method in the nestedset component.');
+            throw new \Exception('Please set the model or custom `getNestedset` method in the nestedset component.');
         }
 
         $scopes = [];
@@ -107,7 +110,7 @@ class Nestedset extends Component
         return $this->recordView;
     }
 
-    public function render()
+    public function render(): View
     {
         return view($this->getView());
     }

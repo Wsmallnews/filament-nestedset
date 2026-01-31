@@ -7,8 +7,11 @@
     $infolistAlignment = $this->getInfolistAlignment();
     $infoListHiddenEndpoint = $this->getInfolistHiddenEndpoint();
 
+    // 是否还有下级
+    $hasNextLevel = is_null($level) || $level > ($record->depth + 1);
+
     $canCreateChildren = false;
-    if ($this->showCreateChildNodeActionInRow() && (is_null($level) || $level > ($record->depth + 1))) {
+    if ($this->showCreateChildNodeActionInRow() && $hasNextLevel) {
         $canCreateChildren = true;
     }
 @endphp
@@ -80,21 +83,23 @@
         </div>
     </div>
 
-    <div x-show="open" x-collapse class="divide-y ltr:pl-6 rtl:pr-6">
-        <div
-            @class([
-                'fi-sn-child-tree divide-y divide-gray-200 dark:divide-white/10',
-                'border-t border-gray-200 dark:border-white/10' => $record->children->isNotEmpty()
-            ])
-            wire:key="tree-item-{{ $record->getKey() }}-children"
-            data-id="{{ $record->getKey() }}"
-            x-data="treeManager({
-                parentId: {{ $record->getKey() }}
-            })"
-        >
-            @foreach ($record->children as $childKey => $child)
-                <x-sn-filament-nestedset::pages.nestedset-record :record="$child" key="tree-component-{{ $childKey }}" :level="$level" />
-            @endforeach
+    @if ($hasNextLevel)
+        <div x-show="open" x-collapse class="divide-y ltr:pl-6 rtl:pr-6">
+            <div
+                @class([
+                    'fi-sn-child-tree divide-y divide-gray-200 dark:divide-white/10',
+                    'border-t border-gray-200 dark:border-white/10' => $record->children->isNotEmpty()
+                ])
+                wire:key="tree-item-{{ $record->getKey() }}-children"
+                data-id="{{ $record->getKey() }}"
+                x-data="treeManager({
+                    parentId: {{ $record->getKey() }}
+                })"
+            >
+                @foreach ($record->children as $childKey => $child)
+                    <x-sn-filament-nestedset::pages.nestedset-record :record="$child" key="tree-component-{{ $childKey }}" :level="$level" />
+                @endforeach
+            </div>
         </div>
-    </div>
+    @endif
 </div>

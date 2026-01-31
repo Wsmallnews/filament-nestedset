@@ -126,9 +126,9 @@ class MakeNestedsetPageCommand extends Command
     /**
      * 获取要创建的页面所在的 命名空间 和 目录
      *
-     * @return array
+     * @return array{namespace: string, path: string}
      */
-    private function getPanelNamespaceAndPath(Panel $panel)
+    private function getPanelNamespaceAndPath(Panel $panel): array
     {
         $pageDirectories = $panel->getPageDirectories();
         $pageNamespaces = $panel->getPageNamespaces();
@@ -151,16 +151,16 @@ class MakeNestedsetPageCommand extends Command
             ? $pageDirectories[array_search($namespace, $pageNamespaces, true)]
             : (Arr::first($pageDirectories) ?? app_path('Filament/Pages/'));
 
-        return compact('namespace', 'path');
+        return ['namespace' => $namespace, 'path' => $path];
     }
 
     /**
      * 获取 cluster 需要填充的内容
      *
      * @param  string  $namespace
-     * @return array
+     * @return array{clusterAssignment: string|null, clusterImport: string|null}
      */
-    private function getPotentialCluster($namespace)
+    private function getPotentialCluster(string $namespace): array
     {
         $potentialCluster = (string) str($namespace)->beforeLast('\Pages');
         $clusterAssignment = null;
@@ -172,15 +172,16 @@ class MakeNestedsetPageCommand extends Command
             && filled($potentialCluster)
         ) {
             $clusterAssignment = $this->indentString(
-                PHP_EOL . PHP_EOL . 'protected static ?string $cluster = ' . class_basename(
-                    $potentialCluster,
-                ) . '::class;',
+                PHP_EOL . PHP_EOL . 'protected static ?string $cluster = ' . class_basename($potentialCluster) . '::class;'
             );
 
             $clusterImport = "use {$potentialCluster};" . PHP_EOL;
         }
 
-        return compact('clusterAssignment', 'clusterImport');
+        return [
+            'clusterAssignment' => $clusterAssignment,
+            'clusterImport' => $clusterImport,
+        ];
     }
 
     /**

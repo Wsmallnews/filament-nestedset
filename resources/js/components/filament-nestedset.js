@@ -1,5 +1,7 @@
 import Sortable from 'sortablejs'
 
+const getSortableContainerId = (element) => element?.dataset?.id ?? null
+
 export default function treeManager({ parentId = null }) {
     return {
         parentId,
@@ -13,19 +15,22 @@ export default function treeManager({ parentId = null }) {
                 draggable: '[data-sortable-item]',
                 handle: '[data-sortable-handle]',
                 onEnd: (evt) => {
-                    console.log(evt, 'onEnd');
-                    let info = {
-                        id: evt.item.dataset.id,
-                        ancestor: evt.from.dataset.id,
-                        parent: evt.to.dataset.id,
+                    const parentContainerId = getSortableContainerId(evt.to) ?? this.parentId
+                    const info = {
+                        id: getSortableContainerId(evt.item),
+                        ancestor: getSortableContainerId(evt.from),
+                        parent: parentContainerId,
                         from: evt.oldIndex,
-                        to: evt.newIndex
+                        to: evt.newIndex,
                     }
 
-                    if (info.parent !== info.ancestor || info.from !== info.to) {
+                    const hasMovedParent = info.parent !== info.ancestor
+                    const hasMovedIndex = info.from !== info.to
+
+                    if (hasMovedParent || hasMovedIndex) {
                         this.$wire.mountAction('moveNode', info)
                     }
-                }
+                },
             })
         },
     }
