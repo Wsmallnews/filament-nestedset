@@ -164,7 +164,7 @@ php artisan migrate
 php artisan make:filament-nestedset-page
 ```
 
-### Please define attribute name of the nodes in your tree, eg. title or name
+### Please define attribute name of the nodes in your tree, eg. title or name.
 
 ```php
 <?php
@@ -176,6 +176,8 @@ use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
 class Test extends NestedsetPage
 {
     ...
+    // Uncomment this in case you get this error "Property [$data] not found on component"
+    // protected ?array $data = [];
 
     protected static string $recordTitleAttribute = 'name';
     ...
