@@ -161,11 +161,6 @@ abstract class NestedsetPage extends Page
     public function editAction(): EditAction
     {
         return EditAction::make()
-            ->record(function (array $arguments) {
-                $id = $arguments['id'] ?? 0;
-
-                return $id ? $this->getQuery()->findOrFail($id) : null;
-            })
             ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
             ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-pencil-square')->iconSize(IconSize::Small)
@@ -187,11 +182,6 @@ abstract class NestedsetPage extends Page
                     $action->cancel();
                     $action->halt();
                 }
-            })
-            ->record(function (array $arguments) {
-                $id = $arguments['id'] ?? 0;
-
-                return $id ? $this->getQuery()->find($id) : null;
             })
             ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-trash')->iconSize(IconSize::Small)
