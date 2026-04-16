@@ -43,7 +43,7 @@ abstract class NestedsetPage extends Page
     #[Url]
     public ?string $activeTab = null;
 
-    protected static ?int $level = null;
+    protected static ?int $level = 999;
 
     protected static ?string $emptyLabel = '';
 
