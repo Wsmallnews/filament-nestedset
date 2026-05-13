@@ -164,7 +164,7 @@ php artisan migrate
 php artisan make:filament-nestedset-page
 ```
 
-### Please define attribute name of the nodes in your tree, eg. title or name
+### Please define attribute name of the nodes in your tree, eg. title or name.
 
 ```php
 <?php
