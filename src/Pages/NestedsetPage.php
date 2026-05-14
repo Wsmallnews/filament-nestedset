@@ -239,7 +239,7 @@ abstract class NestedsetPage extends Page
                         $node->up($shift);
                     } else {
                         // 插入指定父级, 并调整顺序
-                        $parentNode = $node->newScopedQuery()->withDepth()->findOrFail($parent);
+                        $parentNode = $this->getQuery()->withDepth()->findOrFail($parent);
                         if ($parentNode->depth >= $this->getLevel() - 1) {
                             Notification::make()
                                 ->danger()
