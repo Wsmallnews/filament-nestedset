@@ -11,13 +11,13 @@ Filament nestedset tree build on kalnoy/nestedset, support multi language. suppo
 
 ## Overview
 
-* Elegant UI, consistent with the default style of the filament page
-* The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/lazychaser/laravel-nestedset)
-* ParentSelect field depends on [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
-* Some features are borrowed from [15web/filament-tree](https://github.com/15web/filament-tree)
-* Support multi-tenancy, you can easily create nestedset pages among multiple tenants
-* Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
-* Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
+- Elegant UI, consistent with the default style of the filament page
+- The Filament nestedset plugin is built on [kalnoy/nestedset](https://github.com/lazychaser/laravel-nestedset)
+- ParentSelect field depends on [codewithdennis/filament-select-tree](https://github.com/codewithdennis/filament-select-tree)
+- Some features are borrowed from [15web/filament-tree](https://github.com/15web/filament-tree)
+- Support multi-tenancy, you can easily create nestedset pages among multiple tenants
+- Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
+- Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
 
 ## Screenshots
 
@@ -155,7 +155,6 @@ And run the migration
 php artisan migrate
 ```
 
-
 ## Usage
 
 ### Create the nestedset page
@@ -233,7 +232,6 @@ class Test extends NestedsetPage
 
 If the schema for create and edit are different, you can define createSchema and editSchema methods separately.
 
-
 ```php
 <?php
 
@@ -262,7 +260,6 @@ class Test extends NestedsetPage
 }
 ```
 
-
 ### Define the prompt text when the tree is empty
 
 ```php
@@ -285,7 +282,7 @@ class Test extends NestedsetPage
 
 ### Limit nestedset level
 
-Nestedset level is unlimited by default, you can limit the nestedset levels by: 
+Nestedset level is unlimited by default, you can limit the nestedset levels by:
 
 ```php
 <?php
@@ -312,7 +309,6 @@ class Test extends NestedsetPage
 }
 ```
 
-
 ### Other customizable properties
 
 ```php
@@ -327,7 +323,7 @@ class Test extends NestedsetPage
     ...
 
     protected static ?string $model = NavigationModel::class;
-    
+
     protected static ?string $modelLabel = 'Test Management';
 
     protected static ?string $title = 'Page Title';
@@ -405,7 +401,6 @@ class Test extends NestedsetPage
 }
 ```
 
-
 ## Advanced features
 
 ### Multi-tenancy support
@@ -457,7 +452,6 @@ class Test extends NestedsetPage
 Tabs are implemented based on `kalnoy/nestedset` scoped feature. You can [view detailed documentation here](https://github.com/lazychaser/laravel-nestedset?tab=readme-ov-file#scoping)
 
 Set the associated tab field name using tabFieldName. And setting tabs array, you don't need to add the current tab condition on the tab, as the tab condition will be automatically appended to `kalnoy/nestedset` scoping parameters.
-
 
 ```php
 <?php
@@ -555,7 +549,6 @@ class YouModel extends Model
 }
 ```
 
-
 ### Add custom eloquent query conditions
 
 ```php
@@ -581,15 +574,15 @@ class Test extends NestedsetPage
 
 #### Overview
 
-* The property `showLevel` can be set to nestedset show level
-* The property `emptyLabel` can be set to nestedset empty state
-* The method `getRecordLabel` custom nestedset node label
-* The method `getHasActive` mark active status
-* You can customize the view by using the `view` and `recordView` properties
-* You can use the `getRecordUrl` method to customize the href jump link, which defaults to inserting `href="JavaScript:;"`
-* When clicking on the nestedset leaf node, a `sn-filament-nestedset-leaf-click` event will be triggered
-* When clicking on nestedset non leaf nodes, a `sn-filament-nestedset-node-click` event will be triggered
-* Suggest choosing between `event` and `getRecordUrl`
+- The property `showLevel` can be set to nestedset show level
+- The property `emptyLabel` can be set to nestedset empty state
+- The method `getRecordLabel` custom nestedset node label
+- The method `getHasActive` mark active status
+- You can customize the view by using the `view` and `recordView` properties
+- You can use the `getRecordUrl` method to customize the href jump link, which defaults to inserting `href="JavaScript:;"`
+- When clicking on the nestedset leaf node, a `sn-filament-nestedset-leaf-click` event will be triggered
+- When clicking on nestedset non leaf nodes, a `sn-filament-nestedset-node-click` event will be triggered
+- Suggest choosing between `event` and `getRecordUrl`
 
 #### Example
 
@@ -649,7 +642,7 @@ Disable the automatic loading of the CSS file
 <?php
 return [
     ...
-    
+
     'autoload_assets' => false,
 ];
 ```
@@ -657,7 +650,7 @@ return [
 You should add the following code to your custom theme file. If you custom theme file is `/resources/css/filament/admin/theme.css`
 
 ```css
-@import '../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css';
+@import "../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css";
 ```
 
 ## Changelog
