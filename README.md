@@ -288,6 +288,8 @@ class Test extends NestedsetPage
 
     protected static ?string $emptyLabel = 'no test data';
 
+    protected static ?string $emptyTipLabel = 'no test data available';
+
     ...
 
 }

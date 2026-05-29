@@ -47,6 +47,8 @@ abstract class NestedsetPage extends Page
 
     protected static ?string $emptyLabel = '';
 
+    protected static ?string $emptyTipLabel = '';
+
     protected static ?string $model = null;
 
     protected static ?string $modelLabel = null;
@@ -350,6 +352,11 @@ abstract class NestedsetPage extends Page
     public function getEmptyLabel(): ?string
     {
         return static::$emptyLabel;
+    }
+
+    public function getEmptyTipLabel(): ?string
+    {
+        return static::$emptyTipLabel;
     }
 
     public static function getRecordTitleAttribute(): ?string

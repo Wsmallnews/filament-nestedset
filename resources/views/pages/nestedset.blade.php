@@ -24,11 +24,19 @@
             @forelse($nestedset as $treeKey => $record)
                 <x-sn-filament-nestedset::pages.nestedset-record :record="$record" key="tree-component-{{ $record->getKey() }}" :level="$level" />
             @empty
-                <div 
-                    class="fi-sn-tree-empty w-full px-3 py-2 text-center"
+                <x-filament::empty-state
+                    :contained="false"
+                    icon="heroicon-m-document-text"
+                    icon-color="gray"
                 >
-                    {{ $this->getEmptyLabel() ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
-                </div>
+                    <x-slot name="heading">
+                        {{ $this->getEmptyLabel() }}
+                    </x-slot>
+
+                    <x-slot name="description">
+                        {{ $this->getEmptyTipLabel() }}
+                    </x-slot>
+                </x-filament::empty-state>
             @endforelse
         </div>
     </div>

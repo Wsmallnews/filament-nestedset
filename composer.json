@@ -7,10 +7,12 @@
         "filament-nestedset",
         "filament-plugin",
         "filament-tree",
+        "laravel-boost",
         "nestedset",
         "tree",
         "smallnews",
-        "Wsmallnews"
+        "Wsmallnews",
+        "AI Guidelines"
     ],
     "homepage": "https://github.com/wsmallnews/filament-nestedset",
     "support": {
