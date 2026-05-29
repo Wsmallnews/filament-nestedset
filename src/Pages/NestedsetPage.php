@@ -156,7 +156,7 @@ abstract class NestedsetPage extends Page
                     parent: $parent,
                 );
             })
-            ->after(fn(): Event => $this->dispatch('filament-nestedset-updated'))
+            ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->createAnother(false);
     }
 
@@ -168,8 +168,8 @@ abstract class NestedsetPage extends Page
 
                 return $id ? $this->getQuery()->findOrFail($id) : null;
             })
-            ->schema(fn(array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
-            ->after(fn(): Event => $this->dispatch('filament-nestedset-updated'))
+            ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
+            ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-pencil-square')->iconSize(IconSize::Small)
             ->link();
     }
@@ -195,7 +195,7 @@ abstract class NestedsetPage extends Page
 
                 return $id ? $this->getQuery()->find($id) : null;
             })
-            ->after(fn(): Event => $this->dispatch('filament-nestedset-updated'))
+            ->after(fn (): Event => $this->dispatch('filament-nestedset-updated'))
             ->icon('heroicon-m-trash')->iconSize(IconSize::Small)
             ->link();
     }
