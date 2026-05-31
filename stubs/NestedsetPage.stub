@@ -3,7 +3,7 @@
 namespace {{ namespace }};
 
 {{ clusterImport }}use Kalnoy\Nestedset\QueryBuilder;
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class {{ class }} extends NestedsetPage
 {
@@ -12,15 +12,14 @@ class {{ class }} extends NestedsetPage
 
     protected static string $recordTitleAttribute = 'name';
 
-    protected function schema(array $arguments): array
+    public function schema(array $arguments): array
     {
         return [
-            // 
+            //
         ];
     }
 
-
-    protected function infolistSchema(): array
+    public function infolistSchema(): array
     {
         return [
             //

@@ -1,16 +1,10 @@
-@php
-    $level = $this->getLevel();
-@endphp
-
-<x-filament-panels::page>
-    {{ $this->content }}
-
+<div>
     <div
-        class="fi-sn-tree-container overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
-        wire:key="tree-items-wrapper"
+        class="fi-sn-nestedset-container overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+        wire:key="sn-nestedset-items-wrapper"
     >
         <div
-            class="fi-sn-tree divide-y divide-gray-200 dark:divide-white/10"
+            class="fi-sn-nestedset divide-y divide-gray-200 dark:divide-white/10"
             data-id
             data-sortable-container
             @if (\Filament\Support\Facades\FilamentView::hasSpaMode())
@@ -19,10 +13,13 @@
                 x-load
             @endif
             x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-nestedset', 'wsmallnews/filament-nestedset') }}"
-            x-data="treeManager({})"
+            x-data="nestedsetManager({})"
         >
-            @forelse($nestedset as $treeKey => $record)
-                <x-sn-filament-nestedset::pages.nestedset-record :record="$record" key="tree-component-{{ $record->getKey() }}" :level="$level" />
+            @forelse($nestedset as $nestedsetKey => $record)
+                <x-sn-filament-nestedset::filament.nestedset-record 
+                    :record="$record" 
+                    :level="$level" 
+                    key="sn-filament-nestedset-fi-record-component-{{ $record->getKey() }}" />
             @empty
                 <x-filament::empty-state
                     :contained="false"
@@ -40,4 +37,6 @@
             @endforelse
         </div>
     </div>
-</x-filament-panels::page>
+    
+    <x-filament-actions::modals />
+</div>

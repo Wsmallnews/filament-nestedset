@@ -1,8 +1,9 @@
 <?php
 
 return [
-    'tree' => [
+    'nestedset' => [
         'empty_label' => '没有数据',
+        'empty_tip_label' => '暂无数据',
     ],
 
     'action' => [

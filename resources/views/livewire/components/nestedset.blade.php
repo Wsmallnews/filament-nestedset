@@ -4,7 +4,7 @@
 
 <ul
     @class([
-        'w-full flex flex-col',
+        'sn-nestedset w-full flex flex-col',
     ])
     role="menu"
 >
@@ -14,7 +14,7 @@
                 'w-full',
             ]) 
             :component="$this->getRecordView()" 
-            key="categories-component-{{ $record->getKey() }}" 
+            key="sn-filament-nestedset-record-component-{{ $record->getKey() }}" 
             :record="$record" 
             :first="$loop->first" 
             :last="$loop->last" 
@@ -22,7 +22,7 @@
         />
     @empty
         <li class="w-full px-3 py-2 text-center">
-            {{ $this->getEmptyLabel() ?: __('sn-filament-nestedset::nestedset.tree.empty_label')}}
+            {{ $this->getEmptyLabel() ?: __('sn-filament-nestedset::nestedset.nestedset.empty_label')}}
         </li>
     @endforelse
 </ul>

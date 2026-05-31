@@ -19,6 +19,22 @@ Filament nestedset tree build on kalnoy/nestedset, support multi language. suppo
 - Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
 - Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
 
+## Architecture
+
+The package uses a **Page + Component** architecture pattern:
+
+- **NestedsetPage** (`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`) — Abstract Filament Page class. Contains configuration (static properties), schema definitions, and header actions that dispatch events to the Component.
+- **Nestedset Component** (`Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`) — Livewire component extending `Filament\Pages\BasePage`. Handles data querying, CRUD operations, and renders the tree UI.
+
+The Page passes configuration to the Component via Blade props, and communicates through Livewire events (`sn-open-create-modal`, `sn-open-fix-nestedset-modal`).
+
+### Two Nestedset Components
+
+| Component                   | Namespace                                                          | Base Class                | Purpose                                   |
+| --------------------------- | ------------------------------------------------------------------ | ------------------------- | ----------------------------------------- |
+| Filament Panel Component    | `Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset` | `Filament\Pages\BasePage` | Full CRUD management in Filament panel    |
+| Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`       | `Livewire\Component`      | Read-only tree display for frontend pages |
+
 ## Screenshots
 
 ![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/light.png)
@@ -182,7 +198,7 @@ php artisan make:filament-nestedset-page
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -203,7 +219,7 @@ namespace App\Filament\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -226,13 +242,13 @@ If the schema for create and edit are the same, you can define the schema method
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
     ...
 
-    protected function schema(array $arguments): array
+    public function schema(array $arguments): array
     {
         return [
             //
@@ -249,19 +265,19 @@ If the schema for create and edit are different, you can define createSchema and
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
     ...
 
-    protected function createSchema(array $arguments): array
+    public function createSchema(array $arguments): array
     {
         return [
             //
         ];
     }
-    protected function editSchema(array $arguments): array
+    public function editSchema(array $arguments): array
     {
         return [
             //
@@ -279,7 +295,7 @@ class Test extends NestedsetPage
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -303,7 +319,7 @@ Nestedset level is unlimited by default, you can limit the nestedset levels by:
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -313,7 +329,7 @@ class Test extends NestedsetPage
 
     // Alternatively, you may use the getLevel() to define a dynamic level
 
-    public function getLevel(): ?int
+    public static function getLevel(): ?int
     {
         return static::$level;
     }
@@ -330,7 +346,7 @@ class Test extends NestedsetPage
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -367,12 +383,12 @@ You can define additional attributes to display in each row through the infolist
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
     ...
-    protected function infolistSchema(): array
+    public function infolistSchema(): array
     {
         return [];
     }
@@ -387,7 +403,7 @@ By default, the infolist will be displayed at the `md` breakpoint and above. You
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -405,7 +421,7 @@ By default, the infolist will be right-aligned. You can change the alignment by 
 namespace App\Filament\Pages;
 
 use Filament\Support\Enums\Alignment;
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -451,7 +467,7 @@ If your filament panel supports multi-tenancy, but the current page doesn't need
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -472,7 +488,7 @@ Set the associated tab field name using tabFieldName. And setting tabs array, yo
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -526,7 +542,7 @@ Define the `nestedScoped` method
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -570,7 +586,7 @@ class YouModel extends Model
 
 namespace App\Filament\Pages;
 
-use Wsmallnews\FilamentNestedset\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
 {
@@ -584,21 +600,146 @@ class Test extends NestedsetPage
 }
 ```
 
+### Filament Panel Component
+
+The Filament Panel Component (`Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`) is used internally by `NestedsetPage` to render the tree UI and handle CRUD operations in the Filament panel. It extends `Filament\Pages\BasePage` and uses the `HasNestedsetActions` trait.
+
+#### Properties (passed from Page via Blade)
+
+| Property | Type | Description |
+|---|---|---|
+| `$pageClass` | `?string` | Page class name, used to access schema and configuration |
+| `$activeTab` | `?string` | Currently active tab for filtering |
+| `$model` | `?string` | Nestedset model class name |
+| `$tabFieldName` | `?string` | Tab filter field name |
+| `$recordTitleAttribute` | `string` | Node title attribute name |
+| `$level` | `?int` | Nested level limit |
+| `$emptyLabel` | `?string` | Empty state label |
+| `$emptyTipLabel` | `?string` | Empty state tip label |
+| `$isScopedToTenant` | `bool` | Whether to scope to tenant |
+
+#### Methods
+
+```php
+// Get the nested level limit
+public function getLevel(): ?int
+
+// Get the empty state label (with translation fallback)
+public function getEmptyLabel(): ?string
+
+// Get the empty state tip label (with translation fallback)
+public function getEmptyTipLabel(): ?string
+
+// Get the record label (delegates to Page)
+public function getRecordLabel(Model $record): HtmlString|string
+
+// Check if infolist schema is defined
+public function hasInfolist(): bool
+
+// Get infolist schema (delegates to Page)
+public function infolistSchema(): array
+
+// Get infolist alignment (delegates to Page)
+public function getInfolistAlignment(): Alignment
+
+// Get infolist hidden endpoint (delegates to Page)
+public function getInfolistHiddenEndpoint(): string
+
+// Check if "Create Child Node" action should show in row
+public function showCreateChildNodeActionInRow(): bool
+
+// Check if a record can be deleted (respects config)
+public function canBeDeleted(Model $record): bool
+```
+
+#### Events
+
+| Event | Method | Description |
+|---|---|---|
+| `sn-filament-nestedset-updated` | `refresh()` | Refresh the component |
+| `sn-open-create-modal` | `openCreateModal()` | Open create modal |
+| `sn-open-fix-nestedset-modal` | `openFixNestedsetModal()` | Open fix tree modal |
+
+#### Actions (from HasNestedsetActions trait)
+
+| Action | Type | Description |
+|---|---|---|
+| `createAction()` | `CreateAction` | Create node (header action) |
+| `createChildAction()` | `CreateAction` | Create child node (inline) |
+| `editAction()` | `Action` | Edit node (avoids N+1 with `fillForm()`) |
+| `deleteAction()` | `Action` | Delete node (with confirmation) |
+| `moveNodeAction()` | `Action` | Drag-and-drop reorder confirmation |
+| `fixNestedsetAction()` | `Action` | Fix tree structure |
+
+#### Usage
+
+The component is automatically registered as `sn-filament-nestedset-fi-nestedset` and used by `NestedsetPage`. You typically don't need to use it directly unless building a custom page:
+
+```blade
+<livewire:sn-filament-nestedset-fi-nestedset
+    :page-class="$pageClass"
+    :active-tab="$activeTab"
+    :model="static::getModel()"
+    :tab-field-name="static::getTabFieldName()"
+    :record-title-attribute="static::getRecordTitleAttribute()"
+    :level="static::getLevel()"
+    :empty-label="static::getEmptyLabel()"
+    :empty-tip-label="static::getEmptyTipLabel()"
+    :is-scoped-to-tenant="static::isScopedToTenant()"
+/>
+```
+
 ### Nestedset Livewire component
 
-#### Overview
+The Nestedset Livewire Component (`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`) is a read-only tree display component for frontend pages. It extends `Livewire\Component` and provides customizable node labels, URLs, and active state.
 
-- The property `showLevel` can be set to nestedset show level
-- The property `emptyLabel` can be set to nestedset empty state
-- The method `getRecordLabel` custom nestedset node label
-- The method `getHasActive` mark active status
-- You can customize the view by using the `view` and `recordView` properties
-- You can use the `getRecordUrl` method to customize the href jump link, which defaults to inserting `href="JavaScript:;"`
-- When clicking on the nestedset leaf node, a `sn-filament-nestedset-leaf-click` event will be triggered
-- When clicking on nestedset non leaf nodes, a `sn-filament-nestedset-node-click` event will be triggered
-- Suggest choosing between `event` and `getRecordUrl`
+#### Instance Properties (pass via Blade attributes)
 
-#### Example
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `$model` | `?string` | `null` | Nestedset model class name |
+| `$recordTitleAttribute` | `string` | `'name'` | Node title attribute name |
+| `$showLevel` | `?string` | `null` | Limit display to specific depth level |
+| `$emptyLabel` | `?string` | `''` | Empty state label text |
+| `$view` | `?string` | `'sn-filament-nestedset::livewire.components.nestedset'` | Component view path |
+| `$recordView` | `?string` | `'sn-filament-nestedset::components.nestedset-record'` | Record view path |
+
+#### Methods
+
+```php
+// Get the record title attribute
+public function getRecordTitleAttribute(): string
+
+// Custom node label (supports HtmlString)
+public function getRecordLabel(Model $record): HtmlString|string
+
+// Custom node URL (return null to use JavaScript:void)
+public function getRecordUrl(Model $record): string|HtmlString|null
+
+// Custom active state
+public function getHasActive(Model $record): bool
+
+// Get nestedset data (override to customize query)
+public function getNestedset(): Collection
+
+// Custom query conditions
+protected function getQuery(): Builder
+
+// Additional scope parameters
+public function nestedScoped(): array
+
+// Custom eloquent query conditions
+public function getEloquentQuery(Builder $query): Builder
+```
+
+#### Events
+
+| Event | Trigger |
+|---|---|
+| `sn-filament-nestedset-leaf-click` | Click on leaf node |
+| `sn-filament-nestedset-node-click` | Click on non-leaf node |
+
+#### Usage
 
 ```php
 <?php
@@ -615,7 +756,11 @@ use function Filament\Support\generate_href_html;
 
 class Categories extends Nestedset
 {
-    public function getRecordLabel(Model $record): HtmlString | string
+    public ?string $model = Category::class;
+
+    public string $recordTitleAttribute = 'name_label';
+
+    public function getRecordLabel(Model $record): HtmlString|string
     {
         return $record->name_label;
     }
@@ -630,20 +775,28 @@ class Categories extends Nestedset
     {
         $this->categoryId = $recordId;
     }
-    // ... or
-    public function getRecordUrl(Model $record): string | HtmlString | null
+
+    // ... or use getRecordUrl for navigation
+    public function getRecordUrl(Model $record): string|HtmlString|null
     {
         return generate_href_html(route('categories.show', $record->id), false);
     }
 
-
-    public function getNestedset()
+    public function getNestedset(): Collection
     {
         return Category::normal()->defaultOrder()
             ->get()->toTree();
     }
 }
+```
 
+#### Blade Usage
+
+```blade
+<livewire:sn-filament-nestedset-nestedset
+    show-level="3"
+    empty-label="No categories found"
+/>
 ```
 
 ### Custom theme
@@ -666,6 +819,18 @@ You should add the following code to your custom theme file. If you custom theme
 ```css
 @import "../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css";
 ```
+
+## Namespace Quick Reference
+
+| Category                    | Namespace                                                             |
+| --------------------------- | --------------------------------------------------------------------- |
+| Page Base Class             | `Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`           |
+| Filament Panel Component    | `Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`    |
+| Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`          |
+| Form Field                  | `Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree` |
+| Artisan Command             | `Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand`      |
+| Exception                   | `Wsmallnews\FilamentNestedset\Exceptions\NestedsetException`          |
+| ServiceProvider             | `Wsmallnews\FilamentNestedset\FilamentNestedsetServiceProvider`       |
 
 ## Changelog
 

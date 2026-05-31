@@ -6,7 +6,7 @@
 @endphp
 
 <li
-    class="flex flex-col"
+    class="sn-nestedset-record flex flex-col"
     @if ($hasChild)
         x-data="{ isExpanded: {{ $hasActive ? 'true' : 'false' }} }"
         aria-controls="accordionItem{{$record->id}}"
@@ -66,11 +66,11 @@
             $currentLevel++;
         @endphp
         <ul @class([
-            'w-full flex flex-col',
+            'sn-nestedset-child w-full flex flex-col',
         ])
-            id="accordionItemCategory{{$record->id}}"
+            id="accordionRecordNestedset{{$record->id}}"
             x-cloak x-show="isExpanded"
-            aria-labelledby="controlsAccordionItemOne{{$record->id}}"
+            aria-labelledby="controlsAccordionRecordNestedset{{$record->id}}"
             x-collapse
             role="menu"
         >
@@ -80,7 +80,7 @@
                         'w-full',
                     ]) 
                     :component="$this->getRecordView()" 
-                    key="categories-component-{{ $child->getKey() }}" 
+                    key="sn-filament-nestedset-record-component-{{ $child->getKey() }}" 
                     :record="$child" 
                     :first="$loop->first" 
                     :last="$loop->last" 

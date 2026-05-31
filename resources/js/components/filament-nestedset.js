@@ -2,7 +2,7 @@ import Sortable from 'sortablejs'
 
 const getSortableContainerId = (element) => element?.dataset?.id ?? null
 
-export default function treeManager({ parentId = null }) {
+export default function nestedsetManager({ parentId = null }) {
     return {
         parentId,
         sortable: null,

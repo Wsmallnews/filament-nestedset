@@ -19,14 +19,9 @@ class Nestedset extends Component
 
     public ?string $recordView = 'sn-filament-nestedset::components.nestedset-record';
 
-    protected static ?string $model = null;
+    public ?string $model = null;
 
-    protected static string $recordTitleAttribute = 'name';
-
-    protected static function getModel(): ?string
-    {
-        return static::$model;
-    }
+    public string $recordTitleAttribute = 'name';
 
     public function getShowLevel(): ?string
     {
@@ -38,14 +33,14 @@ class Nestedset extends Component
         return $this->emptyLabel;
     }
 
-    public static function getRecordTitleAttribute(): ?string
+    public function getRecordTitleAttribute(): string
     {
-        return static::$recordTitleAttribute;
+        return $this->recordTitleAttribute;
     }
 
     public function getRecordLabel(Model $record): HtmlString | string
     {
-        return $record->{static::getRecordTitleAttribute()} ?? ' ';
+        return $record->{$this->recordTitleAttribute} ?? ' ';
     }
 
     public function getRecordUrl(Model $record): string | HtmlString | null
@@ -73,7 +68,7 @@ class Nestedset extends Component
 
     protected function getQuery(): Builder
     {
-        $model = static::getModel();
+        $model = $this->model;
         if (is_null($model)) {
             throw new \Exception('Please set the model or custom `getNestedset` method in the nestedset component.');
         }

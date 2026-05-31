@@ -8,10 +8,12 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
+use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand;
+use Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset;
 
 class FilamentNestedsetServiceProvider extends PackageServiceProvider
 {
@@ -75,6 +77,9 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
                 ], 'filament-nestedset-stubs');
             }
         }
+        
+        // 注册 filament panel 组件
+        Livewire::component('sn-filament-nestedset-fi-nestedset', Nestedset::class);
     }
 
     protected function getAssetPackageName(): ?string
