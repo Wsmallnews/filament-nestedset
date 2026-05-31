@@ -26,12 +26,24 @@ Filament nestedset tree build on kalnoy/nestedset, support multi language. suppo
 ![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/create.png)
 ![Hasparentselect](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/hasparentselect.png)
 
+## AI Guidelines
+
+First, you should install laravel-boost. See details [here](https://laravel.com/docs/13.x/boost)
+
+You should Update Boost resources to ensure that the AI Guidelines for the current package are added to the project overview
+
+```
+php artisan boost:update --discover
+```
+
+Your boost.json and CLAUDE.md files will be updated automatically. You can check the updated files in the project root directory
+
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require wsmallnews/filament-nestedset:^2.0
+composer require wsmallnews/filament-nestedset:^3.0
 ```
 
 The current release is compatible with both Filament v4 and v5.
@@ -274,6 +286,8 @@ class Test extends NestedsetPage
     ...
 
     protected static ?string $emptyLabel = 'no test data';
+
+    protected static ?string $emptyTipLabel = 'no test data available';
 
     ...
 

@@ -20,7 +20,7 @@ class {{ class }} extends NestedsetPage
     }
 
 
-    public function infolistSchema(): array
+    protected function infolistSchema(): array
     {
         return [
             //

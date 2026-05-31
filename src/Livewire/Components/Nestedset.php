@@ -15,13 +15,13 @@ class Nestedset extends Component
 
     public ?string $emptyLabel = '';
 
-    public string $recordTitleAttribute = 'name';
-
     public ?string $view = 'sn-filament-nestedset::livewire.components.nestedset';
 
     public ?string $recordView = 'sn-filament-nestedset::components.nestedset-record';
 
     protected static ?string $model = null;
+
+    protected static string $recordTitleAttribute = 'name';
 
     protected static function getModel(): ?string
     {
@@ -38,14 +38,14 @@ class Nestedset extends Component
         return $this->emptyLabel;
     }
 
-    public function getRecordTitleAttribute(): ?string
+    public static function getRecordTitleAttribute(): ?string
     {
-        return $this->recordTitleAttribute;
+        return static::$recordTitleAttribute;
     }
 
     public function getRecordLabel(Model $record): HtmlString | string
     {
-        return $record->{$this->getRecordTitleAttribute()} ?? ' ';
+        return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }
 
     public function getRecordUrl(Model $record): string | HtmlString | null
