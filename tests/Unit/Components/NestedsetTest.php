@@ -1,15 +1,17 @@
 <?php
 
+use Filament\Pages\BasePage;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset;
+use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions;
 
 test('component uses HasNestedsetActions trait', function () {
     expect(class_uses(Nestedset::class))->toContain(
-        \Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions::class
+        HasNestedsetActions::class
     );
 });
 
 test('component extends BasePage', function () {
-    expect(is_subclass_of(Nestedset::class, \Filament\Pages\BasePage::class))->toBeTrue();
+    expect(is_subclass_of(Nestedset::class, BasePage::class))->toBeTrue();
 });
 
 test('component has public properties', function () {

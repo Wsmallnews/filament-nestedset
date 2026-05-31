@@ -7,21 +7,30 @@ use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 beforeEach(function () {
     $this->page = new class extends NestedsetPage
     {
-        protected static ?string $model = \stdClass::class;
+        protected static ?string $model = stdClass::class;
+
         protected static ?string $modelLabel = 'Test Model';
+
         protected static ?int $level = 3;
+
         protected static ?string $emptyLabel = 'No data';
+
         protected static ?string $emptyTipLabel = 'No data available';
+
         protected static string $recordTitleAttribute = 'title';
+
         protected static ?string $tabFieldName = 'type';
+
         protected static Alignment $infolistAlignment = Alignment::Left;
+
         protected static string $infolistHiddenEndpoint = 'lg';
+
         protected static bool $isScopedToTenant = false;
     };
 });
 
 test('getModel returns model class', function () {
-    expect($this->page::getModel())->toBe(\stdClass::class);
+    expect($this->page::getModel())->toBe(stdClass::class);
 });
 
 test('getModelLabel returns model label', function () {

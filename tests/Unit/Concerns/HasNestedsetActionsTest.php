@@ -1,7 +1,6 @@
 <?php
 
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions;
 
 test('HasNestedsetActions trait exists', function () {

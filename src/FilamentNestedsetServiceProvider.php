@@ -77,7 +77,7 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
                 ], 'filament-nestedset-stubs');
             }
         }
-        
+
         // 注册 filament panel 组件
         Livewire::component('sn-filament-nestedset-fi-nestedset', Nestedset::class);
     }
