@@ -1,33 +1,29 @@
 <?php
 
-namespace Wsmallnews\FilamentNestedset\Filament\Pages;
+namespace Wsmallnews\FilamentNestedset\Filament\Pages\Widgets;
 
 use BackedEnum;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
-use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
-use Filament\Pages\Concerns\InteractsWithFormActions;
-use Filament\Pages\Page;
+use Filament\Actions\Action;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Icons\Heroicon;
+use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
-use Livewire\Attributes\Url;
+use Livewire\Features\SupportEvents\Event;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetHeaderActions;
 
 use function Filament\Support\get_model_label;
 
-abstract class NestedsetPage extends Page
+abstract class Nestedset extends Widget
 {
-    use CanUseDatabaseTransactions;
     use HasNestedsetHeaderActions;
     use HasTabs;
-    use HasUnsavedDataChangesAlert;
-    use InteractsWithFormActions;
 
-    #[Url]
-    public ?string $activeTab = null;
+    protected static ?string $model = null;
+
+    protected static ?string $modelLabel = null;
 
     protected static ?int $level = null;
 
@@ -35,25 +31,20 @@ abstract class NestedsetPage extends Page
 
     protected static ?string $emptyTipLabel;
 
-    protected static ?string $model = null;
-
-    protected static ?string $modelLabel = null;
-
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBars3BottomRight;
-
-    protected static string | BackedEnum | null $activeNavigationIcon = Heroicon::Bars3BottomRight;
-
     protected static bool $isScopedToTenant = true;
 
     protected static string $recordTitleAttribute = 'name';
-
-    protected string $view = 'sn-filament-nestedset::filament.pages.nestedset-page';
 
     protected static ?string $tabFieldName = null;
 
     protected static Alignment $infolistAlignment = Alignment::Right;
 
     protected static string $infolistHiddenEndpoint = 'md';
+
+    protected int | string | array $columnSpan = 'full';
+
+    protected string $view = 'sn-filament-nestedset::filament.pages.widgets.nestedset';
+
 
     public function mount(): void
     {
@@ -119,7 +110,6 @@ abstract class NestedsetPage extends Page
     {
         return static::$infolistHiddenEndpoint;
     }
-
 
     /**
      * 自定义 kalnoy/nestedset 的 scoped 外条件

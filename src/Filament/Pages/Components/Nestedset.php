@@ -12,7 +12,6 @@ use Kalnoy\Nestedset\NodeTrait;
 use Livewire\Attributes\On;
 use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions;
-use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Nestedset extends BasePage
 {
@@ -62,8 +61,6 @@ class Nestedset extends BasePage
      * 是否关联多租户
      */
     public bool $isScopedToTenant = true;
-
-    protected ?NestedsetPage $nestedsetPage = null;
 
     protected string $view = 'sn-filament-nestedset::filament.pages.components.nestedset';
 
@@ -118,7 +115,7 @@ class Nestedset extends BasePage
 
     public function getRecordLabel(Model $record): HtmlString | string
     {
-        return $this->getNestedsetPage()->getRecordLabel($record);
+        return ($this->pageClass)::getRecordLabel($record);
     }
 
     public function hasInfolist(): bool
@@ -128,17 +125,17 @@ class Nestedset extends BasePage
 
     public function infolistSchema(): array
     {
-        return $this->getNestedsetPage()->infolistSchema();
+        return ($this->pageClass)::infolistSchema();
     }
 
     public function getInfolistAlignment(): Alignment
     {
-        return $this->getNestedsetPage()->getInfolistAlignment();
+        return ($this->pageClass)::getInfolistAlignment();
     }
 
     public function getInfolistHiddenEndpoint(): string
     {
-        return $this->getNestedsetPage()->getInfolistHiddenEndpoint();
+        return ($this->pageClass)::getInfolistHiddenEndpoint();
     }
 
     public function showCreateChildNodeActionInRow(): bool
@@ -163,7 +160,7 @@ class Nestedset extends BasePage
     protected function getQuery(): Builder
     {
         $model = $this->model;
-        $page = $this->getNestedsetPage();
+        $pageClass = $this->pageClass;
 
         $scopes = [];
         if ($this->isScopedToTenant && ($tenant = Filament::getTenant())) {
@@ -174,8 +171,8 @@ class Nestedset extends BasePage
             $scopes[$this->tabFieldName] = $this->activeTab;
         }
 
-        // 自定义 scope（委托给 Page）
-        $customScopes = $page->nestedScoped();
+        // 自定义 scope（静态委托给 Page）
+        $customScopes = $pageClass::nestedScoped();
         if (! empty($customScopes)) {
             $scopes = array_merge($scopes, $customScopes);
         }
@@ -186,8 +183,8 @@ class Nestedset extends BasePage
             $query = (new $model)->newScopedQuery();
         }
 
-        // 自定义条件（委托给 Page）
-        $query = $page->getEloquentQuery($query);
+        // 自定义条件（静态委托给 Page）
+        $query = $pageClass::getEloquentQuery($query);
 
         $query = $query->defaultOrder();
 
@@ -201,14 +198,5 @@ class Nestedset extends BasePage
         return [
             'nestedset' => $nestedset,
         ];
-    }
-
-    protected function getNestedsetPage(): NestedsetPage
-    {
-        if ($this->nestedsetPage === null) {
-            $this->nestedsetPage = app($this->pageClass);
-        }
-
-        return $this->nestedsetPage;
     }
 }

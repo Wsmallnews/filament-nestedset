@@ -20,7 +20,7 @@ trait HasNestedsetActions
     {
         return $this->configureCreateAction(
             CreateAction::make()
-                ->modelLabel($this->getNestedsetPage()::getModelLabel())
+                ->modelLabel(($this->pageClass)::getModelLabel())
         );
     }
 
@@ -40,7 +40,7 @@ trait HasNestedsetActions
      */
     private function configureCreateAction(CreateAction $action, $type = 'create'): Action
     {
-        $page = $this->getNestedsetPage();
+        $pageClass = $this->pageClass;
 
         return $action->model($this->model)     // Action 需要 model attribute is a string
             ->mutateDataUsing(function (array $data): array {
@@ -51,8 +51,8 @@ trait HasNestedsetActions
                     ...$queryModel->getAttributes(),
                 ];
             })
-            ->schema(function (array $arguments) use ($page, $type) {
-                $schema = method_exists($page, 'createSchema') ? $page->createSchema($arguments) : $page->schema($arguments);
+            ->schema(function (array $arguments) use ($pageClass, $type) {
+                $schema = method_exists($pageClass, 'createSchema') ? $pageClass::createSchema($arguments) : $pageClass::schema($arguments);
 
                 if ($type == 'create' && (is_null($this->getLevel()) || $this->getLevel() >= 2) && $this->hasFormParentSelect()) {
                     $parentSelect = Arr::wrap($this->getParentSelect());
@@ -81,7 +81,7 @@ trait HasNestedsetActions
 
     public function editAction(): Action
     {
-        $page = $this->getNestedsetPage();
+        $pageClass = $this->pageClass;
 
         return Action::make('edit')
             ->label(__('filament-actions::edit.single.label'))
@@ -90,7 +90,7 @@ trait HasNestedsetActions
             ->modalSubmitActionLabel(__('filament-actions::edit.single.modal.actions.save.label'))
             ->successNotificationTitle(__('filament-actions::edit.single.notifications.saved.title'))
             ->defaultColor('primary')
-            ->schema(fn (array $arguments): array => method_exists($page, 'editSchema') ? $page->editSchema($arguments) : $page->schema($arguments))
+            ->schema(fn (array $arguments): array => method_exists($pageClass, 'editSchema') ? $pageClass::editSchema($arguments) : $pageClass::schema($arguments))
             ->fillForm(function (array $arguments) {
                 $id = $arguments['id'] ?? 0;
                 $record = $id ? $this->getQuery()->findOrFail($id) : null;
