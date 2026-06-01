@@ -40,7 +40,7 @@ abstract class Nestedset extends Widget implements HasSchemas
 
     protected static string $infolistHiddenEndpoint = 'md';
 
-    protected int|string|array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'sn-filament-nestedset::filament.pages.widgets.nestedset';
 
@@ -94,7 +94,7 @@ abstract class Nestedset extends Widget implements HasSchemas
         return static::$tabFieldName;
     }
 
-    public static function getRecordLabel(Model $record): HtmlString|string
+    public static function getRecordLabel(Model $record): HtmlString | string
     {
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }

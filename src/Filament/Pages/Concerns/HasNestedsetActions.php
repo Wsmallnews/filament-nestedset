@@ -245,7 +245,7 @@ trait HasNestedsetActions
         return config('sn-filament-nestedset.create_action_modal_show_parent_select') ?? false;
     }
 
-    protected function getParentSelect(): array|Field
+    protected function getParentSelect(): array | Field
     {
         return KalnoyNestedsetSelectTree::make('parent_id')->label(__('sn-filament-nestedset::nestedset.field.parent_select_field'))
             ->level(is_null($this->getLevel()) ? null : ($this->getLevel() - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
