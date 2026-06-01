@@ -19,9 +19,9 @@ trait HasNestedsetHeaderActions
     protected function createAction(): Action
     {
         return Action::make('create')
-            ->label(fn(): string => __('filament-actions::create.single.label', ['label' => static::getModelLabel()]))
+            ->label(fn (): string => __('filament-actions::create.single.label', ['label' => static::getModelLabel()]))
             ->icon(Heroicon::Plus)
-            ->action(fn(): Event => $this->dispatch('sn-open-create-modal'));
+            ->action(fn (): Event => $this->dispatch('sn-open-create-modal'));
     }
 
     protected function fixNestedsetAction(): Action
@@ -29,6 +29,6 @@ trait HasNestedsetHeaderActions
         return Action::make('fixNestedset')
             ->label(__('sn-filament-nestedset::nestedset.action.fix_nestedset'))
             ->icon(Heroicon::Wrench)
-            ->action(fn(): Event => $this->dispatch('sn-open-fix-nestedset-modal'));
+            ->action(fn (): Event => $this->dispatch('sn-open-fix-nestedset-modal'));
     }
 }

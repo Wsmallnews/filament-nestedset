@@ -120,7 +120,6 @@ abstract class NestedsetPage extends Page
         return static::$infolistHiddenEndpoint;
     }
 
-
     /**
      * 自定义 kalnoy/nestedset 的 scoped 外条件
      */

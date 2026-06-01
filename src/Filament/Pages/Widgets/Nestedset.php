@@ -2,16 +2,12 @@
 
 namespace Wsmallnews\FilamentNestedset\Filament\Pages\Widgets;
 
-use BackedEnum;
-use Filament\Actions\Action;
 use Filament\Resources\Concerns\HasTabs;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
-use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
-use Livewire\Features\SupportEvents\Event;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetHeaderActions;
 
 use function Filament\Support\get_model_label;
@@ -44,7 +40,6 @@ abstract class Nestedset extends Widget
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'sn-filament-nestedset::filament.pages.widgets.nestedset';
-
 
     public function mount(): void
     {
