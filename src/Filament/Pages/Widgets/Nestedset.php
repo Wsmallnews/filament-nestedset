@@ -3,6 +3,8 @@
 namespace Wsmallnews\FilamentNestedset\Filament\Pages\Widgets;
 
 use Filament\Resources\Concerns\HasTabs;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Widgets\Widget;
@@ -12,10 +14,11 @@ use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetHeaderActio
 
 use function Filament\Support\get_model_label;
 
-abstract class Nestedset extends Widget
+abstract class Nestedset extends Widget implements HasSchemas
 {
     use HasNestedsetHeaderActions;
     use HasTabs;
+    use InteractsWithSchemas;
 
     protected static ?string $model = null;
 
@@ -37,7 +40,7 @@ abstract class Nestedset extends Widget
 
     protected static string $infolistHiddenEndpoint = 'md';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected string $view = 'sn-filament-nestedset::filament.pages.widgets.nestedset';
 
@@ -91,7 +94,7 @@ abstract class Nestedset extends Widget
         return static::$tabFieldName;
     }
 
-    public static function getRecordLabel(Model $record): HtmlString | string
+    public static function getRecordLabel(Model $record): HtmlString|string
     {
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }

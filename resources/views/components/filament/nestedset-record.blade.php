@@ -72,7 +72,7 @@
                     {{ Schema::make($this)
                         ->record($record)
                         ->components($this->infolistSchema())
-                        ->view('sn-filament-nestedset::components.pages.nestedset-infolist'); }}
+                        ->view('sn-filament-nestedset::components.filament.nestedset-infolist') }}
                 </div>
             @endif
         </div>

@@ -113,7 +113,7 @@ class Nestedset extends BasePage
         return $this->emptyTipLabel ?? __('sn-filament-nestedset::nestedset.nestedset.empty_tip_label');
     }
 
-    public function getRecordLabel(Model $record): HtmlString | string
+    public function getRecordLabel(Model $record): HtmlString|string
     {
         return ($this->pageClass)::getRecordLabel($record);
     }

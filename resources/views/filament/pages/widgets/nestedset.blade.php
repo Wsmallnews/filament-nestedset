@@ -1,10 +1,8 @@
-<x-filament-widgets::widget>
+<x-filament-widgets::widget class="flex flex-col gap-4">
     @if ($headerActions = $this->getHeaderActions())
-        <x-filament::section>
-            <x-slot name="afterHeader">
-                <x-filament::actions :actions="$headerActions" />
-            </x-slot>
-        </x-filament::section>
+        <div class="flex justify-end items-center">
+            <x-filament::actions :actions="$headerActions" />
+        </div>
     @endif
     
     {{ $this->content }}

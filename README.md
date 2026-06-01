@@ -488,6 +488,7 @@ Set the associated tab field name using tabFieldName. And setting tabs array, yo
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Components\Tabs\Tab;
 use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 
 class Test extends NestedsetPage
@@ -606,17 +607,17 @@ The Filament Panel Component (`Wsmallnews\FilamentNestedset\Filament\Pages\Compo
 
 #### Properties (passed from Page via Blade)
 
-| Property | Type | Description |
-|---|---|---|
-| `$pageClass` | `?string` | Page class name, used to access schema and configuration |
-| `$activeTab` | `?string` | Currently active tab for filtering |
-| `$model` | `?string` | Nestedset model class name |
-| `$tabFieldName` | `?string` | Tab filter field name |
-| `$recordTitleAttribute` | `string` | Node title attribute name |
-| `$level` | `?int` | Nested level limit |
-| `$emptyLabel` | `?string` | Empty state label |
-| `$emptyTipLabel` | `?string` | Empty state tip label |
-| `$isScopedToTenant` | `bool` | Whether to scope to tenant |
+| Property                | Type      | Description                                              |
+| ----------------------- | --------- | -------------------------------------------------------- |
+| `$pageClass`            | `?string` | Page class name, used to access schema and configuration |
+| `$activeTab`            | `?string` | Currently active tab for filtering                       |
+| `$model`                | `?string` | Nestedset model class name                               |
+| `$tabFieldName`         | `?string` | Tab filter field name                                    |
+| `$recordTitleAttribute` | `string`  | Node title attribute name                                |
+| `$level`                | `?int`    | Nested level limit                                       |
+| `$emptyLabel`           | `?string` | Empty state label                                        |
+| `$emptyTipLabel`        | `?string` | Empty state tip label                                    |
+| `$isScopedToTenant`     | `bool`    | Whether to scope to tenant                               |
 
 #### Methods
 
@@ -654,22 +655,22 @@ public function canBeDeleted(Model $record): bool
 
 #### Events
 
-| Event | Method | Description |
-|---|---|---|
-| `sn-filament-nestedset-updated` | `refresh()` | Refresh the component |
-| `sn-open-create-modal` | `openCreateModal()` | Open create modal |
-| `sn-open-fix-nestedset-modal` | `openFixNestedsetModal()` | Open fix tree modal |
+| Event                           | Method                    | Description           |
+| ------------------------------- | ------------------------- | --------------------- |
+| `sn-filament-nestedset-updated` | `refresh()`               | Refresh the component |
+| `sn-open-create-modal`          | `openCreateModal()`       | Open create modal     |
+| `sn-open-fix-nestedset-modal`   | `openFixNestedsetModal()` | Open fix tree modal   |
 
 #### Actions (from HasNestedsetActions trait)
 
-| Action | Type | Description |
-|---|---|---|
-| `createAction()` | `CreateAction` | Create node (header action) |
-| `createChildAction()` | `CreateAction` | Create child node (inline) |
-| `editAction()` | `Action` | Edit node (avoids N+1 with `fillForm()`) |
-| `deleteAction()` | `Action` | Delete node (with confirmation) |
-| `moveNodeAction()` | `Action` | Drag-and-drop reorder confirmation |
-| `fixNestedsetAction()` | `Action` | Fix tree structure |
+| Action                 | Type           | Description                              |
+| ---------------------- | -------------- | ---------------------------------------- |
+| `createAction()`       | `CreateAction` | Create node (header action)              |
+| `createChildAction()`  | `CreateAction` | Create child node (inline)               |
+| `editAction()`         | `Action`       | Edit node (avoids N+1 with `fillForm()`) |
+| `deleteAction()`       | `Action`       | Delete node (with confirmation)          |
+| `moveNodeAction()`     | `Action`       | Drag-and-drop reorder confirmation       |
+| `fixNestedsetAction()` | `Action`       | Fix tree structure                       |
 
 #### Usage
 
@@ -695,14 +696,14 @@ The Nestedset Livewire Component (`Wsmallnews\FilamentNestedset\Livewire\Compone
 
 #### Instance Properties (pass via Blade attributes)
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `$model` | `?string` | `null` | Nestedset model class name |
-| `$recordTitleAttribute` | `string` | `'name'` | Node title attribute name |
-| `$showLevel` | `?string` | `null` | Limit display to specific depth level |
-| `$emptyLabel` | `?string` | `''` | Empty state label text |
-| `$view` | `?string` | `'sn-filament-nestedset::livewire.components.nestedset'` | Component view path |
-| `$recordView` | `?string` | `'sn-filament-nestedset::components.nestedset-record'` | Record view path |
+| Property                | Type      | Default                                                  | Description                           |
+| ----------------------- | --------- | -------------------------------------------------------- | ------------------------------------- |
+| `$model`                | `?string` | `null`                                                   | Nestedset model class name            |
+| `$recordTitleAttribute` | `string`  | `'name'`                                                 | Node title attribute name             |
+| `$showLevel`            | `?string` | `null`                                                   | Limit display to specific depth level |
+| `$emptyLabel`           | `?string` | `''`                                                     | Empty state label text                |
+| `$view`                 | `?string` | `'sn-filament-nestedset::livewire.components.nestedset'` | Component view path                   |
+| `$recordView`           | `?string` | `'sn-filament-nestedset::components.nestedset-record'`   | Record view path                      |
 
 #### Methods
 
@@ -734,9 +735,9 @@ public function getEloquentQuery(Builder $query): Builder
 
 #### Events
 
-| Event | Trigger |
-|---|---|
-| `sn-filament-nestedset-leaf-click` | Click on leaf node |
+| Event                              | Trigger                |
+| ---------------------------------- | ---------------------- |
+| `sn-filament-nestedset-leaf-click` | Click on leaf node     |
 | `sn-filament-nestedset-node-click` | Click on non-leaf node |
 
 #### Usage

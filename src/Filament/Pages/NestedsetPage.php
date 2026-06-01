@@ -39,9 +39,9 @@ abstract class NestedsetPage extends Page
 
     protected static ?string $modelLabel = null;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBars3BottomRight;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBars3BottomRight;
 
-    protected static string | BackedEnum | null $activeNavigationIcon = Heroicon::Bars3BottomRight;
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::Bars3BottomRight;
 
     protected static bool $isScopedToTenant = true;
 
@@ -105,7 +105,7 @@ abstract class NestedsetPage extends Page
         return static::$tabFieldName;
     }
 
-    public static function getRecordLabel(Model $record): HtmlString | string
+    public static function getRecordLabel(Model $record): HtmlString|string
     {
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }

@@ -2,11 +2,14 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-@source '../views/**/*';
+@source "../views/**/*";
 
-.fi-sn-tree-infolist .fi-in-entry {
+.fi-sn-nestedset-record-infolist .fi-in-entry {
     @apply !flex items-center gap-x-2;
 }
-.fi-sn-tree-infolist .fi-in-entry .fi-in-entry-label-col .fi-in-entry-label {
+.fi-sn-nestedset-record-infolist
+    .fi-in-entry
+    .fi-in-entry-label-col
+    .fi-in-entry-label {
     @apply text-gray-400;
 }
