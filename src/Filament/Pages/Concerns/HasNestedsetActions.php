@@ -75,7 +75,7 @@ trait HasNestedsetActions
                     parent: $parent,
                 );
             })
-            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->createAnother(false);
     }
 
@@ -90,7 +90,7 @@ trait HasNestedsetActions
             ->modalSubmitActionLabel(__('filament-actions::edit.single.modal.actions.save.label'))
             ->successNotificationTitle(__('filament-actions::edit.single.notifications.saved.title'))
             ->defaultColor('primary')
-            ->schema(fn(array $arguments): array => method_exists($pageClass, 'editSchema') ? $pageClass::editSchema($arguments) : $pageClass::schema($arguments))
+            ->schema(fn (array $arguments): array => method_exists($pageClass, 'editSchema') ? $pageClass::editSchema($arguments) : $pageClass::schema($arguments))
             ->model($this->model)
             ->fillForm(function (array $arguments) {
                 $id = $arguments['id'] ?? 0;
