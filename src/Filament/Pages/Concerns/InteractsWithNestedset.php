@@ -9,18 +9,17 @@ use Filament\Support\Enums\Alignment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Kalnoy\Nestedset\NodeTrait;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
-use Kalnoy\Nestedset\NodeTrait;
 use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
-use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions;
 
 use function Filament\Support\get_model_label;
 
 trait InteractsWithNestedset
 {
-    use HasTabs;
     use HasNestedsetActions;
+    use HasTabs;
 
     #[Url]
     public ?string $activeTab = null;
@@ -190,7 +189,6 @@ trait InteractsWithNestedset
 
         return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
-
 
     public function content(Schema $schema): Schema
     {

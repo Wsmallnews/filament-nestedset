@@ -19,6 +19,5 @@ abstract class NestedsetPage extends Page
 
     protected static string | BackedEnum | null $activeNavigationIcon = Heroicon::Bars3BottomRight;
 
-
     protected string $view = 'sn-filament-nestedset::filament.pages.nestedset-page';
 }

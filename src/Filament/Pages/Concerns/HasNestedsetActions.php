@@ -88,7 +88,7 @@ trait HasNestedsetActions
             ->modalSubmitActionLabel(__('filament-actions::edit.single.modal.actions.save.label'))
             ->successNotificationTitle(__('filament-actions::edit.single.notifications.saved.title'))
             ->defaultColor('primary')
-            ->schema(fn(array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
+            ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
             ->model(static::getModel())
             ->fillForm(function (array $arguments): array {
                 $id = $arguments['id'] ?? 0;
