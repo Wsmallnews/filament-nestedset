@@ -75,7 +75,7 @@ trait HasNestedsetActions
                     parent: $parent,
                 );
             })
-            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->createAnother(false);
     }
 
