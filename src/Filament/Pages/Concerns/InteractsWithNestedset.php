@@ -24,19 +24,19 @@ trait InteractsWithNestedset
     #[Url]
     public ?string $activeTab = null;
 
+    protected static ?int $level = null;
+
     protected static ?string $model = null;
 
     protected static ?string $modelLabel = null;
-
-    protected static ?int $level = null;
 
     protected static ?string $emptyLabel;
 
     protected static ?string $emptyTipLabel;
 
-    protected static bool $isScopedToTenant = true;
-
     protected static string $recordTitleAttribute = 'name';
+
+    protected static bool $isScopedToTenant = true;
 
     protected static ?string $tabFieldName = null;
 
@@ -119,7 +119,17 @@ trait InteractsWithNestedset
         return static::$tabFieldName;
     }
 
-    public static function getRecordLabel(Model $record): HtmlString | string
+    public static function getInfolistAlignment(): Alignment
+    {
+        return static::$infolistAlignment;
+    }
+
+    public static function getInfolistHiddenEndpoint(): string
+    {
+        return static::$infolistHiddenEndpoint;
+    }
+
+    public function getRecordLabel(Model $record): HtmlString|string
     {
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }
@@ -132,14 +142,6 @@ trait InteractsWithNestedset
     public function nestedScoped(): array
     {
         return [];
-    }
-
-    /**
-     * 自定义 Eloquent 查询条件
-     */
-    public function getEloquentQuery(Builder $query): Builder
-    {
-        return $query;
     }
 
     /**
@@ -163,19 +165,22 @@ trait InteractsWithNestedset
         return count($this->infolistSchema()) > 0;
     }
 
-    public function getInfolistAlignment(): Alignment
+    /**
+     * 自定义 Eloquent 查询条件
+     */
+    public function getEloquentQuery(Builder $query): Builder
     {
-        return static::$infolistAlignment;
-    }
-
-    public function getInfolistHiddenEndpoint(): string
-    {
-        return static::$infolistHiddenEndpoint;
+        return $query;
     }
 
     public function showCreateChildNodeActionInRow(): bool
     {
         return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
+    }
+
+    public function getNestedset()
+    {
+        return $this->getQuery()->withDepth()->get()->toTree();
     }
 
     public function canBeDeleted(Model $record): bool
@@ -230,10 +235,10 @@ trait InteractsWithNestedset
      */
     protected function getViewData(): array
     {
-        $nestedset = $this->getQuery()->withDepth()->get()->toTree();
-
         return [
-            'nestedset' => $nestedset,
+            'level' => static::getLevel(),
+            'emptyLabel' => static::getEmptyLabel(),
+            'emptyTipLabel' => static::getEmptyTipLabel(),
         ];
     }
 }

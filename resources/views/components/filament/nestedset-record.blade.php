@@ -5,8 +5,8 @@
     use Filament\Schemas\Schema;
     use Filament\Support\Icons\Heroicon;
 
-    $infolistAlignment = $this->getInfolistAlignment();
-    $infoListHiddenEndpoint = $this->getInfolistHiddenEndpoint();
+    $infolistAlignment = static::getInfolistAlignment();
+    $infoListHiddenEndpoint = static::getInfolistHiddenEndpoint();
 
     // 是否还有下级
     $hasNextLevel = is_null($level) || $level > ($record->depth + 1);

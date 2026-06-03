@@ -8,12 +8,10 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
-use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand;
-use Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset;
 
 class FilamentNestedsetServiceProvider extends PackageServiceProvider
 {
@@ -71,15 +69,12 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
 
         // Handle Stubs
         if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
+            foreach (app(Filesystem::class)->files(__DIR__.'/../stubs/') as $file) {
                 $this->publishes([
                     $file->getRealPath() => base_path("stubs/filament-nestedset/{$file->getFilename()}"),
                 ], 'filament-nestedset-stubs');
             }
         }
-
-        // 注册 filament panel 组件
-        Livewire::component('sn-filament-nestedset-fi-nestedset', Nestedset::class);
     }
 
     protected function getAssetPackageName(): ?string
@@ -93,11 +88,11 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         $assets = [
-            AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
+            AlpineComponent::make('filament-nestedset', __DIR__.'/../resources/dist/components/filament-nestedset.js'),
         ];
 
         if (config('sn-filament-nestedset.autoload_assets') ?? true) {
-            $assets[] = Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css');
+            $assets[] = Css::make('filament-nestedset-styles', __DIR__.'/../resources/dist/filament-nestedset.css');
         }
 
         return $assets;

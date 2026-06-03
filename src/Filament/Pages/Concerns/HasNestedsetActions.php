@@ -16,6 +16,14 @@ use Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree;
 
 trait HasNestedsetActions
 {
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->createAction(),
+            $this->fixNestedsetAction(),
+        ];
+    }
+
     public function createAction(): Action
     {
         return $this->configureCreateAction(
@@ -54,7 +62,7 @@ trait HasNestedsetActions
                     ? $this->createSchema($arguments)
                     : $this->schema($arguments);
 
-                if ($type === 'create' && (is_null($this->getLevel()) || $this->getLevel() >= 2) && $this->hasFormParentSelect()) {
+                if ($type === 'create' && (is_null(static::getLevel()) || static::getLevel() >= 2) && $this->hasFormParentSelect()) {
                     $parentSelect = Arr::wrap($this->getParentSelect());
 
                     $schema = array_merge([
@@ -181,11 +189,11 @@ trait HasNestedsetActions
                     } else {
                         // 插入指定父级, 并调整顺序
                         $parentNode = $this->getQuery()->withDepth()->findOrFail($parent);
-                        if (! is_null($this->getLevel()) && $parentNode->depth >= $this->getLevel() - 1) {
+                        if (! is_null(static::getLevel()) && $parentNode->depth >= static::getLevel() - 1) {
                             Notification::make()
                                 ->danger()
                                 ->title(__('sn-filament-nestedset::nestedset.action.move_node_failed'))
-                                ->body(__('sn-filament-nestedset::nestedset.action.move_node_failed_body_depth', ['level' => $this->getLevel()]))
+                                ->body(__('sn-filament-nestedset::nestedset.action.move_node_failed_body_depth', ['level' => static::getLevel()]))
                                 ->send();
 
                             $action->cancel();
@@ -245,10 +253,10 @@ trait HasNestedsetActions
         return config('sn-filament-nestedset.create_action_modal_show_parent_select') ?? false;
     }
 
-    protected function getParentSelect(): array | Field
+    protected function getParentSelect(): array|Field
     {
         return KalnoyNestedsetSelectTree::make('parent_id')->label(__('sn-filament-nestedset::nestedset.field.parent_select_field'))
-            ->level(is_null($this->getLevel()) ? null : ($this->getLevel() - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
+            ->level(is_null(static::getLevel()) ? null : (static::getLevel() - 1))      // 能让用户选择的层级，需要 -1,level = null 不限制
             ->searchable()
             ->query(function () {
                 return $this->getQuery();

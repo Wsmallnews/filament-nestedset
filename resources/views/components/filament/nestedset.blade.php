@@ -1,3 +1,10 @@
+@props([
+    'nestedset',
+    'level',
+    'emptyLabel',
+    'emptyTipLabel',
+])
+
 <div>
     <div
         class="fi-sn-nestedset-container overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
@@ -17,8 +24,8 @@
         >
             @forelse($nestedset as $nestedsetKey => $record)
                 <x-sn-filament-nestedset::filament.nestedset-record 
-                    :record="$record" 
-                    :level="$level" 
+                    :record="$record"
+                    :level="$level"
                     key="sn-filament-nestedset-fi-record-component-{{ $record->getKey() }}" />
             @empty
                 <x-filament::empty-state
@@ -27,11 +34,11 @@
                     icon-color="gray"
                 >
                     <x-slot name="heading">
-                        {{ $this->getEmptyLabel() }}
+                        {{ $emptyLabel }}
                     </x-slot>
 
                     <x-slot name="description">
-                        {{ $this->getEmptyTipLabel() }}
+                        {{ $emptyTipLabel }}
                     </x-slot>
                 </x-filament::empty-state>
             @endforelse
