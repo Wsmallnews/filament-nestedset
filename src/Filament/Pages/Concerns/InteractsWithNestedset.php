@@ -129,7 +129,7 @@ trait InteractsWithNestedset
         return static::$infolistHiddenEndpoint;
     }
 
-    public function getRecordLabel(Model $record): HtmlString|string
+    public function getRecordLabel(Model $record): HtmlString | string
     {
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }

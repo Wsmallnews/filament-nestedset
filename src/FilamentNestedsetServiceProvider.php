@@ -69,7 +69,7 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
 
         // Handle Stubs
         if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__.'/../stubs/') as $file) {
+            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
                     $file->getRealPath() => base_path("stubs/filament-nestedset/{$file->getFilename()}"),
                 ], 'filament-nestedset-stubs');
@@ -88,11 +88,11 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         $assets = [
-            AlpineComponent::make('filament-nestedset', __DIR__.'/../resources/dist/components/filament-nestedset.js'),
+            AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
         ];
 
         if (config('sn-filament-nestedset.autoload_assets') ?? true) {
-            $assets[] = Css::make('filament-nestedset-styles', __DIR__.'/../resources/dist/filament-nestedset.css');
+            $assets[] = Css::make('filament-nestedset-styles', __DIR__ . '/../resources/dist/filament-nestedset.css');
         }
 
         return $assets;
