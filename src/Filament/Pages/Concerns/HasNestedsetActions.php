@@ -20,7 +20,7 @@ trait HasNestedsetActions
     {
         return $this->configureCreateAction(
             CreateAction::make()
-                ->modelLabel(($this->pageClass)::getModelLabel())
+                ->modelLabel(static::getModelLabel())
         );
     }
 
@@ -38,23 +38,23 @@ trait HasNestedsetActions
     /**
      * 配置 createAction 操作
      */
-    private function configureCreateAction(CreateAction $action, $type = 'create'): Action
+    private function configureCreateAction(CreateAction $action, string $type = 'create'): Action
     {
-        $pageClass = $this->pageClass;
-
-        return $action->model($this->model)     // Action 需要 model attribute is a string
+        return $action->model(static::getModel())
             ->mutateDataUsing(function (array $data): array {
-                $queryModel = $this->getQuery()->getModel();     // 这个获取的是包含 scopes 中的 attributes 数据的 model 实例
+                $queryModel = $this->getQuery()->getModel();
 
                 return [
                     ...$data,
                     ...$queryModel->getAttributes(),
                 ];
             })
-            ->schema(function (array $arguments) use ($pageClass, $type) {
-                $schema = method_exists($pageClass, 'createSchema') ? $pageClass::createSchema($arguments) : $pageClass::schema($arguments);
+            ->schema(function (array $arguments) use ($type): array {
+                $schema = method_exists($this, 'createSchema')
+                    ? $this->createSchema($arguments)
+                    : $this->schema($arguments);
 
-                if ($type == 'create' && (is_null($this->getLevel()) || $this->getLevel() >= 2) && $this->hasFormParentSelect()) {
+                if ($type === 'create' && (is_null($this->getLevel()) || $this->getLevel() >= 2) && $this->hasFormParentSelect()) {
                     $parentSelect = Arr::wrap($this->getParentSelect());
 
                     $schema = array_merge([
@@ -70,7 +70,7 @@ trait HasNestedsetActions
                 $parent = $this->getQuery()->find($parentId);
                 unset($data['parent_id']);
 
-                return ($this->model)::create(
+                return static::getModel()::create(
                     attributes: $data,
                     parent: $parent,
                 );
@@ -81,8 +81,6 @@ trait HasNestedsetActions
 
     public function editAction(): Action
     {
-        $pageClass = $this->pageClass;
-
         return Action::make('edit')
             ->label(__('filament-actions::edit.single.label'))
             ->icon(Heroicon::PencilSquare)
@@ -90,15 +88,15 @@ trait HasNestedsetActions
             ->modalSubmitActionLabel(__('filament-actions::edit.single.modal.actions.save.label'))
             ->successNotificationTitle(__('filament-actions::edit.single.notifications.saved.title'))
             ->defaultColor('primary')
-            ->schema(fn(array $arguments): array => method_exists($pageClass, 'editSchema') ? $pageClass::editSchema($arguments) : $pageClass::schema($arguments))
-            ->model($this->model)
-            ->fillForm(function (array $arguments) {
+            ->schema(fn(array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
+            ->model(static::getModel())
+            ->fillForm(function (array $arguments): array {
                 $id = $arguments['id'] ?? 0;
                 $record = $id ? $this->getQuery()->findOrFail($id) : null;
 
                 return $record ? $record->toArray() : [];
             })
-            ->action(function (array $data, array $arguments) {
+            ->action(function (array $data, array $arguments): void {
                 $id = $arguments['id'] ?? 0;
                 $record = $id ? $this->getQuery()->findOrFail($id) : null;
                 $record?->update($data);
@@ -116,9 +114,9 @@ trait HasNestedsetActions
             ->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
             ->successNotificationTitle(__('filament-actions::delete.single.notifications.deleted.title'))
             ->defaultColor('danger')
-            ->model($this->model)
+            ->model(static::getModel())
             ->requiresConfirmation()
-            ->before(function (Action $action, array $arguments) {
+            ->before(function (Action $action, array $arguments): void {
                 $id = $arguments['id'] ?? 0;
                 $record = $id ? $this->getQuery()->find($id) : null;
 
@@ -133,7 +131,7 @@ trait HasNestedsetActions
                     $action->halt();
                 }
             })
-            ->action(function (array $arguments) {
+            ->action(function (array $arguments): void {
                 $id = $arguments['id'] ?? 0;
                 $record = $id ? $this->getQuery()->find($id) : null;
                 $record?->delete();
@@ -148,7 +146,7 @@ trait HasNestedsetActions
     {
         return Action::make('moveNode')
             ->label(__('sn-filament-nestedset::nestedset.action.move_node'))
-            ->action(function (Action $action, array $arguments) {
+            ->action(function (Action $action, array $arguments): void {
                 // 当前节点 id
                 $id = $arguments['id'] ?? 0;
                 // 移动到的 父节点 id

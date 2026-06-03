@@ -4,19 +4,11 @@
             <x-filament::actions :actions="$headerActions" />
         </div>
     @endif
-    
+
     {{ $this->content }}
 
-    <livewire:sn-filament-nestedset-fi-nestedset
-        :page-class="static::class"
-        :active-tab="$activeTab"
-        :model="static::getModel()"
-        :tab-field-name="static::getTabFieldName()"
-        :record-title-attribute="static::getRecordTitleAttribute()"
-        :level="static::getLevel()"
-        :empty-label="static::getEmptyLabel()"
-        :empty-tip-label="static::getEmptyTipLabel()"
-        :is-scoped-to-tenant="static::isScopedToTenant()"
-        :key="'fi-components-sn-nestedset-' . $record->id . '-' . $record->level"
-    />
+    @include('sn-filament-nestedset::filament.pages.components.nestedset', [
+        'nestedset' => $this->getNestedset(),
+        'level' => $this->getLevel(),
+    ])
 </x-filament-widgets::widget>
