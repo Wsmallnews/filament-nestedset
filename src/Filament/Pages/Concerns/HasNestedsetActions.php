@@ -4,6 +4,8 @@ namespace Wsmallnews\FilamentNestedset\Filament\Pages\Concerns;
 
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Field;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
@@ -16,6 +18,11 @@ use Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree;
 
 trait HasNestedsetActions
 {
+    /**
+     * @var array<string, Model>
+     */
+    protected array $nestedsetActionRecords = [];
+
     protected function getHeaderActions(): array
     {
         return [
@@ -83,68 +90,52 @@ trait HasNestedsetActions
                     parent: $parent,
                 );
             })
-            ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->createAnother(false);
     }
 
     public function editAction(): Action
     {
-        return Action::make('edit')
-            ->label(__('filament-actions::edit.single.label'))
+        return EditAction::make()
+            ->record(fn(Action $action, array $arguments): ?Model => $this->resolveNestedsetActionRecord($action, $arguments))
+            ->schema(fn(array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
+            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->icon(Heroicon::PencilSquare)
-            ->link()
-            ->modalSubmitActionLabel(__('filament-actions::edit.single.modal.actions.save.label'))
-            ->successNotificationTitle(__('filament-actions::edit.single.notifications.saved.title'))
-            ->defaultColor('primary')
-            ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
-            ->model(static::getModel())
-            ->fillForm(function (array $arguments): array {
-                $id = $arguments['id'] ?? 0;
-                $record = $id ? $this->getQuery()->findOrFail($id) : null;
-
-                return $record ? $record->toArray() : [];
-            })
-            ->action(function (array $data, array $arguments): void {
-                $id = $arguments['id'] ?? 0;
-                $record = $id ? $this->getQuery()->findOrFail($id) : null;
-                $record?->update($data);
-                $this->dispatch('sn-filament-nestedset-updated');
-            });
+            ->link();
     }
 
     public function deleteAction(): Action
     {
-        return Action::make('delete')
-            ->label(__('filament-actions::delete.single.label'))
-            ->icon(Heroicon::Trash)
-            ->keyBindings(['mod+d'])
-            ->link()
-            ->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
-            ->successNotificationTitle(__('filament-actions::delete.single.notifications.deleted.title'))
-            ->defaultColor('danger')
-            ->model(static::getModel())
-            ->requiresConfirmation()
-            ->before(function (Action $action, array $arguments): void {
-                $id = $arguments['id'] ?? 0;
-                $record = $id ? $this->getQuery()->find($id) : null;
-
-                if ($record && ! $this->canBeDeleted($record)) {
-                    Notification::make()
-                        ->danger()
-                        ->title(__('sn-filament-nestedset::nestedset.action.delete_failed_title'))
-                        ->body(__('sn-filament-nestedset::nestedset.action.delete_failed_body_has_child'))
-                        ->send();
-
-                    $action->cancel();
-                    $action->halt();
+        return DeleteAction::make()
+            ->record(fn(Action $action, array $arguments): ?Model => $this->resolveNestedsetActionRecord($action, $arguments))
+            ->before(function (Action $action, Model $record): void {
+                if ($this->canBeDeleted($record)) {
+                    return;
                 }
+
+                Notification::make()
+                    ->danger()
+                    ->title(__('sn-filament-nestedset::nestedset.action.delete_failed_title'))
+                    ->body(__('sn-filament-nestedset::nestedset.action.delete_failed_body_has_child'))
+                    ->send();
+
+                $action->cancel();
+                $action->halt();
             })
-            ->action(function (array $arguments): void {
-                $id = $arguments['id'] ?? 0;
-                $record = $id ? $this->getQuery()->find($id) : null;
-                $record?->delete();
-                $this->dispatch('sn-filament-nestedset-updated');
-            });
+            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->icon(Heroicon::Trash)
+            ->link();
+    }
+
+    protected function resolveNestedsetActionRecord(Action $action, array $arguments): ?Model
+    {
+        $id = $arguments['id'] ?? null;
+
+        if (blank($id) || is_null($action->getNestingIndex())) {
+            return null;
+        }
+
+        return $this->nestedsetActionRecords[$id] ??= $this->getQuery()->findOrFail($id);
     }
 
     /**

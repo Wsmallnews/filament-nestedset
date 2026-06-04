@@ -83,10 +83,10 @@
                 {{ ($this->createChildAction)(['parentId' => $record->getKey()]) }}
             @endif
 
-            {{ ($this->editAction)(['id' => $record->getKey()]) }}
+            {{ ($this->editAction)(['id' => $record->getKey()])->record($record) }}
 
             @if($this->canBeDeleted($record))
-                {{ ($this->deleteAction)(['id' => $record->getKey()]) }}
+                {{ ($this->deleteAction)(['id' => $record->getKey()])->record($record) }}
             @endif
         </div>
     </div>

@@ -129,7 +129,15 @@ trait InteractsWithNestedset
         return static::$infolistHiddenEndpoint;
     }
 
-    public function getRecordLabel(Model $record): HtmlString | string
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getTabsContentComponent(),
+            ]);
+    }
+
+    protected function getRecordLabel(Model $record): HtmlString | string
     {
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }
@@ -139,7 +147,7 @@ trait InteractsWithNestedset
      *
      * @return array<string, mixed>
      */
-    public function nestedScoped(): array
+    protected function nestedScoped(): array
     {
         return [];
     }
@@ -147,7 +155,7 @@ trait InteractsWithNestedset
     /**
      * @return array<int, mixed>
      */
-    public function schema(array $arguments): array
+    protected function schema(array $arguments): array
     {
         return [];
     }
@@ -155,12 +163,12 @@ trait InteractsWithNestedset
     /**
      * @return array<int, mixed>
      */
-    public function infolistSchema(): array
+    protected function infolistSchema(): array
     {
         return [];
     }
 
-    public function hasInfolist(): bool
+    protected function hasInfolist(): bool
     {
         return count($this->infolistSchema()) > 0;
     }
@@ -168,22 +176,22 @@ trait InteractsWithNestedset
     /**
      * 自定义 Eloquent 查询条件
      */
-    public function getEloquentQuery(Builder $query): Builder
+    protected function getEloquentQuery($query)
     {
         return $query;
     }
 
-    public function showCreateChildNodeActionInRow(): bool
+    protected function showCreateChildNodeActionInRow(): bool
     {
         return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
     }
 
-    public function getNestedset()
+    protected function getNestedset()
     {
         return $this->getQuery()->withDepth()->get()->toTree();
     }
 
-    public function canBeDeleted(Model $record): bool
+    protected function canBeDeleted(Model $record): bool
     {
         if (
             config('sn-filament-nestedset.allow_delete_parent') === false
@@ -193,14 +201,6 @@ trait InteractsWithNestedset
         }
 
         return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
-    }
-
-    public function content(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                $this->getTabsContentComponent(),
-            ]);
     }
 
     protected function getQuery(): Builder
