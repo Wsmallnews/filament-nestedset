@@ -90,16 +90,16 @@ trait HasNestedsetActions
                     parent: $parent,
                 );
             })
-            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->createAnother(false);
     }
 
     public function editAction(): Action
     {
         return EditAction::make()
-            ->record(fn(Action $action, array $arguments): ?Model => $this->resolveNestedsetActionRecord($action, $arguments))
-            ->schema(fn(array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
-            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->record(fn (Action $action, array $arguments): ?Model => $this->resolveNestedsetActionRecord($action, $arguments))
+            ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
+            ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->icon(Heroicon::PencilSquare)
             ->link();
     }
@@ -107,7 +107,7 @@ trait HasNestedsetActions
     public function deleteAction(): Action
     {
         return DeleteAction::make()
-            ->record(fn(Action $action, array $arguments): ?Model => $this->resolveNestedsetActionRecord($action, $arguments))
+            ->record(fn (Action $action, array $arguments): ?Model => $this->resolveNestedsetActionRecord($action, $arguments))
             ->before(function (Action $action, Model $record): void {
                 if ($this->canBeDeleted($record)) {
                     return;
@@ -122,7 +122,7 @@ trait HasNestedsetActions
                 $action->cancel();
                 $action->halt();
             })
-            ->after(fn(): Event => $this->dispatch('sn-filament-nestedset-updated'))
+            ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->icon(Heroicon::Trash)
             ->link();
     }
