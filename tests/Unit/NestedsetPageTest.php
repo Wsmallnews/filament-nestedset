@@ -1,82 +1,301 @@
 <?php
 
 use Filament\Support\Enums\Alignment;
+use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
 use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
+use Wsmallnews\FilamentNestedset\Tests\Fixtures\PlainModel;
+use Wsmallnews\FilamentNestedset\Tests\Fixtures\TestCategory;
 
-// Create a concrete implementation for testing
-beforeEach(function () {
-    $this->page = new class extends NestedsetPage
+// Skip tests that need the Laravel app when running without Testbench
+beforeEach(function (): void {
+    if (! app()->bound('config')) {
+        $this->markTestSkipped('Requires Orchestra Testbench (run from package directory)');
+    }
+});
+
+// Helper: create a concrete NestedsetPage subclass with public method accessors
+function makeTestPage(array $overrides = []): NestedsetPage
+{
+    return new class ($overrides) extends NestedsetPage
     {
-        protected static ?string $model = stdClass::class;
+        protected static ?string $model;
+        protected static ?string $modelLabel;
+        protected static ?int $level;
+        protected static ?string $emptyLabel;
+        protected static ?string $emptyTipLabel;
+        protected static string $recordTitleAttribute;
+        protected static ?string $tabFieldName;
+        protected static Alignment $infolistAlignment;
+        protected static string $infolistHiddenEndpoint;
+        protected static bool $isScopedToTenant;
 
-        protected static ?string $modelLabel = 'Test Model';
+        public array $overrides;
 
-        protected static ?int $level = 3;
+        public function __construct(array $overrides = [])
+        {
+            $this->overrides = $overrides;
+            static::$model = $overrides['model'] ?? null;
+            static::$modelLabel = $overrides['modelLabel'] ?? null;
+            static::$level = $overrides['level'] ?? null;
+            static::$emptyLabel = $overrides['emptyLabel'] ?? null;
+            static::$emptyTipLabel = $overrides['emptyTipLabel'] ?? null;
+            static::$recordTitleAttribute = $overrides['recordTitleAttribute'] ?? 'name';
+            static::$tabFieldName = $overrides['tabFieldName'] ?? null;
+            static::$infolistAlignment = $overrides['infolistAlignment'] ?? Alignment::Right;
+            static::$infolistHiddenEndpoint = $overrides['infolistHiddenEndpoint'] ?? 'md';
+            static::$isScopedToTenant = $overrides['isScopedToTenant'] ?? true;
+        }
 
-        protected static ?string $emptyLabel = 'No data';
-
-        protected static ?string $emptyTipLabel = 'No data available';
-
-        protected static string $recordTitleAttribute = 'title';
-
-        protected static ?string $tabFieldName = 'type';
-
-        protected static Alignment $infolistAlignment = Alignment::Left;
-
-        protected static string $infolistHiddenEndpoint = 'lg';
-
-        protected static bool $isScopedToTenant = false;
+        // Expose protected methods for testing
+        public function callSchema(array $arguments): array { return $this->schema($arguments); }
+        public function callInfolistSchema(): array { return $this->infolistSchema(); }
+        public function callNestedScoped(): array { return $this->nestedScoped(); }
+        public function callGetQuery(): \Illuminate\Database\Eloquent\Builder { return $this->getQuery(); }
+        public function callGetNestedset() { return $this->getNestedset(); }
+        public function callCanBeDeleted(\Illuminate\Database\Eloquent\Model $record): bool { return $this->canBeDeleted($record); }
+        public function callGetEloquentQuery($query) { return $this->getEloquentQuery($query); }
     };
+}
+
+// --- Static getters ---
+
+test('getModel returns model class from subclass', function () {
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page::getModel())->toBe(TestCategory::class);
 });
 
-test('getModel returns model class', function () {
-    expect($this->page::getModel())->toBe(stdClass::class);
+test('getModelLabel returns custom label when set', function () {
+    $page = makeTestPage(['model' => TestCategory::class, 'modelLabel' => 'Custom Label']);
+    expect($page::getModelLabel())->toBe('Custom Label');
 });
 
-test('getModelLabel returns model label', function () {
-    expect($this->page::getModelLabel())->toBe('Test Model');
+test('getLevel returns configured level', function () {
+    $page = makeTestPage(['level' => 5]);
+    expect($page::getLevel())->toBe(5);
 });
 
-test('getLevel returns level', function () {
-    expect($this->page::getLevel())->toBe(3);
+test('getLevel returns null when not set', function () {
+    $page = makeTestPage(['level' => null]);
+    expect($page::getLevel())->toBeNull();
 });
 
-test('getEmptyLabel returns empty label', function () {
-    expect($this->page::getEmptyLabel())->toBe('No data');
+test('getEmptyLabel returns custom label when set', function () {
+    $page = makeTestPage(['emptyLabel' => 'No data']);
+    expect($page::getEmptyLabel())->toBe('No data');
 });
 
-test('getEmptyTipLabel returns empty tip label', function () {
-    expect($this->page::getEmptyTipLabel())->toBe('No data available');
+test('getEmptyTipLabel returns custom tip label when set', function () {
+    $page = makeTestPage(['emptyTipLabel' => 'No data available']);
+    expect($page::getEmptyTipLabel())->toBe('No data available');
 });
 
-test('getRecordTitleAttribute returns title attribute', function () {
-    expect($this->page::getRecordTitleAttribute())->toBe('title');
+test('getRecordTitleAttribute returns configured attribute', function () {
+    $page = makeTestPage(['recordTitleAttribute' => 'title']);
+    expect($page::getRecordTitleAttribute())->toBe('title');
 });
 
-test('getTabFieldName returns tab field name', function () {
-    expect($this->page::getTabFieldName())->toBe('type');
+test('getTabFieldName returns configured field', function () {
+    $page = makeTestPage(['tabFieldName' => 'type']);
+    expect($page::getTabFieldName())->toBe('type');
 });
 
-test('isScopedToTenant returns false when set to false', function () {
-    expect($this->page::isScopedToTenant())->toBeFalse();
+test('isScopedToTenant returns configured value', function () {
+    $page = makeTestPage(['isScopedToTenant' => false]);
+    expect($page::isScopedToTenant())->toBeFalse();
 });
 
-test('getInfolistAlignment returns alignment', function () {
-    expect($this->page->getInfolistAlignment())->toBe(Alignment::Left);
+test('getInfolistAlignment returns configured alignment', function () {
+    $page = makeTestPage(['infolistAlignment' => Alignment::Left]);
+    expect($page->getInfolistAlignment())->toBe(Alignment::Left);
 });
 
-test('getInfolistHiddenEndpoint returns endpoint', function () {
-    expect($this->page->getInfolistHiddenEndpoint())->toBe('lg');
+test('getInfolistHiddenEndpoint returns configured endpoint', function () {
+    $page = makeTestPage(['infolistHiddenEndpoint' => 'lg']);
+    expect($page->getInfolistHiddenEndpoint())->toBe('lg');
 });
+
+// --- Default hook returns ---
 
 test('schema returns empty array by default', function () {
-    expect($this->page->schema([]))->toBe([]);
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callSchema([]))->toBe([]);
 });
 
 test('infolistSchema returns empty array by default', function () {
-    expect($this->page->infolistSchema())->toBe([]);
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callInfolistSchema())->toBe([]);
 });
 
 test('nestedScoped returns empty array by default', function () {
-    expect($this->page->nestedScoped())->toBe([]);
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callNestedScoped())->toBe([]);
+});
+
+// --- validateModel ---
+
+test('validateModel throws when model is not set', function () {
+    $page = makeTestPage(['model' => null]);
+    $page->mountInteractsWithNestedset();
+})->throws(NestedsetException::class, 'Nestedset model is not set');
+
+test('validateModel throws when model does not use NodeTrait', function () {
+    $page = makeTestPage(['model' => PlainModel::class]);
+    $page->mountInteractsWithNestedset();
+})->throws(NestedsetException::class);
+
+test('validateModel passes when model uses NodeTrait', function () {
+    $page = makeTestPage(['model' => TestCategory::class]);
+    $page->mountInteractsWithNestedset();
+    expect($page::getModel())->toBe(TestCategory::class);
+});
+
+// --- getQuery ---
+
+test('getQuery uses newScopedQuery when no scopes are set', function () {
+    $page = makeTestPage([
+        'model' => TestCategory::class,
+        'isScopedToTenant' => false,
+        'tabFieldName' => null,
+    ]);
+
+    $query = $page->callGetQuery();
+    expect($query)->toBeInstanceOf(\Illuminate\Database\Eloquent\Builder::class)
+        ->and($query->getModel())->toBeInstanceOf(TestCategory::class);
+});
+
+test('getQuery applies tab scope when tabFieldName and activeTab are set', function () {
+    $page = makeTestPage([
+        'model' => TestCategory::class,
+        'isScopedToTenant' => false,
+        'tabFieldName' => 'scope_type',
+    ]);
+    $page->activeTab = 'web';
+
+    $query = $page->callGetQuery();
+    expect($query)->toBeInstanceOf(\Illuminate\Database\Eloquent\Builder::class);
+});
+
+test('getQuery merges nestedScoped custom scopes', function () {
+    $page = new class (['model' => TestCategory::class]) extends NestedsetPage
+    {
+        protected static ?string $model;
+        protected static bool $isScopedToTenant = false;
+        protected static ?string $tabFieldName = null;
+
+        public function __construct(array $overrides = [])
+        {
+            static::$model = $overrides['model'] ?? null;
+        }
+
+        protected function nestedScoped(): array
+        {
+            return ['scope_type' => 'custom', 'scope_id' => 5];
+        }
+
+        public function callGetQuery(): \Illuminate\Database\Eloquent\Builder { return $this->getQuery(); }
+    };
+
+    $query = $page->callGetQuery();
+    expect($query)->toBeInstanceOf(\Illuminate\Database\Eloquent\Builder::class);
+});
+
+test('getEloquentQuery hook is applied', function () {
+    $page = new class (['model' => TestCategory::class]) extends NestedsetPage
+    {
+        protected static ?string $model;
+        protected static bool $isScopedToTenant = false;
+        protected static ?string $tabFieldName = null;
+
+        public function __construct(array $overrides = [])
+        {
+            static::$model = $overrides['model'] ?? null;
+        }
+
+        protected function nestedScoped(): array { return []; }
+
+        protected function getEloquentQuery($query)
+        {
+            return $query->where('status', 'normal');
+        }
+
+        public function callGetQuery(): \Illuminate\Database\Eloquent\Builder { return $this->getQuery(); }
+    };
+
+    $query = $page->callGetQuery();
+    $sql = $query->toSql();
+    expect($sql)->toContain('status');
+});
+
+// --- getNestedset ---
+
+test('getNestedset returns tree collection', function () {
+    TestCategory::create(['name' => 'Root 1', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Root 2', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    $page = new class (['model' => TestCategory::class]) extends NestedsetPage
+    {
+        protected static ?string $model;
+        protected static bool $isScopedToTenant = false;
+        protected static ?string $tabFieldName = null;
+
+        public function __construct(array $overrides = [])
+        {
+            static::$model = $overrides['model'] ?? null;
+        }
+
+        protected function nestedScoped(): array
+        {
+            return ['scope_type' => 'test', 'scope_id' => 0];
+        }
+
+        public function callGetNestedset() { return $this->getNestedset(); }
+    };
+
+    $tree = $page->callGetNestedset();
+    expect($tree)->toBeInstanceOf(\Illuminate\Support\Collection::class)
+        ->and($tree)->toHaveCount(2);
+});
+
+// --- canBeDeleted ---
+
+test('canBeDeleted returns false for parent when allow_delete_parent is false and has children', function () {
+    config()->set('sn-filament-nestedset.allow_delete_parent', false);
+    config()->set('sn-filament-nestedset.allow_delete_root', false);
+
+    $parent = TestCategory::create(['name' => 'Parent', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0], $parent);
+
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callCanBeDeleted($parent))->toBeFalse();
+});
+
+test('canBeDeleted returns true for leaf node even when allow_delete_parent is false', function () {
+    config()->set('sn-filament-nestedset.allow_delete_parent', false);
+
+    $leaf = TestCategory::create(['name' => 'Leaf', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callCanBeDeleted($leaf))->toBeTrue();
+});
+
+test('canBeDeleted returns true for parent when allow_delete_parent is true', function () {
+    config()->set('sn-filament-nestedset.allow_delete_parent', true);
+    config()->set('sn-filament-nestedset.allow_delete_root', true);
+
+    $parent = TestCategory::create(['name' => 'Parent', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0], $parent);
+
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callCanBeDeleted($parent))->toBeTrue();
+});
+
+test('canBeDeleted returns false for root with children when allow_delete_root is false', function () {
+    config()->set('sn-filament-nestedset.allow_delete_parent', true);
+    config()->set('sn-filament-nestedset.allow_delete_root', false);
+
+    $root = TestCategory::create(['name' => 'Root', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0], $root);
+
+    $page = makeTestPage(['model' => TestCategory::class]);
+    expect($page->callCanBeDeleted($root))->toBeFalse();
 });

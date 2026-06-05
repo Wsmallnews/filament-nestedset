@@ -21,19 +21,21 @@ Filament nestedset tree build on kalnoy/nestedset, support multi language. suppo
 
 ## Architecture
 
-The package uses a **Page + Component** architecture pattern:
+The package uses a **Page + Widget + Livewire Component** architecture pattern:
 
-- **NestedsetPage** (`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`) — Abstract Filament Page class. Contains configuration (static properties), schema definitions, and header actions that dispatch events to the Component.
-- **Nestedset Component** (`Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`) — Livewire component extending `Filament\Pages\BasePage`. Handles data querying, CRUD operations, and renders the tree UI.
+- **NestedsetPage** (`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`) — Abstract Filament Page class. It owns static configuration, schema hooks, nestedset actions, scoped queries, and the default Filament page view.
+- **Filament Panel Widget** (`Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset`) — Abstract Filament widget extending `Filament\Widgets\Widget`. It uses the same `InteractsWithNestedset` behavior and can be embedded in custom Filament pages.
+- **Frontend Livewire Component** (`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`) — Read-only tree display component extending `Livewire\Component` for frontend pages.
 
-The Page passes configuration to the Component via Blade props, and communicates through Livewire events (`sn-open-create-modal`, `sn-open-fix-nestedset-modal`).
+The default `NestedsetPage` renders the tree from its own view and handles CRUD, drag sorting, delete guards, scoped queries, and repair actions through `InteractsWithNestedset` and `HasNestedsetActions`.
 
-### Two Nestedset Components
+### Nestedset classes
 
-| Component                   | Namespace                                                          | Base Class                | Purpose                                   |
-| --------------------------- | ------------------------------------------------------------------ | ------------------------- | ----------------------------------------- |
-| Filament Panel Component    | `Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset` | `Filament\Pages\BasePage` | Full CRUD management in Filament panel    |
-| Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`       | `Livewire\Component`      | Read-only tree display for frontend pages |
+| Class                       | Namespace                                                        | Base Class           | Purpose                                   |
+| --------------------------- | ---------------------------------------------------------------- | -------------------- | ----------------------------------------- |
+| Filament Page               | `Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`     | `Filament\Pages\Page` | Full CRUD management in Filament panel    |
+| Filament Panel Widget       | `Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset` | `Filament\Widgets\Widget` | Embeddable Filament tree widget           |
+| Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`     | `Livewire\Component` | Read-only tree display for frontend pages |
 
 ## Screenshots
 
@@ -44,15 +46,15 @@ The Page passes configuration to the Component via Blade props, and communicates
 
 ## AI Guidelines
 
-First, you should install laravel-boost. See details [here](https://laravel.com/docs/13.x/boost)
+This package ships Laravel Boost AI Guidelines in `resources/boost/guidelines/core.blade.php`.
 
-You should Update Boost resources to ensure that the AI Guidelines for the current package are added to the project overview
+Install or enable Laravel Boost in your application, then refresh Boost resources so this package's guidelines are discovered and added to the project overview:
 
-```
+```bash
 php artisan boost:update --discover
 ```
 
-Your boost.json and CLAUDE.md files will be updated automatically. You can check the updated files in the project root directory
+Boost updates the root `boost.json` and `CLAUDE.md` automatically. Check those files after running the command to confirm `wsmallnews/filament-nestedset` is included.
 
 ## Installation
 
@@ -248,7 +250,7 @@ class Test extends NestedsetPage
 {
     ...
 
-    public function schema(array $arguments): array
+    protected function schema(array $arguments): array
     {
         return [
             //
@@ -271,13 +273,13 @@ class Test extends NestedsetPage
 {
     ...
 
-    public function createSchema(array $arguments): array
+    protected function createSchema(array $arguments): array
     {
         return [
             //
         ];
     }
-    public function editSchema(array $arguments): array
+    protected function editSchema(array $arguments): array
     {
         return [
             //
@@ -356,6 +358,10 @@ class Test extends NestedsetPage
 
     protected static ?string $modelLabel = 'Test Management';
 
+    protected static ?string $emptyLabel = 'no test data';
+
+    protected static ?string $emptyTipLabel = 'no test data available';
+
     protected static ?string $title = 'Page Title';
 
     protected static ?string $navigationLabel = 'Test Navigation';
@@ -388,7 +394,7 @@ use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 class Test extends NestedsetPage
 {
     ...
-    public function infolistSchema(): array
+    protected function infolistSchema(): array
     {
         return [];
     }
@@ -549,7 +555,7 @@ class Test extends NestedsetPage
 {
     ...
 
-    public function nestedScoped()
+    protected function nestedScoped()
     {
         return ['category_id' => 5];
     }
@@ -593,7 +599,7 @@ class Test extends NestedsetPage
 {
     ...
 
-    public function getEloquentQuery($query)
+    protected function getEloquentQuery($query)
     {
         return $query->where('status', 'normal');
     }
@@ -601,94 +607,48 @@ class Test extends NestedsetPage
 }
 ```
 
-### Filament Panel Component
+### Filament Panel Page and Widget
 
-The Filament Panel Component (`Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`) is used internally by `NestedsetPage` to render the tree UI and handle CRUD operations in the Filament panel. It extends `Filament\Pages\BasePage` and uses the `HasNestedsetActions` trait.
+`NestedsetPage` (`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`) is the primary Filament panel entry point. It extends `Filament\Pages\Page`, uses `InteractsWithNestedset`, and renders `sn-filament-nestedset::filament.pages.nestedset-page`.
 
-#### Properties (passed from Page via Blade)
+`Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset` is an abstract widget variant for custom Filament layouts. It extends `Filament\Widgets\Widget`, spans the full column, uses `InteractsWithNestedset`, and renders `sn-filament-nestedset::filament.pages.widgets.nestedset`.
 
-| Property                | Type      | Description                                              |
-| ----------------------- | --------- | -------------------------------------------------------- |
-| `$pageClass`            | `?string` | Page class name, used to access schema and configuration |
-| `$activeTab`            | `?string` | Currently active tab for filtering                       |
-| `$model`                | `?string` | Nestedset model class name                               |
-| `$tabFieldName`         | `?string` | Tab filter field name                                    |
-| `$recordTitleAttribute` | `string`  | Node title attribute name                                |
-| `$level`                | `?int`    | Nested level limit                                       |
-| `$emptyLabel`           | `?string` | Empty state label                                        |
-| `$emptyTipLabel`        | `?string` | Empty state tip label                                    |
-| `$isScopedToTenant`     | `bool`    | Whether to scope to tenant                               |
-
-#### Methods
+#### Shared page/widget methods
 
 ```php
 // Get the nested level limit
-public function getLevel(): ?int
+public static function getLevel(): ?int
 
-// Get the empty state label (with translation fallback)
-public function getEmptyLabel(): ?string
+// Get empty state labels
+public static function getEmptyLabel(): ?string
+public static function getEmptyTipLabel(): ?string
 
-// Get the empty state tip label (with translation fallback)
-public function getEmptyTipLabel(): ?string
+// Customize labels, scopes and queries
+protected function getRecordLabel(Model $record): HtmlString|string
+protected function nestedScoped(): array
+protected function getEloquentQuery($query)
 
-// Get the record label (delegates to Page)
-public function getRecordLabel(Model $record): HtmlString|string
-
-// Check if infolist schema is defined
-public function hasInfolist(): bool
-
-// Get infolist schema (delegates to Page)
-public function infolistSchema(): array
-
-// Get infolist alignment (delegates to Page)
-public function getInfolistAlignment(): Alignment
-
-// Get infolist hidden endpoint (delegates to Page)
-public function getInfolistHiddenEndpoint(): string
-
-// Check if "Create Child Node" action should show in row
-public function showCreateChildNodeActionInRow(): bool
-
-// Check if a record can be deleted (respects config)
-public function canBeDeleted(Model $record): bool
+// Get tree data and delete guards
+protected function getNestedset()
+protected function canBeDeleted(Model $record): bool
 ```
 
 #### Events
 
-| Event                           | Method                    | Description           |
-| ------------------------------- | ------------------------- | --------------------- |
-| `sn-filament-nestedset-updated` | `refresh()`               | Refresh the component |
-| `sn-open-create-modal`          | `openCreateModal()`       | Open create modal     |
-| `sn-open-fix-nestedset-modal`   | `openFixNestedsetModal()` | Open fix tree modal   |
+| Event                           | Method      | Description                  |
+| ------------------------------- | ----------- | ---------------------------- |
+| `sn-filament-nestedset-updated` | `refresh()` | Re-render the page or widget |
 
 #### Actions (from HasNestedsetActions trait)
 
-| Action                 | Type           | Description                              |
-| ---------------------- | -------------- | ---------------------------------------- |
-| `createAction()`       | `CreateAction` | Create node (header action)              |
-| `createChildAction()`  | `CreateAction` | Create child node (inline)               |
-| `editAction()`         | `Action`       | Edit node (avoids N+1 with `fillForm()`) |
-| `deleteAction()`       | `Action`       | Delete node (with confirmation)          |
-| `moveNodeAction()`     | `Action`       | Drag-and-drop reorder confirmation       |
-| `fixNestedsetAction()` | `Action`       | Fix tree structure                       |
-
-#### Usage
-
-The component is automatically registered as `sn-filament-nestedset-fi-nestedset` and used by `NestedsetPage`. You typically don't need to use it directly unless building a custom page:
-
-```blade
-<livewire:sn-filament-nestedset-fi-nestedset
-    :page-class="$pageClass"
-    :active-tab="$activeTab"
-    :model="static::getModel()"
-    :tab-field-name="static::getTabFieldName()"
-    :record-title-attribute="static::getRecordTitleAttribute()"
-    :level="static::getLevel()"
-    :empty-label="static::getEmptyLabel()"
-    :empty-tip-label="static::getEmptyTipLabel()"
-    :is-scoped-to-tenant="static::isScopedToTenant()"
-/>
-```
+| Action                 | Type           | Description                        |
+| ---------------------- | -------------- | ---------------------------------- |
+| `createAction()`       | `CreateAction` | Create node (header action)        |
+| `createChildAction()`  | `CreateAction` | Create child node (inline)         |
+| `editAction()`         | `Action`       | Edit node                          |
+| `deleteAction()`       | `Action`       | Delete node with config guards     |
+| `moveNodeAction()`     | `Action`       | Drag-and-drop reorder confirmation |
+| `fixNestedsetAction()` | `Action`       | Fix scoped tree structure          |
 
 ### Nestedset Livewire component
 
@@ -826,7 +786,7 @@ You should add the following code to your custom theme file. If you custom theme
 | Category                    | Namespace                                                             |
 | --------------------------- | --------------------------------------------------------------------- |
 | Page Base Class             | `Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`           |
-| Filament Panel Component    | `Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`    |
+| Filament Panel Widget       | `Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset`      |
 | Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`          |
 | Form Field                  | `Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree` |
 | Artisan Command             | `Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand`      |

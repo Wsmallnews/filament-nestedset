@@ -4,39 +4,15 @@
 
 ### 核心架构
 
-依赖 `kalnoy/nestedset` 的 `NodeTrait` 实现嵌套集模型，通过 `scoped` 特性支持多租户和 Tabs 筛选。采用 **Page + Component** 架构模式：
+依赖 `kalnoy/nestedset` 的 `NodeTrait` 实现嵌套集模型，通过 `scoped` 特性支持多租户和 Tabs 筛选。当前采用 **Page + Widget + Livewire Component** 架构：
 
-- **NestedsetPage**（`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`）：继承 Filament `Page` 的抽象页面类，包含静态配置、schema 定义和派发事件的 header actions
-- **Filament Panel Component**（`Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset`）：继承 `Filament\Pages\BasePage` 的 Livewire 组件，处理数据查询、CRUD 操作和树形 UI 渲染
-- **Frontend Livewire Component**（`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`）：继承 `Livewire\Component` 的前端只读树形展示组件
-
-### 两个 Nestedset 组件区分
-
-| 组件 | 命名空间 | 基类 | 用途 |
-|---|---|---|---|
-| Filament 后台组件 | `Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset` | `Filament\Pages\BasePage` | Filament 面板中的完整 CRUD 管理 |
-| 前端 Livewire 组件 | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset` | `Livewire\Component` | 前端页面的只读树形展示 |
-
-### Page 与 Component 通信机制
-
-Page 通过 Blade props 传递配置给 Component，通过 Livewire 事件进行通信：
-
-```php
-// Page 中派发事件
-Action::make('create')
-    ->action(fn (): Event => $this->dispatch('sn-open-create-modal')),
-
-// Component 中监听事件
-#[On('sn-open-create-modal')]
-public function openCreateModal(): void
-{
-    $this->mountAction('create');
-}
-```
+- **NestedsetPage**（`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`）：继承 Filament `Page` 的抽象管理页面，使用 `InteractsWithNestedset`，提供 CRUD、拖拽排序、修复树、scope 查询和默认页面视图。
+- **Filament Widget**（`Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset`）：继承 `Filament\Widgets\Widget` 的抽象 Widget，同样使用 `InteractsWithNestedset`，适合嵌入自定义 Filament 页面。
+- **Frontend Livewire Component**（`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`）：继承 `Livewire\Component` 的前端只读树形展示组件。
 
 ### NestedsetPage（管理页面基类）
 
-`Wsmallnews\FilamentNestedset\Pages\NestedsetPage` 继承 `Filament\Pages\Page`，使用 traits：`CanUseDatabaseTransactions`、`HasTabs`、`HasUnsavedDataChangesAlert`、`InteractsWithFormActions`。
+`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage` 继承 `Filament\Pages\Page`，使用 `Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\InteractsWithNestedset`。该 concern 又使用 `HasNestedsetActions` 和 Filament `HasTabs`。
 
 #### 创建页面
 
@@ -44,7 +20,7 @@ public function openCreateModal(): void
 php artisan make:filament-nestedset-page
 ```
 
-生成的页面类继承 `NestedsetPage`，需设置 `$model` 和 `$recordTitleAttribute`。
+生成的页面类继承 `NestedsetPage`，需设置 `$model`，通常也会设置 `$recordTitleAttribute`。
 
 #### 静态属性（类级别配置，通过子类覆盖）
 
@@ -54,45 +30,46 @@ php artisan make:filament-nestedset-page
 | `$modelLabel` | `?string` | `null` | 模型标签，为空时自动从 model 推断 |
 | `$recordTitleAttribute` | `string` | `'name'` | 节点标题字段名 |
 | `$level` | `?int` | `null` | 嵌套集层级限制，`null` = 不限制 |
-| `$emptyLabel` | `?string` | `''` | 树为空时的提示文本 |
+| `$emptyLabel` | `?string` | 翻译文本 | 树为空时的提示文本 |
+| `$emptyTipLabel` | `?string` | 翻译文本 | 树为空时的辅助提示 |
 | `$tabFieldName` | `?string` | `null` | Tabs 筛选的字段名 |
 | `$infolistAlignment` | `Alignment` | `Alignment::Right` | Infolist 对齐方式 |
 | `$infolistHiddenEndpoint` | `string` | `'md'` | Infolist 显示的最小断点 |
-| `$isScopedToTenant` | `bool` | `true` | 是否关联多租户 |
-| `$navigationIcon` | `string\|BackedEnum\|null` | `'heroicon-o-bars-3-bottom-right'` | 导航图标（继承自 Page） |
+| `$isScopedToTenant` | `bool` | `true` | 是否关联 Filament 当前租户 |
+| `$navigationIcon` | `string\|BackedEnum\|null` | `Heroicon::OutlinedBars3BottomRight` | 导航图标（继承自 Page） |
 
-#### 非静态属性（实例属性）
+#### 实例属性
 
 | 属性 | 类型 | 说明 |
 |---|---|---|
 | `$activeTab` | `?string` | 当前选中的 Tab（`#[Url]` 绑定） |
-| `$view` | `string` | 页面 Blade 视图路径 |
+| `$view` | `string` | 页面 Blade 视图路径，默认 `sn-filament-nestedset::filament.pages.nestedset-page` |
 
 #### 可覆盖方法
 
 @verbatim
 ```php
 // 自定义 schema（create 和 edit 共用）
-public function schema(array $arguments): array { return []; }
+protected function schema(array $arguments): array { return []; }
 
 // create 和 edit 分别定义
-public function createSchema(array $arguments): array { return []; }
-public function editSchema(array $arguments): array { return []; }
+protected function createSchema(array $arguments): array { return []; }
+protected function editSchema(array $arguments): array { return []; }
 
 // Infolist 附加属性展示
-public function infolistSchema(): array { return []; }
+protected function infolistSchema(): array { return []; }
 
 // 自定义节点标签，支持 HtmlString
-public function getRecordLabel(Model $item): HtmlString | string { ... }
+protected function getRecordLabel(Model $record): HtmlString | string { ... }
 
-// 自定义嵌套集查询条件
-public function getEloquentQuery($query) { return $query->where('status', 'normal'); }
+// 自定义嵌套集查询条件；用于继续收窄已经 scoped 的查询
+protected function getEloquentQuery($query) { return $query->where('status', 'normal'); }
 
 // 额外的 scope 参数（kalnoy/nestedset scoped）
-public function nestedScoped() { return ['category_id' => 5]; }
+protected function nestedScoped(): array { return ['category_id' => 5]; }
 
 // 动态层级限制
-public static function getLevel(): ?int { return static::$level; }
+protected static function getLevel(): ?int { return static::$level; }
 
 // Tabs 配置
 public function getTabs(): array
@@ -105,22 +82,34 @@ public function getTabs(): array
 ```
 @endverbatim
 
-#### 操作 Actions
+### 查询与 scope 规则
 
-页面提供以下内置 Actions：
+`InteractsWithNestedset::getQuery()` 会按以下顺序构建查询：
+
+1. 当 `static::isScopedToTenant()` 为 `true` 且 `Filament::getTenant()` 存在时，加入 `team_id => tenant id`。
+2. 当 `static::getTabFieldName()` 非空时，加入 `tabFieldName => $this->activeTab`。
+3. 合并 `nestedScoped()` 返回的自定义 scope。使用 `array_merge()`，所以自定义 scope 与租户/Tab scope 使用相同 key 时会覆盖前面的值。
+4. 有任何 scope 时使用 `Model::scoped($scopes)`；没有 scope 时使用 `(new $model)->newScopedQuery()`。
+5. 最后调用 `getEloquentQuery($query)->defaultOrder()`。
+
+### 操作 Actions
+
+页面/Widget 提供以下内置 Actions：
 
 | Action | 返回类型 | 说明 |
 |---|---|---|
-| `createAction()` | `CreateAction` | 创建节点（header action），使用 Filament 的表单弹窗 |
-| `createChildAction()` | `CreateAction` | 创建子节点（行内） |
-| `editAction()` | `Action` | 编辑节点，通过 `fillForm()` 加载数据避免 N+1 |
-| `deleteAction()` | `Action` | 删除节点，通过 `before()` 检查可删除性 |
-| `moveNodeAction()` | `Action` | 拖拽排序确认 |
-| `fixNestedsetAction()` | `Action` | 修复树结构 |
+| `createAction()` | `Action`（实际为 `CreateAction`） | 创建节点（header action） |
+| `createChildAction()` | `Action`（实际为 `CreateAction`） | 创建子节点（行内） |
+| `editAction()` | `Action`（实际为 `EditAction`） | 编辑节点，通过 scoped query 解析记录 |
+| `deleteAction()` | `Action`（实际为 `DeleteAction`） | 删除节点，受 `allow_delete_parent` / `allow_delete_root` 配置控制 |
+| `moveNodeAction()` | `Action` | 拖拽排序确认，受 `$level` 层级限制控制 |
+| `fixNestedsetAction()` | `Action` | 对当前 scoped 查询执行 `fixTree()` 修复树结构 |
 
-#### 模型要求
+`createAction()` 会把当前 scoped query model attributes 合并到提交数据中，用于自动带上 `team_id`、Tab 字段、自定义 scope 字段等；创建时会从 `parent_id` 或 `parentId` argument 中解析父节点，并在保存前移除 `parent_id`。
 
-模型必须 use `Kalnoy\Nestedset\NodeTrait`，否则 `mount()` 会抛出 `NestedsetException`。
+### 模型要求
+
+模型必须 use `Kalnoy\Nestedset\NodeTrait`，否则 `mount()` / `mountInteractsWithNestedset()` 会抛出 `NestedsetException`。
 
 ```php
 use Kalnoy\Nestedset\NodeTrait;
@@ -129,7 +118,7 @@ class Category extends Model
 {
     use NodeTrait;
 
-    // 多租户 / Tabs 支持：定义 scope attributes
+    // 多租户 / Tabs / 自定义 scope 支持：定义 scope attributes
     public function getScopeAttributes(): array
     {
         return ['team_id', 'type'];
@@ -137,57 +126,19 @@ class Category extends Model
 }
 ```
 
-### Filament 后台组件（Nestedset）
+### Filament Widget（Nestedset）
 
-`Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset` 继承 `Filament\Pages\BasePage`，是 Filament 面板中使用的完整 CRUD 管理组件。
+`Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset` 继承 `Filament\Widgets\Widget`，实现 `HasActions` 和 `HasSchemas`，并使用：
 
-#### 注册名称
+- `Filament\Actions\Concerns\InteractsWithActions`
+- `Filament\Schemas\Concerns\InteractsWithSchemas`
+- `Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\InteractsWithNestedset`
 
-```php
-// ServiceProvider 中注册
-Livewire::component('sn-filament-nestedset-fi-nestedset', Nestedset::class);
-```
-
-#### 实例属性（从 Page 通过 Blade 传入）
-
-| 属性 | 类型 | 说明 |
-|---|---|---|
-| `$pageClass` | `?string` | Page 类名，用于获取 schema 和配置 |
-| `$activeTab` | `?string` | 当前激活的 Tab |
-| `$model` | `?string` | 嵌套集模型类名 |
-| `$tabFieldName` | `?string` | Tab 过滤字段名 |
-| `$recordTitleAttribute` | `string` | 节点标题属性名 |
-| `$level` | `?int` | 嵌套层级限制 |
-| `$emptyLabel` | `?string` | 空状态标签 |
-| `$emptyTipLabel` | `?string` | 空状态提示标签 |
-| `$isScopedToTenant` | `bool` | 是否关联多租户 |
-
-#### 关键方法
-
-```php
-// 查询构建（自动应用多租户和 Tab 过滤）
-protected function getQuery(): Builder
-
-// 获取树形数据
-protected function getViewData(): array
-
-// 代理方法（从 Page 获取配置）
-public function getLevel(): ?int
-public function getRecordLabel(Model $record): HtmlString|string
-public function canBeDeleted(Model $record): bool
-```
-
-#### 事件监听
-
-| 事件 | 方法 | 说明 |
-|---|---|---|
-| `sn-filament-nestedset-updated` | `refresh()` | 刷新组件 |
-| `sn-open-create-modal` | `openCreateModal()` | 打开创建弹窗 |
-| `sn-open-fix-nestedset-modal` | `openFixNestedsetModal()` | 打开修复树弹窗 |
+默认 `$columnSpan = 'full'`，默认视图为 `sn-filament-nestedset::filament.pages.widgets.nestedset`。
 
 ### Nestedset Livewire 组件（树形展示）
 
-`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset` 继承 `Livewire\Component`，提供可嵌入的树形展示。
+`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset` 继承 `Livewire\Component`，提供可嵌入前端页面的只读树形展示。
 
 #### 实例属性（可通过 Blade 属性传入）
 
@@ -204,9 +155,6 @@ public function canBeDeleted(Model $record): bool
 
 @verbatim
 ```php
-// 获取节点标题属性名
-public function getRecordTitleAttribute(): string
-
 // 自定义节点标签
 public function getRecordLabel(Model $record): HtmlString | string { ... }
 
@@ -220,12 +168,14 @@ public function getHasActive(Model $record): bool { return false; }
 public function getNestedset(): Collection { ... }
 
 // 自定义查询条件
-public function getEloquentQuery($query) { return $query; }
+protected function getEloquentQuery($query) { return $query; }
 
 // 额外 scope 参数
-public function nestedScoped() { return []; }
+protected function nestedScoped(): array { return []; }
 ```
 @endverbatim
+
+默认 `getNestedset()` 会执行 `getQuery()->withDepth()->get()`，当 `$showLevel` 非空时保留 `depth <= showLevel` 的记录，然后调用 `toTree()`。
 
 #### 事件
 
@@ -238,6 +188,7 @@ public function nestedScoped() { return []; }
 
 @verbatim
 ```php
+use Livewire\Attributes\On;
 use Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset;
 
 class Categories extends Nestedset
@@ -247,7 +198,7 @@ class Categories extends Nestedset
     public string $recordTitleAttribute = 'name_label';
 
     #[On('sn-filament-nestedset-leaf-click')]
-    public function clickCategory($recordId)
+    public function clickCategory($recordId): void
     {
         $this->categoryId = $recordId;
     }
@@ -272,17 +223,19 @@ KalnoyNestedsetSelectTree::make('parent_id')
     ->query(fn () => Category::query(), titleAttribute: 'name', parentAttribute: 'parent_id');
 ```
 
+`level(1)` 只加载根节点；`level(2+)` 会加载 `depth < level` 的非根节点；`level(null)` 不限制层级。
+
 ### 配置
 
 `config/sn-filament-nestedset.php`：
 
 ```php
 return [
-    'allow_delete_parent' => false,                // 是否允许删除有子节点的节点
-    'allow_delete_root' => false,                   // 是否允许删除根节点
-    'create_action_modal_show_parent_select' => true,  // 创建弹窗是否显示父级选择
-    'show_create_child_node_action_in_row' => true,    // 行内是否显示"创建子节点"按钮
-    'autoload_assets' => true,                      // 是否自动加载 CSS（自定义主题时关闭）
+    'allow_delete_parent' => false,                   // 是否允许删除有子节点的节点
+    'allow_delete_root' => false,                     // 是否允许删除根节点
+    'create_action_modal_show_parent_select' => true, // 创建弹窗是否显示父级选择
+    'show_create_child_node_action_in_row' => true,   // 行内是否显示“创建子节点”按钮
+    'autoload_assets' => true,                        // 是否自动加载 CSS（自定义主题时关闭）
 ];
 ```
 
@@ -297,7 +250,9 @@ return [
 | 类别 | 命名空间 |
 |---|---|
 | Page 基类 | `Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage` |
-| Filament 后台组件 | `Wsmallnews\FilamentNestedset\Filament\Pages\Components\Nestedset` |
+| Filament Widget | `Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset` |
+| InteractsWithNestedset | `Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\InteractsWithNestedset` |
+| HasNestedsetActions | `Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions` |
 | 前端 Livewire 组件 | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset` |
 | 表单字段 | `Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree` |
 | Artisan 命令 | `Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand` |
@@ -306,10 +261,11 @@ return [
 
 ### 常见错误
 
-- **模型必须 use `NodeTrait`**，否则 `mount()` 抛出 `NestedsetException`。
+- **模型必须 use `NodeTrait`**，否则 `mount()` / `mountInteractsWithNestedset()` 抛出 `NestedsetException`。
 - **`$level` 设置为 `1` 时只能有根节点**，至少 `2` 才能选择父级（`createAction` 中 `getLevel() >= 2` 才显示父级选择字段）。
-- **`$recordTitleAttribute` 是 `protected static`**，在子类中用 `protected static string $recordTitleAttribute = 'title'` 覆盖，不要用实例属性。
-- **Livewire 组件必须覆盖 `getNestedset()` 或设置 `$model`**，否则抛出异常。
+- **多租户 / Tabs / 自定义 scope 需要模型定义 `getScopeAttributes()`**，返回的字段必须包含对应 scope 字段，如 `team_id`、Tab 字段、`nestedScoped()` 字段。
+- **`nestedScoped()` 与租户/Tab 使用相同 key 时会覆盖前面的 scope**，这是当前 `array_merge()` 行为。
+- **`getEloquentQuery()` 应继续收窄已经 scoped 的查询**，不要绕过 `Model::scoped($scopes)`，否则多租户、Tabs 或自定义 scope 可能失效。
+- **Livewire 前端组件必须覆盖 `getNestedset()` 或设置 `$model`**，否则抛出异常。
 - **`autoload_assets` 关闭后需在自定义主题 CSS 中手动引入**：`@import '../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css'`。
-- **多租户 scope 需要模型定义 `getScopeAttributes()`**，返回的字段必须包含 `team_id`。
 - **拖拽移动节点受 `$level` 限制**，超过层级限制时操作会被取消并提示。
