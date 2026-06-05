@@ -1,6 +1,9 @@
 <?php
 
 use Filament\Support\Enums\Alignment;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
 use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 use Wsmallnews\FilamentNestedset\Tests\Fixtures\PlainModel;
@@ -16,17 +19,26 @@ beforeEach(function (): void {
 // Helper: create a concrete NestedsetPage subclass with public method accessors
 function makeTestPage(array $overrides = []): NestedsetPage
 {
-    return new class ($overrides) extends NestedsetPage
+    return new class($overrides) extends NestedsetPage
     {
         protected static ?string $model;
+
         protected static ?string $modelLabel;
+
         protected static ?int $level;
+
         protected static ?string $emptyLabel;
+
         protected static ?string $emptyTipLabel;
+
         protected static string $recordTitleAttribute;
+
         protected static ?string $tabFieldName;
+
         protected static Alignment $infolistAlignment;
+
         protected static string $infolistHiddenEndpoint;
+
         protected static bool $isScopedToTenant;
 
         public array $overrides;
@@ -34,26 +46,53 @@ function makeTestPage(array $overrides = []): NestedsetPage
         public function __construct(array $overrides = [])
         {
             $this->overrides = $overrides;
-            static::$model = $overrides['model'] ?? null;
-            static::$modelLabel = $overrides['modelLabel'] ?? null;
-            static::$level = $overrides['level'] ?? null;
-            static::$emptyLabel = $overrides['emptyLabel'] ?? null;
-            static::$emptyTipLabel = $overrides['emptyTipLabel'] ?? null;
-            static::$recordTitleAttribute = $overrides['recordTitleAttribute'] ?? 'name';
-            static::$tabFieldName = $overrides['tabFieldName'] ?? null;
-            static::$infolistAlignment = $overrides['infolistAlignment'] ?? Alignment::Right;
-            static::$infolistHiddenEndpoint = $overrides['infolistHiddenEndpoint'] ?? 'md';
-            static::$isScopedToTenant = $overrides['isScopedToTenant'] ?? true;
+            self::$model = $overrides['model'] ?? null;
+            self::$modelLabel = $overrides['modelLabel'] ?? null;
+            self::$level = $overrides['level'] ?? null;
+            self::$emptyLabel = $overrides['emptyLabel'] ?? null;
+            self::$emptyTipLabel = $overrides['emptyTipLabel'] ?? null;
+            self::$recordTitleAttribute = $overrides['recordTitleAttribute'] ?? 'name';
+            self::$tabFieldName = $overrides['tabFieldName'] ?? null;
+            self::$infolistAlignment = $overrides['infolistAlignment'] ?? Alignment::Right;
+            self::$infolistHiddenEndpoint = $overrides['infolistHiddenEndpoint'] ?? 'md';
+            self::$isScopedToTenant = $overrides['isScopedToTenant'] ?? true;
         }
 
         // Expose protected methods for testing
-        public function callSchema(array $arguments): array { return $this->schema($arguments); }
-        public function callInfolistSchema(): array { return $this->infolistSchema(); }
-        public function callNestedScoped(): array { return $this->nestedScoped(); }
-        public function callGetQuery(): \Illuminate\Database\Eloquent\Builder { return $this->getQuery(); }
-        public function callGetNestedset() { return $this->getNestedset(); }
-        public function callCanBeDeleted(\Illuminate\Database\Eloquent\Model $record): bool { return $this->canBeDeleted($record); }
-        public function callGetEloquentQuery($query) { return $this->getEloquentQuery($query); }
+        public function callSchema(array $arguments): array
+        {
+            return $this->schema($arguments);
+        }
+
+        public function callInfolistSchema(): array
+        {
+            return $this->infolistSchema();
+        }
+
+        public function callNestedScoped(): array
+        {
+            return $this->nestedScoped();
+        }
+
+        public function callGetQuery(): Builder
+        {
+            return $this->getQuery();
+        }
+
+        public function callGetNestedset()
+        {
+            return $this->getNestedset();
+        }
+
+        public function callCanBeDeleted(Model $record): bool
+        {
+            return $this->canBeDeleted($record);
+        }
+
+        public function callGetEloquentQuery($query)
+        {
+            return $this->getEloquentQuery($query);
+        }
     };
 }
 
@@ -159,7 +198,7 @@ test('getQuery uses newScopedQuery when no scopes are set', function () {
     ]);
 
     $query = $page->callGetQuery();
-    expect($query)->toBeInstanceOf(\Illuminate\Database\Eloquent\Builder::class)
+    expect($query)->toBeInstanceOf(Builder::class)
         ->and($query->getModel())->toBeInstanceOf(TestCategory::class);
 });
 
@@ -172,19 +211,21 @@ test('getQuery applies tab scope when tabFieldName and activeTab are set', funct
     $page->activeTab = 'web';
 
     $query = $page->callGetQuery();
-    expect($query)->toBeInstanceOf(\Illuminate\Database\Eloquent\Builder::class);
+    expect($query)->toBeInstanceOf(Builder::class);
 });
 
 test('getQuery merges nestedScoped custom scopes', function () {
-    $page = new class (['model' => TestCategory::class]) extends NestedsetPage
+    $page = new class(['model' => TestCategory::class]) extends NestedsetPage
     {
         protected static ?string $model;
+
         protected static bool $isScopedToTenant = false;
+
         protected static ?string $tabFieldName = null;
 
         public function __construct(array $overrides = [])
         {
-            static::$model = $overrides['model'] ?? null;
+            self::$model = $overrides['model'] ?? null;
         }
 
         protected function nestedScoped(): array
@@ -192,33 +233,44 @@ test('getQuery merges nestedScoped custom scopes', function () {
             return ['scope_type' => 'custom', 'scope_id' => 5];
         }
 
-        public function callGetQuery(): \Illuminate\Database\Eloquent\Builder { return $this->getQuery(); }
+        public function callGetQuery(): Builder
+        {
+            return $this->getQuery();
+        }
     };
 
     $query = $page->callGetQuery();
-    expect($query)->toBeInstanceOf(\Illuminate\Database\Eloquent\Builder::class);
+    expect($query)->toBeInstanceOf(Builder::class);
 });
 
 test('getEloquentQuery hook is applied', function () {
-    $page = new class (['model' => TestCategory::class]) extends NestedsetPage
+    $page = new class(['model' => TestCategory::class]) extends NestedsetPage
     {
         protected static ?string $model;
+
         protected static bool $isScopedToTenant = false;
+
         protected static ?string $tabFieldName = null;
 
         public function __construct(array $overrides = [])
         {
-            static::$model = $overrides['model'] ?? null;
+            self::$model = $overrides['model'] ?? null;
         }
 
-        protected function nestedScoped(): array { return []; }
+        protected function nestedScoped(): array
+        {
+            return [];
+        }
 
         protected function getEloquentQuery($query)
         {
             return $query->where('status', 'normal');
         }
 
-        public function callGetQuery(): \Illuminate\Database\Eloquent\Builder { return $this->getQuery(); }
+        public function callGetQuery(): Builder
+        {
+            return $this->getQuery();
+        }
     };
 
     $query = $page->callGetQuery();
@@ -232,15 +284,17 @@ test('getNestedset returns tree collection', function () {
     TestCategory::create(['name' => 'Root 1', 'scope_type' => 'test', 'scope_id' => 0]);
     TestCategory::create(['name' => 'Root 2', 'scope_type' => 'test', 'scope_id' => 0]);
 
-    $page = new class (['model' => TestCategory::class]) extends NestedsetPage
+    $page = new class(['model' => TestCategory::class]) extends NestedsetPage
     {
         protected static ?string $model;
+
         protected static bool $isScopedToTenant = false;
+
         protected static ?string $tabFieldName = null;
 
         public function __construct(array $overrides = [])
         {
-            static::$model = $overrides['model'] ?? null;
+            self::$model = $overrides['model'] ?? null;
         }
 
         protected function nestedScoped(): array
@@ -248,11 +302,14 @@ test('getNestedset returns tree collection', function () {
             return ['scope_type' => 'test', 'scope_id' => 0];
         }
 
-        public function callGetNestedset() { return $this->getNestedset(); }
+        public function callGetNestedset()
+        {
+            return $this->getNestedset();
+        }
     };
 
     $tree = $page->callGetNestedset();
-    expect($tree)->toBeInstanceOf(\Illuminate\Support\Collection::class)
+    expect($tree)->toBeInstanceOf(Collection::class)
         ->and($tree)->toHaveCount(2);
 });
 

@@ -48,7 +48,7 @@ test('Livewire Component extends Livewire Component', function () {
 });
 
 test('Livewire Component has correct default public properties', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
 
     expect($component->showLevel)->toBeNull()
         ->and($component->emptyLabel)->toBe('')
@@ -59,14 +59,14 @@ test('Livewire Component has correct default public properties', function () {
 });
 
 test('Livewire Component getRecordTitleAttribute returns configured value', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->recordTitleAttribute = 'title';
 
     expect($component->getRecordTitleAttribute())->toBe('title');
 });
 
 test('Livewire Component getRecordLabel returns record attribute value', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->recordTitleAttribute = 'name';
 
     $record = TestCategory::create(['name' => 'Test Node', 'scope_type' => 'test', 'scope_id' => 0]);
@@ -75,49 +75,49 @@ test('Livewire Component getRecordLabel returns record attribute value', functio
 });
 
 test('Livewire Component getRecordUrl returns null by default', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $record = TestCategory::create(['name' => 'Url Test', 'scope_type' => 'test', 'scope_id' => 0]);
 
     expect($component->getRecordUrl($record))->toBeNull();
 });
 
 test('Livewire Component getHasActive returns false by default', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $record = TestCategory::create(['name' => 'Active Test', 'scope_type' => 'test', 'scope_id' => 0]);
 
     expect($component->getHasActive($record))->toBeFalse();
 });
 
 test('Livewire Component getView returns configured view', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->view = 'custom.view';
 
     expect($component->getView())->toBe('custom.view');
 });
 
 test('Livewire Component getRecordView returns configured record view', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->recordView = 'custom.record-view';
 
     expect($component->getRecordView())->toBe('custom.record-view');
 });
 
 test('Livewire Component getQuery throws when model is not set', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->model = null;
 
     $component->getNestedset();
-})->throws(\Exception::class, 'Please set the model or custom `getNestedset` method in the nestedset component.');
+})->throws(Exception::class, 'Please set the model or custom `getNestedset` method in the nestedset component.');
 
 test('Livewire Component getShowLevel returns showLevel value', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->showLevel = '3';
 
     expect($component->getShowLevel())->toBe('3');
 });
 
 test('Livewire Component getEmptyLabel returns emptyLabel value', function () {
-    $component = new NestedsetLivewire();
+    $component = new NestedsetLivewire;
     $component->emptyLabel = 'No items';
 
     expect($component->getEmptyLabel())->toBe('No items');

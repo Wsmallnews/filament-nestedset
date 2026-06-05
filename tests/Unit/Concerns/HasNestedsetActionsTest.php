@@ -4,11 +4,14 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Field;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\HasNestedsetActions;
+use Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree;
 use Wsmallnews\FilamentNestedset\Tests\Fixtures\TestCategory;
 
 beforeEach(function () {
@@ -26,22 +29,23 @@ beforeEach(function () {
 // Helper: create an anonymous class using HasNestedsetActions with public accessors
 function makeActionsPage(?string $model = null, ?int $level = null): object
 {
-    return new class ($model, $level)
+    return new class($model, $level)
     {
         use HasNestedsetActions;
 
         protected static ?string $modelClass;
+
         protected static ?int $levelValue;
 
         public function __construct(?string $model, ?int $level)
         {
-            static::$modelClass = $model;
-            static::$levelValue = $level;
+            self::$modelClass = $model;
+            self::$levelValue = $level;
         }
 
         public static function getModel(): ?string
         {
-            return static::$modelClass;
+            return self::$modelClass;
         }
 
         public static function getModelLabel(): string
@@ -51,16 +55,16 @@ function makeActionsPage(?string $model = null, ?int $level = null): object
 
         public static function getLevel(): ?int
         {
-            return static::$levelValue;
+            return self::$levelValue;
         }
 
-        public function getQuery(): \Illuminate\Database\Eloquent\Builder
+        public function getQuery(): Builder
         {
             return TestCategory::query();
         }
 
         // Expose protected methods
-        public function callGetParentSelect(): array|\Filament\Forms\Components\Field
+        public function callGetParentSelect(): array | Field
         {
             return $this->getParentSelect();
         }
@@ -165,7 +169,7 @@ test('getParentSelect returns KalnoyNestedsetSelectTree', function () {
     $page = makeActionsPage(TestCategory::class, 3);
     $select = $page->callGetParentSelect();
 
-    expect($select)->toBeInstanceOf(\Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree::class);
+    expect($select)->toBeInstanceOf(KalnoyNestedsetSelectTree::class);
 });
 
 // --- resolveNestedsetActionRecord ---
