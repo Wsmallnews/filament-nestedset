@@ -39,10 +39,10 @@ The default `NestedsetPage` renders the tree from its own view and handles CRUD,
 
 ## Screenshots
 
-![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/light.png)
-![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/dark.png)  
-![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/create.png)
-![Hasparentselect](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v2/assets/hasparentselect.png)
+![Light](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v3/assets/light.png)
+![Dark](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v3/assets/dark.png)  
+![Create](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v3/assets/create.png)
+![Hasparentselect](https://raw.githubusercontent.com/Wsmallnews/filament-nestedset/refs/heads/v3/assets/widget.png)
 
 ## AI Guidelines
 
