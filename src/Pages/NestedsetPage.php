@@ -242,7 +242,7 @@ abstract class NestedsetPage extends Page
                     } else {
                         // 插入指定父级, 并调整顺序
                         $parentNode = $this->getQuery()->withDepth()->findOrFail($parent);
-                        if ($parentNode->depth >= $this->getLevel() - 1) {
+                        if (! is_null($this->getLevel()) && $parentNode->depth >= $this->getLevel() - 1) {
                             Notification::make()
                                 ->danger()
                                 ->title(__('sn-filament-nestedset::nestedset.action.move_node_failed'))
