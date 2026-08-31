@@ -93,7 +93,7 @@
                 wire:key="tree-item-{{ $record->getKey() }}-children"
                 data-id="{{ $record->getKey() }}"
                 x-data="treeManager({
-                    parentId: {{ $record->getKey() }}
+                    parentId: '{{ $record->getKey() }}'
                 })"
             >
                 @foreach ($record->children as $childKey => $child)
