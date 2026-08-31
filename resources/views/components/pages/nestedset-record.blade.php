@@ -17,7 +17,7 @@
 @endphp
 
 <div
-    x-data="{ open: $persist(true) }"
+    x-data="{ open: $persist(true).as('sn-tree-{{ $record->getKey() }}') }"
     wire:key="tree-item-{{ $record->getKey() }}"
     data-id="{{ $record->getKey() }}"
     class="fi-sn-tree-item"
