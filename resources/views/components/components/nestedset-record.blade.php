@@ -22,10 +22,10 @@
         ])
         @if ($hasChild)
             @click="isExpanded = ! isExpanded"
-            wire:click="$dispatch('sn-filament-nestedset-node-click', { recordId: '{{ $record->id }}', hasChild: {{ $hasChild ? 1 : 0 }} })"
+            wire:click="$dispatch('sn-filament-nestedset-node-click', { recordId: '{{ $record->getKey() }}', hasChild: {{ $hasChild ? 1 : 0 }} })"
             {{ $this->getRecordUrl($record) ?? 'href=javascript:;' }}
         @else
-            wire:click="$dispatch('sn-filament-nestedset-leaf-click', { recordId: '{{ $record->id }}', hasChild: {{ $hasChild ? 1 : 0 }} })"
+            wire:click="$dispatch('sn-filament-nestedset-leaf-click', { recordId: '{{ $record->getKey() }}', hasChild: {{ $hasChild ? 1 : 0 }} })"
             {{ $this->getRecordUrl($record) ?? 'href=javascript:;' }}
         @endif
     >
