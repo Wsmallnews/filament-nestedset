@@ -261,7 +261,7 @@ php artisan filament:assets                           # 发布到 public/（应�
 
 ### Release 规范（发布流程）
 
-1. **发布前同步**：`git fetch origin --tags`，目标分支 `git pull --ff-only` 与远程对齐；重打已存在的 tag 前必须确认它从未推送到远程（`git ls-remote origin refs/tags/<tag>` 为空）。
+1. **发布前同步**：`git fetch origin --tags`，目标分支 `git pull --ff-only` 与远程对齐。**禁止重打任何已存在的稳定版本 tag**：Packagist 稳定版本一经发布永久绑定当时的 commit（tag 即使从 GitHub 删除，Packagist 仍保留该版本）；发现目标版本号在 Packagist 已存在时（含仅 Packagist 有、远程已删除的情况），直接递增版本号发新版本，不要重打。
 2. **tag 命名**：`v` + semver，与现有 tag 一致；维护线（`v2` 分支）取该分支最新 tag 的最小版本号 +1（如 v2.2.1 → v2.2.2）；主线（`v3` 分支）发布正式版（v3.0.0 → v3.1.0 / v4.0.0）。
 3. **Release notes 优先用 GitHub 自动生成**：`gh release create <tag> --title <tag> --generate-notes`（自动包含 PR 作者归属与 New Contributors）；仅当版本范围内没有任何 PR 时，才手写中文变更清单（commit 按时间倒序）；范围 = 上一 tag 到当前 HEAD 的全部提交。
 4. **发布顺序**：push 分支 → push tag → create release；发布后确认 Latest 标记指向主版本线（`gh release edit <tag> --latest`），并提醒 Packagist 会自动抓取新 tag（可手动点 Update 立即触发）。
