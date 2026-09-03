@@ -23,6 +23,13 @@ return [
     'show_create_child_node_action_in_row' => true,
 
     /**
+     * Show the labels of row action buttons (create child / edit / delete).
+     * When false, only icons are shown at any tree container width;
+     * when true, labels are hidden when the tree container is narrower than sm (24rem), icons only.
+     */
+    'show_row_action_labels' => true,
+
+    /**
      * By default, the CSS file will be automatically loaded globally. If you use a filament custom theme, you can disable the automatic loading of the CSS file
      */
     'autoload_assets' => true,

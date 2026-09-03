@@ -47,7 +47,7 @@ trait HasNestedsetActions
                 ->link()
                 ->icon(Heroicon::PlusCircle),
             'createChild'
-        );
+        )->hiddenLabel(fn (): bool => ! $this->showRowActionLabels());
     }
 
     /**
@@ -101,7 +101,8 @@ trait HasNestedsetActions
             ->schema(fn (array $arguments): array => method_exists($this, 'editSchema') ? $this->editSchema($arguments) : $this->schema($arguments))
             ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->icon(Heroicon::PencilSquare)
-            ->link();
+            ->link()
+            ->hiddenLabel(fn (): bool => ! $this->showRowActionLabels());
     }
 
     public function deleteAction(): Action
@@ -124,7 +125,18 @@ trait HasNestedsetActions
             })
             ->after(fn (): Event => $this->dispatch('sn-filament-nestedset-updated'))
             ->icon(Heroicon::Trash)
-            ->link();
+            ->link()
+            ->hiddenLabel(fn (): bool => ! $this->showRowActionLabels());
+    }
+
+    /**
+     * 行操作按钮文字显示开关（sn-filament-nestedset.show_row_action_labels）：
+     * 关闭时操作按钮只保留图标，label 由 Filament 以 sr-only + aria-label 渲染（无障碍名称保留）；
+     * 开启时按树容器宽度响应式显隐（见包 CSS 的容器查询规则）
+     */
+    protected function showRowActionLabels(): bool
+    {
+        return (bool) config('sn-filament-nestedset.show_row_action_labels', true);
     }
 
     protected function resolveNestedsetActionRecord(Action $action, array $arguments): ?Model
