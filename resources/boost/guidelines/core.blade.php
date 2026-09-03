@@ -259,6 +259,14 @@ php artisan filament:assets                           # 发布到 public/（应�
 - 包资产 URL 版本号是 Composer 对无版本 path 仓库的占位符（恒定不变），重新发布后**浏览器需强刷**（Ctrl+F5）才能拿到新 CSS。
 - blade 中新引入的 Tailwind 工具类（如新断点、新变体）必须重建 CSS 才会生成，只改 blade 不重建时类存在但无样式。
 
+### Release 规范（发布流程）
+
+1. **发布前同步**：`git fetch origin --tags`，目标分支 `git pull --ff-only` 与远程对齐；重打已存在的 tag 前必须确认它从未推送到远程（`git ls-remote origin refs/tags/<tag>` 为空）。
+2. **tag 命名**：`v` + semver，与现有 tag 一致；维护线（`v2` 分支）取该分支最新 tag 的最小版本号 +1（如 v2.2.1 → v2.2.2）；主线（`v3` 分支）发布正式版（v3.0.0 → v3.1.0 / v4.0.0）。
+3. **Release notes 优先用 GitHub 自动生成**：`gh release create <tag> --title <tag> --generate-notes`（自动包含 PR 作者归属与 New Contributors）；仅当版本范围内没有任何 PR 时，才手写中文变更清单（commit 按时间倒序）；范围 = 上一 tag 到当前 HEAD 的全部提交。
+4. **发布顺序**：push 分支 → push tag → create release；发布后确认 Latest 标记指向主版本线（`gh release edit <tag> --latest`），并提醒 Packagist 会自动抓取新 tag（可手动点 Update 立即触发）。
+5. **主应用侧注意**：宿主项目的 `vendor/wsmallnews/filament-nestedset` 是指向本目录的软链，在本仓库切过分支（如 `v2`）后必须切回 `v3`，否则宿主应用会引用旧分支代码而损坏；发布完成后宿主仓库需提交 submodule 指针变更。
+
 ### 多租户支持
 
 基于 `kalnoy/nestedset` 的 `scoped` 特性。模型需定义 `getScopeAttributes()` 返回 scope 字段数组。页面默认 `$isScopedToTenant = true`，自动将 `team_id` 加入 scope。
