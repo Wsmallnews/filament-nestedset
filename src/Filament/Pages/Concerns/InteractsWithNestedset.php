@@ -42,7 +42,14 @@ trait InteractsWithNestedset
 
     protected static Alignment $infolistAlignment = Alignment::Right;
 
-    protected static string $infolistHiddenEndpoint = 'md';
+    /**
+     * infolist 显示的最小树容器宽度断点（CSS 容器查询，按树容器实际宽度而非视口判断）。
+     *
+     * 允许的值（Tailwind v4 容器查询刻度，https://tailwindcss.com/docs/responsive-design#container-size-reference）：
+     * 3xs 16rem、2xs 18rem、xs 20rem、sm 24rem、md 28rem、lg 32rem、xl 36rem、
+     * 2xl 42rem、3xl 48rem、4xl 56rem、5xl 64rem、6xl 72rem、7xl 80rem
+     */
+    protected static string $infolistHiddenEndpoint = '3xl';
 
     public function mountInteractsWithNestedset(): void
     {

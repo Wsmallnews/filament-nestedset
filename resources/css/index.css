@@ -13,3 +13,40 @@
     .fi-in-entry-label {
     @apply text-gray-400;
 }
+
+/* Alpine 初始化前隐藏需要 JS 控制显隐的区域（如树节点子级），避免刷新时展开/折叠状态跳动 */
+[x-cloak] {
+    display: none !important;
+}
+
+/*
+ * 整树首次加载的入场动画：纯 CSS 关键帧（grid-template-rows 0fr → 1fr 实现高度展开）。
+ * 不依赖 transitionend / JS 生命周期：即使动画被中断（后台标签页、渲染节流），
+ * 元素也停留在正常可见状态，不会像 x-collapse 那样卡死在 height:0 并阻断模块按需加载。
+ */
+.sn-nestedset-enter {
+    display: grid;
+    animation: sn-nestedset-reveal 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes sn-nestedset-reveal {
+    from {
+        grid-template-rows: 0fr;
+        opacity: 0.4;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sn-nestedset-enter {
+        animation: none;
+    }
+}
+
+/* 树容器宽度不足 sm（24rem）时，行操作按钮只保留图标；sr-only 视觉隐藏保留无障碍可读名称。
+ * 常驻隐藏（配置 show_row_action_labels = false）不走 CSS，由 HasNestedsetActions 的
+ * hiddenLabel() 在 Action 层渲染为 sr-only + aria-label */
+@container (width < 24rem) {
+    .fi-sn-nestedset-record-rowinfo .fi-ac-link-action > .fi-link-label {
+        @apply sr-only;
+    }
+}
