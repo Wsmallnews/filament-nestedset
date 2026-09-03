@@ -402,7 +402,9 @@ class Test extends NestedsetPage
 }
 ```
 
-By default, the infolist will be displayed at the `md` breakpoint and above. You can change the display breakpoint by setting `$infolistHiddenEndpoint`.
+The infolist is shown or hidden by **CSS container queries** based on the actual width of the tree container (not the viewport), so it reacts correctly even when the panel sidebar or page layout shrinks the tree area. By default, the infolist is displayed when the tree container is at least the `3xl` breakpoint (48rem) wide. You can change the display breakpoint by setting `$infolistHiddenEndpoint`.
+
+Allowed values (Tailwind v4 container scale): `3xs` 16rem, `2xs` 18rem, `xs` 20rem, `sm` 24rem, `md` 28rem, `lg` 32rem, `xl` 36rem, `2xl` 42rem, `3xl` 48rem, `4xl` 56rem, `5xl` 64rem, `6xl` 72rem, `7xl` 80rem. See the [Tailwind container size reference](https://tailwindcss.com/docs/responsive-design#container-size-reference).
 
 ```php
 <?php
@@ -414,7 +416,7 @@ use Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage;
 class Test extends NestedsetPage
 {
     ...
-    protected static string $infolistHiddenEndpoint = 'lg';
+    protected static string $infolistHiddenEndpoint = 'xl';
     ...
 }
 ```
@@ -436,6 +438,23 @@ class Test extends NestedsetPage
     ...
 }
 ```
+
+### Row action labels
+
+Each tree row ships inline actions (create child node, edit, delete). Their text labels are responsive: when the tree container is narrower than `sm` (24rem), only icons are shown (labels are visually hidden while screen readers can still read them).
+
+If you prefer icon-only actions at any width, set `show_row_action_labels` to `false` in the package config:
+
+```php
+// config/sn-filament-nestedset.php
+'show_row_action_labels' => false,
+```
+
+When disabled, the actions are rendered at the Filament Action level with `hiddenLabel()` — no label markup at all, and the accessible name is preserved via `aria-label`.
+
+### Expand/collapse persistence
+
+Each node's expand/collapse state is persisted in the browser (per record id), so the tree restores exactly how the user left it after a page refresh — collapsed nodes stay collapsed without any flicker, and expanded nodes replay a smooth expand animation on load.
 
 ## Advanced features
 

@@ -21,7 +21,8 @@ class TestCategory extends Model
     {
         $scopes = ['scope_type', 'scope_id'];
 
-        if (isset($this->attributes['team_id']) || array_key_exists('team_id', $this->attributes)) {
+        // team_id 为 null 时不能纳入 scope：嵌套集关联会生成 WHERE team_id = NULL，永远匹配不到行
+        if (! is_null($this->attributes['team_id'] ?? null)) {
             $scopes[] = 'team_id';
         }
 

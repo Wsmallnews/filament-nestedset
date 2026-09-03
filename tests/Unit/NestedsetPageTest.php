@@ -322,8 +322,12 @@ test('canBeDeleted returns false for parent when allow_delete_parent is false an
     $parent = TestCategory::create(['name' => 'Parent', 'scope_type' => 'test', 'scope_id' => 0]);
     TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0], $parent);
 
+    // kalnoy 的 create() 返回的实例带有过期的 children 关系缓存；生产路径中记录
+    // 经 getQuery()->findOrFail() 重新解析，这里保持一致
+    $freshParent = TestCategory::query()->findOrFail($parent->id);
+
     $page = makeTestPage(['model' => TestCategory::class]);
-    expect($page->callCanBeDeleted($parent))->toBeFalse();
+    expect($page->callCanBeDeleted($freshParent))->toBeFalse();
 });
 
 test('canBeDeleted returns true for leaf node even when allow_delete_parent is false', function () {
@@ -353,6 +357,20 @@ test('canBeDeleted returns false for root with children when allow_delete_root i
     $root = TestCategory::create(['name' => 'Root', 'scope_type' => 'test', 'scope_id' => 0]);
     TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0], $root);
 
+    $freshRoot = TestCategory::query()->findOrFail($root->id);
+
     $page = makeTestPage(['model' => TestCategory::class]);
-    expect($page->callCanBeDeleted($root))->toBeFalse();
+    expect($page->callCanBeDeleted($freshRoot))->toBeFalse();
+});
+
+// --- 默认断点（容器查询刻度） ---
+
+test('infolistHiddenEndpoint defaults to 3xl on the bare page class', function () {
+    // makeTestPage 的 harness 会覆盖该值，这里用最小子类验证 trait 默认值
+    $page = new class extends NestedsetPage
+    {
+        protected static ?string $model = TestCategory::class;
+    };
+
+    expect($page->getInfolistHiddenEndpoint())->toBe('3xl');
 });

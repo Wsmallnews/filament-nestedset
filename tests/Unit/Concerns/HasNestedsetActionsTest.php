@@ -69,6 +69,11 @@ function makeActionsPage(?string $model = null, ?int $level = null): object
             return $this->getParentSelect();
         }
 
+        public function callShowRowActionLabels(): bool
+        {
+            return $this->showRowActionLabels();
+        }
+
         public function callResolveNestedsetActionRecord(Action $action, array $arguments): ?Model
         {
             return $this->resolveNestedsetActionRecord($action, $arguments);
@@ -195,4 +200,48 @@ test('resolveNestedsetActionRecord caches resolved records', function () {
 
     $result2 = $page->callResolveNestedsetActionRecord($action, ['id' => $record->id]);
     expect($result2)->toBe($result1);
+});
+
+// --- show_row_action_labels（行操作按钮文字显隐） ---
+
+test('showRowActionLabels defaults to true with shipped config', function () {
+    // 包配置文件默认 show_row_action_labels = true，Testbench 启动时由服务提供者合并
+    $page = makeActionsPage();
+    expect($page->callShowRowActionLabels())->toBeTrue();
+});
+
+test('showRowActionLabels reads config value', function () {
+    config()->set('sn-filament-nestedset.show_row_action_labels', false);
+
+    $page = makeActionsPage();
+    expect($page->callShowRowActionLabels())->toBeFalse();
+});
+
+test('row action labels are shown by default', function () {
+    config()->set('sn-filament-nestedset.show_row_action_labels', true);
+
+    $page = makeActionsPage(TestCategory::class);
+    expect($page->editAction()->isLabelHidden())->toBeFalse()
+        ->and($page->deleteAction()->isLabelHidden())->toBeFalse()
+        ->and($page->createChildAction()->isLabelHidden())->toBeFalse();
+});
+
+test('row action labels are hidden at any width when config disabled', function () {
+    config()->set('sn-filament-nestedset.show_row_action_labels', false);
+
+    $page = makeActionsPage(TestCategory::class);
+    expect($page->editAction()->isLabelHidden())->toBeTrue()
+        ->and($page->deleteAction()->isLabelHidden())->toBeTrue()
+        ->and($page->createChildAction()->isLabelHidden())->toBeTrue();
+});
+
+test('hidden labels keep accessible label text', function () {
+    config()->set('sn-filament-nestedset.show_row_action_labels', false);
+
+    $page = makeActionsPage(TestCategory::class);
+    $action = $page->editAction();
+
+    // label 本身仍然可读（渲染为 sr-only / aria-label），只是视觉隐藏
+    expect($action->getLabel())->toBeString()
+        ->and($action->getLabel())->not->toBeEmpty();
 });

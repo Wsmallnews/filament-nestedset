@@ -5,6 +5,7 @@ namespace Wsmallnews\FilamentNestedset\Tests;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Kalnoy\Nestedset\NestedSetServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Wsmallnews\FilamentNestedset\FilamentNestedsetServiceProvider;
 
@@ -23,6 +24,7 @@ class TestCase extends Orchestra
     {
         return [
             FilamentNestedsetServiceProvider::class,
+            NestedSetServiceProvider::class,
         ];
     }
 

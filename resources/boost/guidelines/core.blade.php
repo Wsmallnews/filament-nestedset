@@ -34,7 +34,7 @@ php artisan make:filament-nestedset-page
 | `$emptyTipLabel` | `?string` | 翻译文本 | 树为空时的辅助提示 |
 | `$tabFieldName` | `?string` | `null` | Tabs 筛选的字段名 |
 | `$infolistAlignment` | `Alignment` | `Alignment::Right` | Infolist 对齐方式 |
-| `$infolistHiddenEndpoint` | `string` | `'md'` | Infolist 显示的最小断点 |
+| `$infolistHiddenEndpoint` | `string` | `'3xl'` | Infolist 显示的最小**树容器宽度**断点（CSS 容器查询刻度，按树容器实际宽度而非视口判断）。允许值：`3xs` 16rem、`2xs` 18rem、`xs` 20rem、`sm` 24rem、`md` 28rem、`lg` 32rem、`xl` 36rem、`2xl` 42rem、`3xl` 48rem、`4xl` 56rem、`5xl` 64rem、`6xl` 72rem、`7xl` 80rem。完整说明见 [Tailwind 容器尺寸对照表](https://tailwindcss.com/docs/responsive-design#container-size-reference) |
 | `$isScopedToTenant` | `bool` | `true` | 是否关联 Filament 当前租户 |
 | `$navigationIcon` | `string\|BackedEnum\|null` | `Heroicon::OutlinedBars3BottomRight` | 导航图标（继承自 Page） |
 
@@ -235,9 +235,29 @@ return [
     'allow_delete_root' => false,                     // 是否允许删除根节点
     'create_action_modal_show_parent_select' => true, // 创建弹窗是否显示父级选择
     'show_create_child_node_action_in_row' => true,   // 行内是否显示“创建子节点”按钮
+    'show_row_action_labels' => true,                 // 行操作按钮文字：true = 树容器不足 sm(24rem) 时隐藏文字只留图标（容器查询）；false = Action 层 hiddenLabel，任何宽度只留图标（aria-label 保留）
     'autoload_assets' => true,                        // 是否自动加载 CSS（自定义主题时关闭）
 ];
 ```
+
+### UI 行为与动画机制
+
+- **展开/折叠持久化**：每个记录 `x-data` 中 `open: $persist(true).as('sn-tree-{id}')`（localStorage）。子级容器 `x-show + x-collapse + x-cloak`，`x-cloak` 配合包 CSS 的 `[x-cloak]{display:none!important}` 保证刷新时折叠节点不闪跳。
+- **首次加载展开动画**：Alpine 初始渲染跳过 x-show 过渡，因此顶层记录经 `animateLoad` prop 门控（`hydrated` 初始 false，`init` 中 `$nextTick(() => setTimeout(() => hydrated = true, 150))` 延迟到首帧绘制后翻转才播放动画）。仅顶层门控——嵌套节点同时动画会互相测不到高度。箭头旋转与子级显隐绑定同一表达式 `open && hydrated`，同帧联动。
+- **箭头图标**：`ChevronRight` 默认朝右 = 折叠朝向（与服务端渲染的初始隐藏状态天然一致，无需 x-cloak），展开时 `rotate-90`。不要改回 ChevronDown + `-rotate-90`（默认朝向是展开态，刷新会闪跳）。
+- **卡片入场动画**：树卡片用纯 CSS 关键帧 `sn-nestedset-enter`（grid-template-rows 0fr→1fr）。**禁止**改用 x-collapse/x-show 做加载动画——其依赖 transitionend，时序不利时卡死在 height:0 并把树裁剪成零可见区域，IntersectionObserver 判定不可见 → JS 模块永不加载 → 展开折叠整体失效。
+- **infolist 容器查询**：`@container` 在树根 `.fi-sn-nestedset`（所有层级共用同一容器宽度，不受子级 pl-6 缩进影响）；显示类用 `@{breakpoint}:flex!`（important 后缀击败主题样式表后加载的同层 `.hidden`）。
+- **行操作按钮文字**：配置 `show_row_action_labels = false` 时由 `HasNestedsetActions` 的 `hiddenLabel()` 在 Action 层渲染（无 label DOM，aria-label 保留）；`true` 时由包 CSS 容器查询 `@container (width < 24rem)` 以 sr-only 隐藏。
+
+### 开发工作流（改包内 CSS / JS 后）
+
+```bash
+cd addons/filament-nestedset && npm run build        # 或 npm run build:styles
+php artisan filament:assets                           # 发布到 public/（应用根目录执行）
+```
+
+- 包资产 URL 版本号是 Composer 对无版本 path 仓库的占位符（恒定不变），重新发布后**浏览器需强刷**（Ctrl+F5）才能拿到新 CSS。
+- blade 中新引入的 Tailwind 工具类（如新断点、新变体）必须重建 CSS 才会生成，只改 blade 不重建时类存在但无样式。
 
 ### 多租户支持
 
@@ -267,5 +287,6 @@ return [
 - **`nestedScoped()` 与租户/Tab 使用相同 key 时会覆盖前面的 scope**，这是当前 `array_merge()` 行为。
 - **`getEloquentQuery()` 应继续收窄已经 scoped 的查询**，不要绕过 `Model::scoped($scopes)`，否则多租户、Tabs 或自定义 scope 可能失效。
 - **Livewire 前端组件必须覆盖 `getNestedset()` 或设置 `$model`**，否则抛出异常。
-- **`autoload_assets` 关闭后需在自定义主题 CSS 中手动引入**：`@import '../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css'`。
+- **`autoload_assets` 关闭后需在自定义主题 CSS 中手动引入**：`@import '../../../../vendor/wsmallnews/filament-nestedset/resources/css/index.css'`（注意该文件包含 `[x-cloak]`、容器查询 sr-only、入场动画等规则，跳过引入会导致刷新闪跳和响应式失效）。
 - **拖拽移动节点受 `$level` 限制**，超过层级限制时操作会被取消并提示。
+- **改包内 CSS 或在 blade 引入新工具类后必须重建 + 发布**（见"开发工作流"），否则浏览器拿到的还是旧样式。
