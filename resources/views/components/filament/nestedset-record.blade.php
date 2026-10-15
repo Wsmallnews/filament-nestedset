@@ -8,13 +8,8 @@
     $infolistAlignment = static::getInfolistAlignment();
     $infoListHiddenEndpoint = static::getInfolistHiddenEndpoint();
 
-    // 是否还有下级
+    // whether deeper levels remain
     $hasNextLevel = is_null($level) || $level > ($record->depth + 1);
-
-    $canCreateChildren = false;
-    if ($this->showCreateChildNodeActionInRow() && $hasNextLevel) {
-        $canCreateChildren = true;
-    }
 @endphp
 
 <div
@@ -26,10 +21,9 @@
                 return;
             }
 
-            // Alpine 初始渲染跳过 x-show 过渡动画，这里延迟翻转 hydrated，
-            // 让持久化为展开的节点在首次加载时播放 x-collapse 展开动画。
-            // 先 $nextTick 等组件初始渲染完全就绪，再用 setTimeout 延迟到浏览器首帧绘制之后翻转：
-            // 翻转过早（首帧绘制前）CSS 过渡会被快进，动画大概率不出现
+            // Alpine skips x-show transitions on the initial render, so `hydrated` flips late:
+            // $nextTick waits for the component to settle, setTimeout defers past the first paint.
+            // Flipping too early fast-forwards the CSS transition and the animation mostly never plays.
             this.$nextTick(() => {
                 setTimeout(() => { this.hydrated = true }, 150)
             })
@@ -59,9 +53,6 @@
 
             @if($record->children->isNotEmpty())
                 <button type="button" x-on:click="open = !open" title="Toggle children" class="appearance-none text-gray-500">
-                    {{-- 图标默认朝右 = 折叠朝向，与 Alpine 初始化前的子级隐藏状态天然一致，无需 x-cloak；
-                        展开时 rotate-90 转为朝下。旋转与子级显隐绑定同一表达式（open && hydrated），
-                        顶层节点在子级开始展开的同一帧一起转为展开朝向 --}}
                     <x-filament::icon
                         class="size-5 font-bold transform transition-transform duration-200"
                         :icon="Heroicon::ChevronRight"
@@ -75,8 +66,8 @@
             @if ($this->hasInfolist())
                 <div @class([
                     'fi-sn-nestedset-record-infolist hidden grow gap-x-4 px-4 items-center',
-                    // 树容器宽度达到指定断点后显示 infolist（容器查询刻度见 $infolistHiddenEndpoint 文档）；
-                    // important 后缀用于击败主题样式表中后加载的同层 .hidden（跨样式表同名 utilities 层按文档顺序合并）
+                    // the infolist appears once the tree container reaches the breakpoint (container query,
+                    // see $infolistHiddenEndpoint); the important suffix beats the theme stylesheet's .hidden
                     match ($infoListHiddenEndpoint) {
                         '3xs' => '@3xs:flex!',
                         '2xs' => '@2xs:flex!',
@@ -108,21 +99,15 @@
         </div>
 
         <div class="flex grow-0 items-center gap-3">
-            {{-- 一级 depth = 0 --}}
-            @if($canCreateChildren)
-                {{ ($this->createChildAction)(['parentId' => $record->getKey()]) }}
-            @endif
-
-            {{ ($this->editAction)(['id' => $record->getKey()])->record($record) }}
-
-            @if($this->canBeDeleted($record))
-                {{ ($this->deleteAction)(['id' => $record->getKey()])->record($record) }}
-            @endif
+            {{-- row actions: built-in create-child/edit/delete filtered by condition, optionally grouped (HasNestedsetActions::getRowActions) --}}
+            @foreach ($this->getRowActions($record) as $rowAction)
+                {{ $rowAction }}
+            @endforeach
         </div>
     </div>
 
     @if ($hasNextLevel)
-        {{-- x-cloak：Alpine 初始化前先隐藏子节点，避免持久化为折叠状态时刷新出现“先展开再折叠”的跳动 --}}
+        {{-- x-cloak hides children before Alpine boots, preventing an expand-then-collapse flash on refresh --}}
         <div x-show="open && hydrated" x-collapse x-cloak class="divide-y ltr:pl-6 rtl:pr-6">
             <div
                 @class([

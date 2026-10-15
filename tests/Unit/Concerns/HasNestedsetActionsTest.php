@@ -1,6 +1,7 @@
 <?php
 
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -26,7 +27,9 @@ beforeEach(function () {
     }
 });
 
-// Helper: create an anonymous class using HasNestedsetActions with public accessors
+// Helper: create an anonymous class using HasNestedsetActions with public accessors.
+// 注意：匿名类直接 use trait（第二层），不能声明与 trait 同名的静态属性（默认值不同会 fatal），
+// 配置覆盖统一走 setter（getXxx/xxx 三件套中的 setter）断言。
 function makeActionsPage(?string $model = null, ?int $level = null): object
 {
     return new class($model, $level)
@@ -69,14 +72,24 @@ function makeActionsPage(?string $model = null, ?int $level = null): object
             return $this->getParentSelect();
         }
 
-        public function callShowRowActionLabels(): bool
-        {
-            return $this->showRowActionLabels();
-        }
-
         public function callResolveNestedsetActionRecord(Action $action, array $arguments): ?Model
         {
             return $this->resolveNestedsetActionRecord($action, $arguments);
+        }
+
+        public function callCanBeDeleted(Model $record): bool
+        {
+            return $this->canBeDeleted($record);
+        }
+
+        public function callGetRowActions(Model $record): array
+        {
+            return $this->getRowActions($record);
+        }
+
+        public function callShouldShowCreateChildAction(Model $record): bool
+        {
+            return $this->shouldShowCreateChildAction($record);
         }
     };
 }
@@ -97,7 +110,10 @@ test('trait has required action methods', function () {
 });
 
 test('trait has helper methods', function () {
-    expect(method_exists(HasNestedsetActions::class, 'hasFormParentSelect'))->toBeTrue()
+    expect(method_exists(HasNestedsetActions::class, 'getHasFormParentSelect'))->toBeTrue()
+        ->and(method_exists(HasNestedsetActions::class, 'hasFormParentSelect'))->toBeTrue()
+        ->and(method_exists(HasNestedsetActions::class, 'getRowActionsInGroup'))->toBeTrue()
+        ->and(method_exists(HasNestedsetActions::class, 'rowActionsInGroup'))->toBeTrue()
         ->and(method_exists(HasNestedsetActions::class, 'getParentSelect'))->toBeTrue()
         ->and(method_exists(HasNestedsetActions::class, 'resolveNestedsetActionRecord'))->toBeTrue();
 });
@@ -154,18 +170,18 @@ test('deleteAction has Action return type', function () {
 
 // --- hasFormParentSelect ---
 
-test('hasFormParentSelect reads config value', function () {
-    config()->set('sn-filament-nestedset.create_action_modal_show_parent_select', true);
-
-    $page = makeActionsPage();
-    expect($page->hasFormParentSelect())->toBeTrue();
+test('hasFormParentSelect defaults to true', function () {
+    expect(makeActionsPage()::getHasFormParentSelect())->toBeTrue();
 });
 
-test('hasFormParentSelect returns false when config is false', function () {
-    config()->set('sn-filament-nestedset.create_action_modal_show_parent_select', false);
-
+test('hasFormParentSelect can be disabled via setter', function () {
     $page = makeActionsPage();
-    expect($page->hasFormParentSelect())->toBeFalse();
+    $page::hasFormParentSelect(false);
+
+    expect($page::getHasFormParentSelect())->toBeFalse();
+
+    $page::hasFormParentSelect(null);    // 复位，避免静态存储影响后续用例
+    expect($page::getHasFormParentSelect())->toBeTrue();
 });
 
 // --- getParentSelect ---
@@ -202,46 +218,119 @@ test('resolveNestedsetActionRecord caches resolved records', function () {
     expect($result2)->toBe($result1);
 });
 
-// --- show_row_action_labels（行操作按钮文字显隐） ---
+// --- show_row_action_labels（平铺行操作按钮文字显隐；ActionGroup 内 label 恒显示） ---
 
-test('showRowActionLabels defaults to true with shipped config', function () {
-    // 包配置文件默认 show_row_action_labels = true，Testbench 启动时由服务提供者合并
+test('showRowActionLabels defaults to true', function () {
+    expect(makeActionsPage()::getShowRowActionLabels())->toBeTrue();
+});
+
+test('showRowActionLabels can be disabled via setter', function () {
     $page = makeActionsPage();
-    expect($page->callShowRowActionLabels())->toBeTrue();
+    $page::showRowActionLabels(false);
+
+    expect($page::getShowRowActionLabels())->toBeFalse();
+
+    $page::showRowActionLabels(null);    // 复位
+    expect($page::getShowRowActionLabels())->toBeTrue();
 });
 
-test('showRowActionLabels reads config value', function () {
-    config()->set('sn-filament-nestedset.show_row_action_labels', false);
+test('flat row action labels are shown by default', function () {
+    $record = TestCategory::create(['name' => 'Row', 'scope_type' => 'test', 'scope_id' => 0]);
+    $actions = makeActionsPage(TestCategory::class)->callGetRowActions($record);
+
+    expect($actions[0]->isLabelHidden())->toBeFalse()
+        ->and($actions[1]->isLabelHidden())->toBeFalse();
+});
+
+test('flat row action labels are icon-only when disabled via setter', function () {
+    $record = TestCategory::create(['name' => 'Row', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    $page = makeActionsPage(TestCategory::class);
+    $page::showRowActionLabels(false);
+
+    $actions = $page->callGetRowActions($record);
+
+    expect($actions[0]->isLabelHidden())->toBeTrue()
+        ->and($actions[1]->isLabelHidden())->toBeTrue()
+        // label 本身仍然可读（渲染为 sr-only / aria-label），只是视觉隐藏
+        ->and($actions[1]->getLabel())->toBeString()
+        ->and($actions[1]->getLabel())->not->toBeEmpty();
+
+    $page::showRowActionLabels(null);    // 复位
+});
+
+// --- getRowActions（行操作集合：显示过滤 + ActionGroup 切换 + 子类覆写点） ---
+
+test('getRowActions returns flat createChild/edit/delete by default', function () {
+    $record = TestCategory::create(['name' => 'Row', 'scope_type' => 'test', 'scope_id' => 0]);
+    $actions = makeActionsPage(TestCategory::class)->callGetRowActions($record);
+
+    expect($actions)->toHaveCount(3)
+        ->and($actions[0])->toBeInstanceOf(CreateAction::class)
+        ->and($actions[1])->toBeInstanceOf(EditAction::class)
+        ->and($actions[2])->toBeInstanceOf(DeleteAction::class);
+});
+
+test('getRowActions collapses actions into an ActionGroup when enabled via setter', function () {
+    $record = TestCategory::create(['name' => 'Row', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    $page = makeActionsPage(TestCategory::class);
+    $page::rowActionsInGroup(true);
+
+    $actions = $page->callGetRowActions($record);
+
+    expect($actions)->toHaveCount(1)
+        ->and($actions[0])->toBeInstanceOf(ActionGroup::class);
+
+    $page::rowActionsInGroup(null);    // 复位
+    expect($page::getRowActionsInGroup())->toBeFalse();
+});
+
+test('getRowActions hides create child when disabled via setter', function () {
+    $record = TestCategory::create(['name' => 'Row', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    $page = makeActionsPage(TestCategory::class);
+    $page::showCreateChildNodeActionInRow(false);
+
+    $actions = $page->callGetRowActions($record);
+
+    expect($actions)->toHaveCount(2)
+        ->and($actions[0])->toBeInstanceOf(EditAction::class);
+
+    $page::showCreateChildNodeActionInRow(null);    // 复位
+});
+
+test('getRowActions hides create child when the level limit is reached', function () {
+    // level = 1：根节点（depth 0）不能再建子级
+    $record = TestCategory::create(['name' => 'Row', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    expect(makeActionsPage(TestCategory::class, 1)->callShouldShowCreateChildAction($record))->toBeFalse()
+        ->and(makeActionsPage(TestCategory::class, 2)->callShouldShowCreateChildAction($record))->toBeTrue();
+});
+
+test('getRowActions hides delete for nodes with children when parent deletion disallowed', function () {
+    $parent = TestCategory::create(['name' => 'Parent', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0, 'parent_id' => $parent->id]);
+
+    // 默认 $allowDeleteParent = false（有子级不可删）
+    // 视图记录来自树查询（children 已加载），这里按同语境 fresh 加载
+    $actions = makeActionsPage(TestCategory::class)->callGetRowActions(TestCategory::find($parent->id));
+
+    expect($actions)->toHaveCount(2)      // createChild + edit，无 delete
+        ->and($actions[1])->toBeInstanceOf(EditAction::class);
+});
+
+test('canBeDeleted respects setter over the default', function () {
+    $parent = TestCategory::create(['name' => 'Parent', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0, 'parent_id' => $parent->id]);
 
     $page = makeActionsPage();
-    expect($page->callShowRowActionLabels())->toBeFalse();
-});
+    $page::allowDeleteParent(true);
+    $page::allowDeleteRoot(true);
 
-test('row action labels are shown by default', function () {
-    config()->set('sn-filament-nestedset.show_row_action_labels', true);
+    expect($page->callCanBeDeleted(TestCategory::find($parent->id)))->toBeTrue();
 
-    $page = makeActionsPage(TestCategory::class);
-    expect($page->editAction()->isLabelHidden())->toBeFalse()
-        ->and($page->deleteAction()->isLabelHidden())->toBeFalse()
-        ->and($page->createChildAction()->isLabelHidden())->toBeFalse();
-});
-
-test('row action labels are hidden at any width when config disabled', function () {
-    config()->set('sn-filament-nestedset.show_row_action_labels', false);
-
-    $page = makeActionsPage(TestCategory::class);
-    expect($page->editAction()->isLabelHidden())->toBeTrue()
-        ->and($page->deleteAction()->isLabelHidden())->toBeTrue()
-        ->and($page->createChildAction()->isLabelHidden())->toBeTrue();
-});
-
-test('hidden labels keep accessible label text', function () {
-    config()->set('sn-filament-nestedset.show_row_action_labels', false);
-
-    $page = makeActionsPage(TestCategory::class);
-    $action = $page->editAction();
-
-    // label 本身仍然可读（渲染为 sr-only / aria-label），只是视觉隐藏
-    expect($action->getLabel())->toBeString()
-        ->and($action->getLabel())->not->toBeEmpty();
+    $page::allowDeleteParent(null);    // 复位
+    $page::allowDeleteRoot(null);
+    expect($page->callCanBeDeleted(TestCategory::find($parent->id)))->toBeFalse();
 });

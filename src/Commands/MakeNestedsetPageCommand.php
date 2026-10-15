@@ -36,10 +36,9 @@ class MakeNestedsetPageCommand extends Command
 
         $panel = $this->getPanel();
 
-        // 文件要保存的 命名空间，和 目录
+        // resolve the target namespace and directory
         ['namespace' => $namespace, 'path' => $path] = $this->getPanelNamespaceAndPath($panel);
 
-        // 页面最终保存路径
         $path = (string) str($page)
             ->prepend('/')
             ->prepend($path)
@@ -51,10 +50,9 @@ class MakeNestedsetPageCommand extends Command
             return self::INVALID;
         }
 
-        // cluster 需要替换的内容
+        // cluster replacements
         $clusterParams = $this->getPotentialCluster($namespace);
 
-        // model 替换内容
         $model = $this->getModelStmt();
 
         $this->copyStub(
@@ -73,9 +71,6 @@ class MakeNestedsetPageCommand extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * 解析页面名称
-     */
     public function parsePage(): string
     {
         $pageName = $this->argument('name') ?? text(
@@ -94,9 +89,6 @@ class MakeNestedsetPageCommand extends Command
             ->replace('/', '\\');
     }
 
-    /**
-     * 获取选择的 panel
-     */
     private function getPanel(): Panel
     {
         $panel = $this->option('panel');
@@ -124,8 +116,6 @@ class MakeNestedsetPageCommand extends Command
     }
 
     /**
-     * 获取要创建的页面所在的 命名空间 和 目录
-     *
      * @return array{namespace: string, path: string}
      */
     private function getPanelNamespaceAndPath(Panel $panel): array
@@ -133,7 +123,7 @@ class MakeNestedsetPageCommand extends Command
         $pageDirectories = $panel->getPageDirectories();
         $pageNamespaces = $panel->getPageNamespaces();
 
-        // 如果是 vendor 下面的目录，则排除 vendor 目录 （不可创建到 vendor 目录下）
+        // never generate into vendor directories
         foreach ($pageDirectories as $pageIndex => $pageDirectory) {
             if (str($pageDirectory)->startsWith(base_path('vendor'))) {
                 unset($pageDirectories[$pageIndex], $pageNamespaces[$pageIndex]);
@@ -155,8 +145,6 @@ class MakeNestedsetPageCommand extends Command
     }
 
     /**
-     * 获取 cluster 需要填充的内容
-     *
      * @return array{clusterAssignment: string|null, clusterImport: string|null}
      */
     private function getPotentialCluster(string $namespace): array
@@ -183,9 +171,6 @@ class MakeNestedsetPageCommand extends Command
         ];
     }
 
-    /**
-     * 获取 mdoel 需要填充的 代码
-     */
     private function getModelStmt(): string
     {
         $placeholder = 'null;       // TODO: Set nestedset model';
@@ -210,9 +195,6 @@ class MakeNestedsetPageCommand extends Command
         return "{$modelClass}::class;";
     }
 
-    /**
-     * 格式化 model
-     */
     private function parseModel(string $model): string
     {
         if (preg_match('([^A-Za-z0-9_/\\\\])', $model)) {

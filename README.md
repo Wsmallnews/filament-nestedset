@@ -21,13 +21,14 @@ Filament nestedset tree build on kalnoy/nestedset, support multi language. suppo
 
 ## Architecture
 
-The package uses a **Page + Widget + Livewire Component** architecture pattern:
+The package uses a **Page + Widget + Sidebar Component + Frontend Component** architecture pattern. All bases must be extended — the package registers nothing by itself:
 
 - **NestedsetPage** (`Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`) — Abstract Filament Page class. It owns static configuration, schema hooks, nestedset actions, scoped queries, and the default Filament page view.
 - **Filament Panel Widget** (`Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset`) — Abstract Filament widget extending `Filament\Widgets\Widget`. It uses the same `InteractsWithNestedset` behavior and can be embedded in custom Filament pages.
+- **Sidebar Nestedset Component** (`Wsmallnews\FilamentNestedset\Filament\Components\SidebarNestedset`) — Abstract Livewire component for panel sidebars: a manageable tree (inline CRUD) whose row clicks dispatch frontend events for the host page to filter content.
 - **Frontend Livewire Component** (`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`) — Read-only tree display component extending `Livewire\Component` for frontend pages.
 
-The default `NestedsetPage` renders the tree from its own view and handles CRUD, drag sorting, delete guards, scoped queries, and repair actions through `InteractsWithNestedset` and `HasNestedsetActions`.
+The page, widget and sidebar component share the same `InteractsWithNestedset` configuration surface (static `$model` / `$level`, `nestedScoped()`, `schema()`, tenant scoping) and the same `HasNestedsetActions` CRUD actions.
 
 ### Nestedset classes
 
@@ -35,6 +36,7 @@ The default `NestedsetPage` renders the tree from its own view and handles CRUD,
 | --------------------------- | ---------------------------------------------------------------- | -------------------- | ----------------------------------------- |
 | Filament Page               | `Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`     | `Filament\Pages\Page` | Full CRUD management in Filament panel    |
 | Filament Panel Widget       | `Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset` | `Filament\Widgets\Widget` | Embeddable Filament tree widget           |
+| Sidebar Livewire Component  | `Wsmallnews\FilamentNestedset\Filament\Components\SidebarNestedset` | `Livewire\Component` | Manageable sidebar tree for panel pages |
 | Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`     | `Livewire\Component` | Read-only tree display for frontend pages |
 
 ## Screenshots
@@ -89,31 +91,22 @@ This is the contents of the published config file:
 ```php
 return [
     /**
-     * Restrict deletion of nodes with children
-     */
-    'allow_delete_parent' => false,
-
-    /*
-     * Restrict deletion of root nodes, even if 'allow_delete_parent' is true, root nodes can be deleted.
-     */
-    'allow_delete_root' => false,
-
-    /**
-     * create action show parent select field
-     */
-    'create_action_modal_show_parent_select' => true,
-
-    /**
-     * Display the "Create Child Node" action in each row (if 'create_action_modal_show_parent_select' is false, This field should be set to true)
-     */
-    'show_create_child_node_action_in_row' => true,
-
-    /**
      * By default, the CSS file will be automatically loaded globally. If you use a filament custom theme, you can disable the automatic loading of the CSS file
      */
     'autoload_assets' => true,
 ];
 ```
+
+All other behavior is configured per class via static properties (each comes with a `getXxx()` getter and a `xxx()` setter, following Filament conventions). Subclasses may declare the property, override the getter, or call the setter at runtime:
+
+| Static property                | Default (page / sidebar) | Description                                          |
+| ------------------------------ | ------------------------ | ---------------------------------------------------- |
+| `$rowActionsInGroup`           | `false` / `true`         | Collapse row actions into an "..." ActionGroup        |
+| `$showRowActionLabels`         | `true` / `false`         | Show text labels on flat row actions                  |
+| `$showCreateChildNodeActionInRow` | `true` / `true`       | Show the create-child action in each row              |
+| `$allowDeleteParent`           | `false` / `false`        | Allow deleting nodes that have children               |
+| `$allowDeleteRoot`             | `false` / `false`        | Allow deleting root nodes                             |
+| `$hasFormParentSelect`         | `true` / `true`          | Show the parent select in the create modal            |
 
 ## Prepare your model
 
@@ -443,14 +436,17 @@ class Test extends NestedsetPage
 
 Each tree row ships inline actions (create child node, edit, delete). Their text labels are responsive: when the tree container is narrower than `sm` (24rem), only icons are shown (labels are visually hidden while screen readers can still read them).
 
-If you prefer icon-only actions at any width, set `show_row_action_labels` to `false` in the package config:
+If you prefer icon-only actions at any width, declare the static property on your class (or call the setter):
 
 ```php
-// config/sn-filament-nestedset.php
-'show_row_action_labels' => false,
+protected static ?bool $showRowActionLabels = false;
+
+// or at runtime: MyTreePage::showRowActionLabels(false);
 ```
 
-When disabled, the actions are rendered at the Filament Action level with `hiddenLabel()` — no label markup at all, and the accessible name is preserved via `aria-label`.
+> **Note for custom row actions**: `getRowActions()` applies `->link()` and `hiddenLabel()` only in the flat branch. When adding custom actions to the group, do not set `->link()` on them — an explicit view overrides the group's grouped default and renders bare links inside the dropdown.
+
+When disabled, the actions are rendered at the Filament Action level with `hiddenLabel()` — no label markup at all, and the accessible name is preserved via `aria-label`. Labels always show for actions inside an ActionGroup.
 
 ### Expand/collapse persistence
 
@@ -669,6 +665,111 @@ protected function canBeDeleted(Model $record): bool
 | `moveNodeAction()`     | `Action`       | Drag-and-drop reorder confirmation |
 | `fixNestedsetAction()` | `Action`       | Fix scoped tree structure          |
 
+### Sidebar Nestedset component
+
+`Wsmallnews\FilamentNestedset\Filament\Components\SidebarNestedset` is an abstract Livewire component for panel sidebars — e.g. a directory tree next to a media library, or a category tree next to a posts table. It must be extended and registered by the consuming package (never by this package).
+
+The view renders only tree rows (a collapsible nested list plus a full-width outlined create button at the bottom) — no wrapper, heading or sentinel rows. Hosts assemble the container themselves. Row clicks dispatch pure frontend events (same contract as the frontend component):
+
+| Event                              | Trigger               | Payload                        |
+| ---------------------------------- | --------------------- | ------------------------------ |
+| `sn-filament-nestedset-leaf-click` | Click on a leaf node  | `{ recordId, hasChild }`       |
+| `sn-filament-nestedset-node-click` | Click on a parent node | `{ recordId, hasChild }`      |
+
+The host listens via `#[On]`, filters its content, and feeds the selection back through the `#[Reactive] $activeId` prop — `getHasActive()` then highlights the active row, keeping the host the single source of truth for selection state.
+
+```php
+<?php
+
+namespace App\Filament\Components;
+
+use Filament\Forms;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
+use Wsmallnews\FilamentNestedset\Filament\Components\SidebarNestedset;
+use Wsmallnews\Media\Models\Media;
+use Wsmallnews\Media\Models\MediaDirectory;
+
+class MediaDirectories extends SidebarNestedset
+{
+    protected static ?string $model = MediaDirectory::class;
+
+    protected static ?int $level = 3;
+
+    // Label with a child-inclusive count, assembled via HtmlString
+    protected function getRecordLabel(Model $record): HtmlString | string
+    {
+        $count = Media::query()
+            ->whereIn('directory_id', $record->descendants()->pluck('id')->merge([$record->id]))
+            ->count();
+
+        return new HtmlString(
+            '<span class="min-w-0 truncate">' . e($record->name) . '</span>' .
+            ' <span class="text-xs tabular-nums text-gray-400">' . $count . '</span>'
+        );
+    }
+
+    // Subclasses must implement schema() (same contract as the page base)
+    protected function schema(array $arguments): array
+    {
+        return [
+            Forms\Components\TextInput::make('name')
+                ->label(__('sn-media::media.directories.name'))
+                ->maxLength(20)
+                ->required(),
+        ];
+    }
+}
+```
+
+Register the subclass in your package's service provider, render it from any blade view, and handle the events on the host page:
+
+```blade
+{{-- host view: the host owns the wrapper, heading and sentinel rows --}}
+<aside class="w-64 ...">
+    <button wire:click="$set('selectedDir', null)">All files ({{ $totalCount }})</button>
+    <livewire:media-directories :active-id="$selectedDir" />
+</aside>
+```
+
+```php
+// host page
+#[On('sn-filament-nestedset-leaf-click')]
+#[On('sn-filament-nestedset-node-click')]
+public function onTreeClick(int $recordId): void
+{
+    $this->selectedDir = ($this->selectedDir === $recordId) ? null : $recordId;
+}
+```
+
+#### Sidebar-specific defaults
+
+| Property / method         | Page default | Sidebar default | Notes                                              |
+| ------------------------- | ------------ | --------------- | -------------------------------------------------- |
+| `$rowActionsInGroup`      | `false`      | `true`          | Sidebar rows collapse actions into an ActionGroup  |
+| `$showRowActionLabels`    | `true`       | `false`         | Flat sidebar actions are icon-only                 |
+
+The sidebar base overrides the getters (it cannot redeclare the trait properties); subclasses may still declare the properties or call the setters.
+
+#### Custom row actions
+
+Override `getRowActions(Model $record): array` to add custom actions, drop built-ins, or take over the grouping entirely — return flat `Action`s or an `ActionGroup`, the view renders whatever you return:
+
+```php
+public function getRowActions(Model $record): array
+{
+    return array_merge(parent::getRowActions($record), [
+        Action::make('moveFiles')->label('Move files')->action(fn (array $arguments) => ...),
+    ]);
+}
+```
+
+Row actions bind record context via arguments — call the action builder with `['id' => $record->getKey()]` (or `['parentId' => ...]`) before rendering.
+
+#### Node links
+
+Return a full attribute `HtmlString` from `getRecordUrl()` (e.g. via `function Filament\Support\generate_href_html`) to make row clicks navigate instead of only dispatching the event. Plain strings get escaped by `{{ }}` — wrap them in `HtmlString`.
+
 ### Nestedset Livewire component
 
 The Nestedset Livewire Component (`Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`) is a read-only tree display component for frontend pages. It extends `Livewire\Component` and provides customizable node labels, URLs, and active state.
@@ -806,6 +907,7 @@ You should add the following code to your custom theme file. If you custom theme
 | --------------------------- | --------------------------------------------------------------------- |
 | Page Base Class             | `Wsmallnews\FilamentNestedset\Filament\Pages\NestedsetPage`           |
 | Filament Panel Widget       | `Wsmallnews\FilamentNestedset\Filament\Pages\Widgets\Nestedset`      |
+| Sidebar Livewire Component  | `Wsmallnews\FilamentNestedset\Filament\Components\SidebarNestedset`  |
 | Frontend Livewire Component | `Wsmallnews\FilamentNestedset\Livewire\Components\Nestedset`          |
 | Form Field                  | `Wsmallnews\FilamentNestedset\Forms\Fields\KalnoyNestedsetSelectTree` |
 | Artisan Command             | `Wsmallnews\FilamentNestedset\Commands\MakeNestedsetPageCommand`      |

@@ -6,9 +6,9 @@
 ])
 
 <div>
-    {{-- 首次加载整树入场动画（sn-nestedset-enter，纯 CSS 关键帧）：不用 x-collapse，
-         避免其依赖 transitionend 的展开在加载时序不利时卡死在 height:0 并阻断
-         x-load 的 visible 策略（IO 判定不可见 → 模块永不加载 → 展开折叠失效） --}}
+    {{-- First-load tree enter animation (sn-nestedset-enter, pure CSS keyframes): not x-collapse,
+         whose transitionend-dependent expand can stall at height:0 on unlucky load timing and block
+         the x-load visible strategy (IO sees nothing visible -> module never loads -> tree breaks) --}}
     <div
         class="fi-sn-nestedset-container sn-nestedset-enter overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
         wire:key="sn-nestedset-items-wrapper"

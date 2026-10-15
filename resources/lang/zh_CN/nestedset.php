@@ -8,6 +8,11 @@ return [
 
     'action' => [
         'create_child_node' => '创建子节点',
+        'create' => '新建',
+        'more_actions' => '更多操作',
+
+        'create_failed_title' => '创建失败',
+        'create_failed_body_depth' => '创建失败, 节点层级不能超过 :level 级.',
 
         'delete_failed_title' => '删除失败',
         'delete_failed_body_has_child' => '存在子级节点, 请先删除子级节点.',
@@ -25,5 +30,6 @@ return [
         'parent_select_field' => '父节点',
         'parent_select_field_placeholder' => '请选择父节点',
         'parent_select_field_empty_label' => '未搜索到父节点',
+        'name' => '名称',
     ],
 ];

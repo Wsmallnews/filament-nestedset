@@ -74,7 +74,7 @@ class Nestedset extends Component
         }
 
         $scopes = [];
-        // 自定义 scope
+        // custom scopes
         if (method_exists($this, 'nestedScoped')) {
             $scopes = array_merge($scopes, $this->nestedScoped());
         }
@@ -85,7 +85,7 @@ class Nestedset extends Component
             $query = (new $model)->newScopedQuery();
         }
 
-        // 自定义条件
+        // custom conditions
         if (method_exists($this, 'getEloquentQuery')) {
             $query = $this->getEloquentQuery($query);
         }

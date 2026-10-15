@@ -43,11 +43,9 @@ trait InteractsWithNestedset
     protected static Alignment $infolistAlignment = Alignment::Right;
 
     /**
-     * infolist 显示的最小树容器宽度断点（CSS 容器查询，按树容器实际宽度而非视口判断）。
-     *
-     * 允许的值（Tailwind v4 容器查询刻度，https://tailwindcss.com/docs/responsive-design#container-size-reference）：
-     * 3xs 16rem、2xs 18rem、xs 20rem、sm 24rem、md 28rem、lg 32rem、xl 36rem、
-     * 2xl 42rem、3xl 48rem、4xl 56rem、5xl 64rem、6xl 72rem、7xl 80rem
+     * Minimum tree container width (CSS container query, not viewport) at which
+     * the infolist shows. Values are Tailwind v4 container scale steps:
+     * https://tailwindcss.com/docs/responsive-design#container-size-reference
      */
     protected static string $infolistHiddenEndpoint = '3xl';
 
@@ -76,7 +74,7 @@ trait InteractsWithNestedset
     }
 
     /**
-     * 覆盖 hasTabs 中的 updatedActiveTab 方法
+     * Neutralize the updatedActiveTab hook from HasTabs
      */
     public function updatedActiveTab(): void {}
 
@@ -150,7 +148,7 @@ trait InteractsWithNestedset
     }
 
     /**
-     * 自定义 kalnoy/nestedset 的 scoped 外条件
+     * Extra scoped parameters for kalnoy/nestedset scoping
      *
      * @return array<string, mixed>
      */
@@ -181,33 +179,16 @@ trait InteractsWithNestedset
     }
 
     /**
-     * 自定义 Eloquent 查询条件
+     * Further constrain the scoped query
      */
     protected function getEloquentQuery($query)
     {
         return $query;
     }
 
-    protected function showCreateChildNodeActionInRow(): bool
-    {
-        return config('sn-filament-nestedset.show_create_child_node_action_in_row') ?? true;
-    }
-
     protected function getNestedset()
     {
         return $this->getQuery()->withDepth()->get()->toTree();
-    }
-
-    protected function canBeDeleted(Model $record): bool
-    {
-        if (
-            config('sn-filament-nestedset.allow_delete_parent') === false
-            && $record->children->isNotEmpty()
-        ) {
-            return false;
-        }
-
-        return ! (config('sn-filament-nestedset.allow_delete_root') === false && $record->children->isNotEmpty() && $record->isRoot());
     }
 
     protected function getQuery(): Builder

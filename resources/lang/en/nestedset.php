@@ -8,6 +8,11 @@ return [
 
     'action' => [
         'create_child_node' => 'Create child node',
+        'create' => 'New',
+        'more_actions' => 'More actions',
+
+        'create_failed_title' => 'Creation failed',
+        'create_failed_body_depth' => 'Creation failed, the node level cannot exceed :level levels.',
 
         'delete_failed_title' => 'Deletion failed',
         'delete_failed_body_has_child' => 'There are child nodes, Please delete child nodes first.',
@@ -25,5 +30,6 @@ return [
         'parent_select_field' => 'Parent node',
         'parent_select_field_placeholder' => 'Please select a parent node',
         'parent_select_field_empty_label' => 'No parent node found',
+        'name' => 'Name',
     ],
 ];
