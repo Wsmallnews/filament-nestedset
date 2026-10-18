@@ -1,44 +1,51 @@
 @php
-    use Filament\Support\Enums\Size;
+    use Filament\Support\Facades\FilamentAsset;
     use Filament\Support\Icons\Heroicon;
 
     $nestedset = $this->getNestedset();
     $level = static::getLevel();
 @endphp
 
-<div class="w-full">
-    <ul class="w-full flex flex-col" role="menu">
-        @forelse ($nestedset as $record)
-            <x-dynamic-component
-                @class([
-                    'w-full',
-                ])
-                :component="$this->getRecordView()"
-                :key="'sn-filament-nestedset-sidebar-record-' . $record->getKey()"
-                :record="$record"
-                :level="$level"
-                :current-level="1"
-            />
-        @empty
-            <x-filament::empty-state :contained="false" :icon="Heroicon::OutlinedFolderOpen" icon-color="gray">
-                <x-slot name="heading">
-                    {{ static::getEmptyLabel() ?: __('sn-filament-nestedset::nestedset.nestedset.empty_label') }}
-                </x-slot>
-                <x-slot name="description">
-                    {{ static::getEmptyTipLabel() ?: __('sn-filament-nestedset::nestedset.nestedset.empty_tip_label') }}
-                </x-slot>
-            </x-filament::empty-state>
-        @endforelse
-    </ul>
-
-    <div class="mt-1 px-1">
-        {{ $this->createAction()
-            ->button()
-            ->label(__('sn-filament-nestedset::nestedset.action.create'))
-            ->size(Size::Small)
-            ->outlined()
-            ->extraAttributes(['class' => 'w-full']) }}
+<div
+    x-load
+    x-load-src="{{ FilamentAsset::getAlpineComponentSrc('sn-sidebar-nestedset', 'wsmallnews/filament-nestedset') }}"
+    x-data="snSidebarNestedset()"
+    class="flex w-full flex-none flex-col md:min-h-full md:flex-1"
+>
+    <div class="hidden md:flex! md:min-h-full md:flex-col">
+        <x-dynamic-component
+            :component="$this->getContentComponent()"
+            :nestedset="$nestedset"
+            :level="$level"
+        >{{ $slot }}</x-dynamic-component>
     </div>
+
+    <x-filament::modal
+        slide-over
+        :close-by-clicking-away="true"
+        :close-by-escaping="true"
+        width="sm"
+        class="md:!hidden"
+    >
+        <x-slot name="trigger">
+            @if ($slot->has('mobileTrigger'))
+                <div class="w-full md:hidden">
+                    {{ $slot->get('mobileTrigger') }}
+                </div>
+            @else
+                <div class="flex w-full items-center justify-start gap-1.5 bg-gray-100 px-3 py-2 text-left text-sm text-gray-600 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 md:hidden">
+                    <x-filament::icon :icon="Heroicon::OutlinedListBullet" class="size-4" />
+                    <span>{{ __('sn-filament-nestedset::nestedset.sidebar.label') }}</span>
+                </div>
+            @endif
+        </x-slot>
+
+        <x-dynamic-component
+            :component="$this->getContentComponent()"
+            :nestedset="$nestedset"
+            :level="$level"
+        >{{ $slot }}</x-dynamic-component>
+    </x-filament::modal>
 
     <x-filament-actions::modals />
 </div>

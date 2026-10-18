@@ -42,6 +42,14 @@
     }
 }
 
+[data-sidebar-row].sn-drop-target {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-primary-500, #f59e0b) 60%, transparent);
+}
+
+[data-sidebar-row].sn-drop-invalid {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-danger-500, #ef4444) 60%, transparent);
+}
+
 /* 树容器宽度不足 sm（24rem）时，行操作按钮只保留图标；sr-only 视觉隐藏保留无障碍可读名称。
  * 常驻隐藏（配置 show_row_action_labels = false）不走 CSS，由 HasNestedsetActions 的
  * hiddenLabel() 在 Action 层渲染为 sr-only + aria-label */

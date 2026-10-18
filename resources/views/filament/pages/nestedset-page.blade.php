@@ -5,7 +5,7 @@
 <x-filament-panels::page>
     {{ $this->content }}
 
-    <x-sn-filament-nestedset::filament.nestedset 
+    <x-sn-filament-nestedset::filament.pages.nestedset 
         :nestedset="$nestedset" 
         :level="$level" 
         :empty-label="$emptyLabel" 

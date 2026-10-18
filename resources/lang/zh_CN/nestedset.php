@@ -21,6 +21,7 @@ return [
         'move_node_success' => '节点移动成功',
         'move_node_failed' => '节点移动失败',
         'move_node_failed_body_depth' => '节点移动失败, 目标节点层级不能超过支持节点层级 :level.',
+        'move_node_failed_body_cycle' => '节点不能移动到自身或其子级节点中。',
 
         'fix_nestedset' => '修复嵌套集合',
         'fix_nestedset_success' => '嵌套集合修复成功',
@@ -31,5 +32,15 @@ return [
         'parent_select_field_placeholder' => '请选择父节点',
         'parent_select_field_empty_label' => '未搜索到父节点',
         'name' => '名称',
+    ],
+
+    'sidebar' => [
+        'label' => '侧栏',
+        'search_placeholder' => '搜索节点…',
+        'search_no_results' => '未找到匹配的节点',
+        'sort_toggle' => '排序模式',
+        'drag_handle' => '拖动调整顺序',
+        'sort_active' => '排序模式：拖动节点调整顺序',
+        'sort_done' => '完成',
     ],
 ];

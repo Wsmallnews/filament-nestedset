@@ -89,6 +89,7 @@ class FilamentNestedsetServiceProvider extends PackageServiceProvider
     {
         $assets = [
             AlpineComponent::make('filament-nestedset', __DIR__ . '/../resources/dist/components/filament-nestedset.js'),
+            AlpineComponent::make('sn-sidebar-nestedset', __DIR__ . '/../resources/dist/components/sidebar-nestedset.js'),
         ];
 
         if (config('sn-filament-nestedset.autoload_assets') ?? true) {
