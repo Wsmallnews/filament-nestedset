@@ -12,13 +12,16 @@ class KalnoyNestedsetSelectTree extends SelectTree
 
     protected function buildTree(): Collection
     {
-        $nullParentQuery = $this->getQuery()->clone()->whereIsRoot();
-        $nonNullParentQuery = $this->getQuery()->clone()->hasParent()->withDepth();
+        $nullParentQuery = $this->getQuery()->clone();
+        $nonNullParentQuery = $this->getQuery()->clone();
 
         if ($this->withTrashed) {
             $nullParentQuery->withTrashed($this->withTrashed);
             $nonNullParentQuery->withTrashed($this->withTrashed);
         }
+
+        $nullParentQuery->whereIsRoot();
+        $nonNullParentQuery->withDepth()->hasParent();
 
         $nullParentResults = $nullParentQuery->get();
         $nonNullParentResults = collect([]);

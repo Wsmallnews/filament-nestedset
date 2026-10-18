@@ -217,10 +217,24 @@ class MakeNestedsetPageCommand extends Command
         string $targetPath,
         array $replacements = [],
     ): void {
-        $stubPath = base_path('stubs/NestedsetPage.stub');
+        $stubPath = null;
 
-        if (! $this->fileExists($stubPath)) {
-            $stubPath = $this->getDefaultStubPath() . '/NestedsetPage.stub';
+        foreach ([
+            base_path('stubs/filament-nestedset/NestedsetPage.stub'),
+            base_path('stubs/NestedsetPage.stub'),
+            $this->getDefaultStubPath() . '/NestedsetPage.stub',
+        ] as $candidate) {
+            if ($this->fileExists($candidate)) {
+                $stubPath = $candidate;
+
+                break;
+            }
+        }
+
+        if (is_null($stubPath)) {
+            $this->components->error('The NestedsetPage stub could not be found.');
+
+            return;
         }
 
         $stub = str($filesystem->get($stubPath));

@@ -267,11 +267,17 @@ trait HasNestedsetActions
      */
     protected function canBeDeleted(Model $record): bool
     {
-        if (static::getAllowDeleteParent() === false && $record->children->isNotEmpty()) {
+        $hasChildren = $record->children->isNotEmpty();
+
+        if ($hasChildren && ! static::getAllowDeleteParent()) {
             return false;
         }
 
-        return ! (static::getAllowDeleteRoot() === false && $record->children->isNotEmpty() && $record->isRoot());
+        if ($hasChildren && $record->isRoot() && ! static::getAllowDeleteRoot()) {
+            return false;
+        }
+
+        return true;
     }
 
     protected function resolveNestedsetActionRecord(Action $action, array $arguments): ?Model
@@ -299,7 +305,7 @@ trait HasNestedsetActions
                 $from = $arguments['from'] ?? 0;
                 $to = $arguments['to'] ?? 0;
 
-                $node = $this->getQuery()->findOrFail($id);
+                $node = $this->getQuery()->withDepth()->findOrFail($id);
 
                 if ($parent == $node->getAttribute(NestedSet::PARENT_ID)) {
                     // Parent unchanged: reorder among siblings only
@@ -317,11 +323,33 @@ trait HasNestedsetActions
                         $siblingsCount = $node->refresh()->siblings()->count();
                         $shift = $siblingsCount - $to;
 
-                        $node->up($shift);
+                        if ($shift > 0) {
+                            $node->up($shift);
+                        }
                     } else {
                         // Prepended to the target parent, then adjust position
                         $parentNode = $this->getQuery()->withDepth()->findOrFail($parent);
-                        if (! is_null(static::getLevel()) && $parentNode->depth >= static::getLevel() - 1) {
+                        if ($parentNode->getKey() == $node->getKey() || $parentNode->isDescendantOf($node)) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('sn-filament-nestedset::nestedset.action.move_node_failed'))
+                                ->body(__('sn-filament-nestedset::nestedset.action.move_node_failed_body_cycle'))
+                                ->send();
+
+                            $action->cancel();
+                            $action->halt();
+                        }
+
+                        $deepestDescendantDepth = $node->descendants()
+                            ->withDepth()
+                            ->orderByDesc('depth')
+                            ->value('depth');
+                        $subtreeHeight = is_null($deepestDescendantDepth)
+                            ? 0
+                            : $deepestDescendantDepth - $node->depth;
+                        $resultingDepth = $parentNode->depth + 1 + $subtreeHeight;
+
+                        if (! is_null(static::getLevel()) && $resultingDepth >= static::getLevel()) {
                             Notification::make()
                                 ->danger()
                                 ->title(__('sn-filament-nestedset::nestedset.action.move_node_failed'))
@@ -343,6 +371,7 @@ trait HasNestedsetActions
                     ->title(__('sn-filament-nestedset::nestedset.action.move_node_success'))
                     ->send();
 
+                $this->dispatch('sn-filament-nestedset-updated');
                 $action->success();
             })
             ->color('danger');
@@ -354,8 +383,6 @@ trait HasNestedsetActions
             ->label(__('sn-filament-nestedset::nestedset.action.fix_nestedset'))
             ->icon(Heroicon::Wrench)
             ->action(function (Action $action): void {
-                $this->dispatch('sn-filament-nestedset-updated');
-
                 try {
                     $this->getQuery()->fixTree();
                 } catch (Throwable $e) {
@@ -370,6 +397,8 @@ trait HasNestedsetActions
 
                     return;
                 }
+
+                $this->dispatch('sn-filament-nestedset-updated');
 
                 Notification::make()
                     ->success()
