@@ -9,6 +9,7 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 use Wsmallnews\FilamentNestedset\Filament\Pages\Concerns\InteractsWithNestedset;
@@ -22,13 +23,27 @@ class SidebarNestedset extends Component implements HasActions, HasSchemas
     #[Reactive]
     public int | string | null $activeId = null;
 
+    public bool $searchable = true;
+
+    public bool $sortable = true;
+
+    #[Locked]
     public ?string $view = 'sn-filament-nestedset::filament.components.sidebar-nestedset';
 
-    public ?string $recordView = 'sn-filament-nestedset::filament.sidebar-nestedset-record';
+    #[Locked]
+    public ?string $contentComponent = 'sn-filament-nestedset::filament.components.sidebar-nestedset-content';
 
-    public function mount(): void
+    #[Locked]
+    public ?string $recordView = 'sn-filament-nestedset::filament.components.sidebar-nestedset-record';
+
+    public function getSearchable(): bool
     {
-        $this->mountInteractsWithNestedset();
+        return $this->searchable;
+    }
+
+    public function getSortable(): bool
+    {
+        return $this->sortable;
     }
 
     public function render(): View
@@ -44,6 +59,11 @@ class SidebarNestedset extends Component implements HasActions, HasSchemas
     public function getRecordView(): string
     {
         return $this->recordView;
+    }
+
+    public function getContentComponent(): string
+    {
+        return $this->contentComponent;
     }
 
     /**

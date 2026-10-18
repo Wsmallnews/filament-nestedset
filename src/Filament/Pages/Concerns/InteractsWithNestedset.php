@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Kalnoy\Nestedset\NodeTrait;
+use Kalnoy\Nestedset\QueryBuilder;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
@@ -79,6 +80,7 @@ trait InteractsWithNestedset
     public function updatedActiveTab(): void {}
 
     #[On('sn-filament-nestedset-updated')]
+    #[On('refresh-page')]
     public function refresh(): void
     {
         // Re-render component
@@ -147,6 +149,11 @@ trait InteractsWithNestedset
         return $record->{static::getRecordTitleAttribute()} ?? ' ';
     }
 
+    protected function getRecordUrl(Model $record): string | HtmlString | null
+    {
+        return null;
+    }
+
     /**
      * Extra scoped parameters for kalnoy/nestedset scoping
      *
@@ -180,6 +187,9 @@ trait InteractsWithNestedset
 
     /**
      * Further constrain the scoped query
+     *
+     * @param  QueryBuilder  $query
+     * @return QueryBuilder
      */
     protected function getEloquentQuery($query)
     {
@@ -191,13 +201,16 @@ trait InteractsWithNestedset
         return $this->getQuery()->withDepth()->get()->toTree();
     }
 
+    /**
+     * @return QueryBuilder
+     */
     protected function getQuery(): Builder
     {
         $model = static::getModel();
 
         $scopes = [];
         if (static::isScopedToTenant() && ($tenant = Filament::getTenant())) {
-            $scopes['team_id'] = $tenant->id;
+            $scopes['team_id'] = $tenant->getKey();
         }
 
         if (static::getTabFieldName()) {

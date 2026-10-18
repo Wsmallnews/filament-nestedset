@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
+use Kalnoy\Nestedset\QueryBuilder;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Wsmallnews\FilamentNestedset\Exceptions\NestedsetException;
 
 class Nestedset extends Component
 {
@@ -15,10 +18,13 @@ class Nestedset extends Component
 
     public ?string $emptyLabel = '';
 
+    #[Locked]
     public ?string $view = 'sn-filament-nestedset::livewire.components.nestedset';
 
+    #[Locked]
     public ?string $recordView = 'sn-filament-nestedset::components.nestedset-record';
 
+    #[Locked]
     public ?string $model = null;
 
     public string $recordTitleAttribute = 'name';
@@ -66,11 +72,14 @@ class Nestedset extends Component
         return $nestedset->toTree();
     }
 
+    /**
+     * @return QueryBuilder
+     */
     protected function getQuery(): Builder
     {
         $model = $this->model;
         if (is_null($model)) {
-            throw new \Exception('Please set the model or custom `getNestedset` method in the nestedset component.');
+            throw new NestedsetException('Please set the model or custom `getNestedset` method in the nestedset component.');
         }
 
         $scopes = [];

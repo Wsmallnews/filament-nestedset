@@ -68,7 +68,7 @@ $nextLevel = $currentLevel + 1;
                 'text-primary-500 dark:text-primary-600' => $hasActive,
             ])
         >
-            {!! $this->getRecordLabel($record) !!}
+            {{ $this->getRecordLabel($record) }}
         </a>
 
         <div
