@@ -320,6 +320,37 @@ test('getRowActions hides delete for nodes with children when parent deletion di
         ->and($actions[1])->toBeInstanceOf(EditAction::class);
 });
 
+test('canBeDeleted allows deleting a childless root even with root deletion disallowed', function () {
+    // 根守卫只针对"带子树的根"：删掉整枝才需要额外授权，孤立的根节点是普通叶子
+    $root = TestCategory::create(['name' => 'Lonely root', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    $page = makeActionsPage(TestCategory::class);
+    $page::allowDeleteRoot(false);
+
+    expect($page->callCanBeDeleted(TestCategory::find($root->id)))->toBeTrue();
+
+    $page::allowDeleteRoot(null);
+});
+
+test('canBeDeleted gates a root with children separately from parents in general', function () {
+    $root = TestCategory::create(['name' => 'Branch root', 'scope_type' => 'test', 'scope_id' => 0]);
+    TestCategory::create(['name' => 'Branch child', 'scope_type' => 'test', 'scope_id' => 0, 'parent_id' => $root->id]);
+
+    $page = makeActionsPage(TestCategory::class);
+
+    // 允许级联删父级，但仍然不允许从根节点开始级联（会清空整枝）
+    $page::allowDeleteParent(true);
+    $page::allowDeleteRoot(false);
+
+    expect($page->callCanBeDeleted(TestCategory::find($root->id)))->toBeFalse();
+
+    $page::allowDeleteRoot(true);
+    expect($page->callCanBeDeleted(TestCategory::find($root->id)))->toBeTrue();
+
+    $page::allowDeleteParent(null);
+    $page::allowDeleteRoot(null);
+});
+
 test('canBeDeleted respects setter over the default', function () {
     $parent = TestCategory::create(['name' => 'Parent', 'scope_type' => 'test', 'scope_id' => 0]);
     TestCategory::create(['name' => 'Child', 'scope_type' => 'test', 'scope_id' => 0, 'parent_id' => $parent->id]);

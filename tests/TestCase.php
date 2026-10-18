@@ -6,14 +6,19 @@ use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use CodeWithDennis\FilamentSelectTree\FilamentSelectTreeServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
+use Filament\Facades\Filament;
 use Filament\FilamentServiceProvider;
 use Filament\Forms\FormsServiceProvider;
+use Filament\Infolists\InfolistsServiceProvider;
 use Filament\Notifications\NotificationsServiceProvider;
+use Filament\Panel;
 use Filament\Schemas\SchemasServiceProvider;
 use Filament\Support\SupportServiceProvider;
+use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Kalnoy\Nestedset\NestedSetServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
@@ -39,8 +44,10 @@ class TestCase extends Orchestra
             SupportServiceProvider::class,
             SchemasServiceProvider::class,
             FormsServiceProvider::class,
+            InfolistsServiceProvider::class,
             ActionsServiceProvider::class,
             NotificationsServiceProvider::class,
+            WidgetsServiceProvider::class,
             FilamentServiceProvider::class,
             LivewireServiceProvider::class,
             FilamentNestedsetServiceProvider::class,
@@ -62,6 +69,16 @@ class TestCase extends Orchestra
         ]);
 
         config()->set('sn-filament-nestedset.autoload_assets', false);
+
+        // Theme-style views passed at mount time (see NestedsetLivewireComponentTest)
+        View::addLocation(__DIR__ . '/Fixtures/views');
+
+        // Filament pages/widgets render through panel layout components; without a
+        // current panel any render-level test dies in NoDefaultPanelSetException.
+        $panel = Panel::make()->id('test')->default();
+
+        Filament::registerPanel($panel);
+        Filament::setCurrentPanel($panel);
     }
 
     protected function defineDatabaseMigrations(): void

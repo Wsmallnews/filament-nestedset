@@ -104,9 +104,15 @@ All other behavior is configured per class via static properties (each comes wit
 | `$rowActionsInGroup`           | `false` / `true`         | Collapse row actions into an "..." ActionGroup        |
 | `$showRowActionLabels`         | `true` / `false`         | Show text labels on flat row actions                  |
 | `$showCreateChildNodeActionInRow` | `true` / `true`       | Show the create-child action in each row              |
-| `$allowDeleteParent`           | `false` / `false`        | Allow deleting nodes that have children               |
-| `$allowDeleteRoot`             | `false` / `false`        | Allow deleting root nodes                             |
+| `$allowDeleteParent`           | `false` / `false`        | Allow deleting a node together with its children       |
+| `$allowDeleteRoot`             | `false` / `false`        | Allow that cascade to start at a root node (removes a whole branch) |
 | `$hasFormParentSelect`         | `true` / `true`          | Show the parent select in the create modal            |
+
+**Delete guards.** Both flags only ever block nodes that *have* children — a childless node is always deletable, including a childless root. `$allowDeleteParent` is the general "may a subtree go with its parent" switch; `$allowDeleteRoot` additionally gates the case where that root cascade would wipe out an entire branch.
+
+**Initialization.** `InteractsWithNestedset::mountInteractsWithNestedset()` runs automatically through Livewire's `mount{TraitBasename}()` hook on pages, widgets and the sidebar component alike — you do **not** need to (and should not) call it from a `mount()` of your own, that would run the model guard and the default tab twice.
+
+**Wiring properties are locked.** `$view`, `$recordView`, `$contentComponent` and `$model` are `#[Locked]` Livewire properties: they are chosen where the component is placed (mount time) and cannot be rewritten from the browser afterwards.
 
 ## Prepare your model
 
@@ -643,6 +649,9 @@ protected function getRecordLabel(Model $record): HtmlString|string
 protected function nestedScoped(): array
 protected function getEloquentQuery($query)
 
+// Customize row links
+protected function getRecordUrl(Model $record): string|HtmlString|null
+
 // Get tree data and delete guards
 protected function getNestedset()
 protected function canBeDeleted(Model $record): bool
@@ -768,7 +777,16 @@ Row actions bind record context via arguments — call the action builder with `
 
 #### Node links
 
-Return a full attribute `HtmlString` from `getRecordUrl()` (e.g. via `function Filament\Support\generate_href_html`) to make row clicks navigate instead of only dispatching the event. Plain strings get escaped by `{{ }}` — wrap them in `HtmlString`.
+The row view prints `getRecordUrl()` through `{{ }}`, which is Laravel's `e()`. That helper escapes plain strings and returns `Htmlable` values verbatim, so only the two shapes below are safe:
+
+| Return value                                                             | Rendered as                                                       |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `null` (default)                                                         | `href=javascript:;` — the row only dispatches the click event     |
+| a full attribute `HtmlString` (via `Filament\Support\generate_href_html`) | kept verbatim, so `target` / `rel` survive and the link navigates |
+
+A **bare URL string is not supported**: it lands in the tag as an escaped bare word and silently produces no link. Return `new HtmlString('href="..."')` (or `generate_href_html()`) instead.
+
+The same `{{ }}` rule applies to `getRecordLabel()`: node titles are escaped by default, and returning an `HtmlString` is the supported way to opt into markup.
 
 ### Nestedset Livewire component
 
@@ -780,10 +798,12 @@ The Nestedset Livewire Component (`Wsmallnews\FilamentNestedset\Livewire\Compone
 | ----------------------- | --------- | -------------------------------------------------------- | ------------------------------------- |
 | `$model`                | `?string` | `null`                                                   | Nestedset model class name            |
 | `$recordTitleAttribute` | `string`  | `'name'`                                                 | Node title attribute name             |
-| `$showLevel`            | `?string` | `null`                                                   | Limit display to specific depth level |
+| `$showLevel`            | `?string` | `null`                                                   | Max depth to display (0-based)        |
 | `$emptyLabel`           | `?string` | `''`                                                     | Empty state label text                |
 | `$view`                 | `?string` | `'sn-filament-nestedset::livewire.components.nestedset'` | Component view path                   |
 | `$recordView`           | `?string` | `'sn-filament-nestedset::components.nestedset-record'`   | Record view path                      |
+
+`showLevel` is compared against the depth `withDepth()` reports, which is **0-based**: `0` shows roots only, `1` includes their children, and so on. `$view`, `$recordView` and `$model` are `#[Locked]` — they are wiring, chosen where the component is placed, and cannot be rewritten from the client side after mount.
 
 #### Methods
 
@@ -791,10 +811,12 @@ The Nestedset Livewire Component (`Wsmallnews\FilamentNestedset\Livewire\Compone
 // Get the record title attribute
 public function getRecordTitleAttribute(): string
 
-// Custom node label (supports HtmlString)
+// Custom node label. Rendered with {{ }}: plain strings are escaped,
+// an HtmlString is your opt-in to markup.
 public function getRecordLabel(Model $record): HtmlString|string
 
-// Custom node URL (return null to use JavaScript:void)
+// Custom node URL: null keeps the row dispatch-only. Return an attribute
+// HtmlString to navigate — a bare string does NOT work.
 public function getRecordUrl(Model $record): string|HtmlString|null
 
 // Custom active state
@@ -807,10 +829,10 @@ public function getNestedset(): Collection
 protected function getQuery(): Builder
 
 // Additional scope parameters
-public function nestedScoped(): array
+protected function nestedScoped(): array
 
 // Custom eloquent query conditions
-public function getEloquentQuery(Builder $query): Builder
+protected function getEloquentQuery(Builder $query): Builder
 ```
 
 #### Events

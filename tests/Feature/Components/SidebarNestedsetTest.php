@@ -43,7 +43,7 @@ test('renders a nested tree with indentation containers', function () {
         ->assertSee('Root A')
         ->assertSee('Child A1')
         ->assertSee('Grandchild')
-        ->assertSeeHtml('x-show="isExpanded"')
+        ->assertSeeHtml('x-show="isExpanded || isSearching"')
         ->assertSeeHtml('mt-0.5 flex w-full flex-col"')
         ->assertSeeHtml("mountAction('create')")
         ->assertSeeHtml('fi-size-sm')
@@ -55,6 +55,48 @@ test('renders the empty state and root create button', function () {
         ->assertSee('No data')
         ->assertSeeHtml("mountAction('create')")
         ->assertSee('New');
+});
+
+// ============ searchable / sortable 开关（仅侧栏组件的 props，不在共用 trait） ============
+
+test('renders the search box and sort toggle by default', function () {
+    TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    sidebarTree()
+        ->assertSeeHtml('x-model.debounce.200ms="search"')
+        ->assertSeeHtml('x-on:click="toggleSortMode()"')
+        ->assertSeeHtml('x-on:click="exitSortMode()"')
+        ->assertSeeHtml('fi-modal-slide-over-from-end')
+        ->assertSeeHtml('data-sidebar-list')
+        ->assertDontSeeHtml('data-sidebar-drop-list')
+        ->assertDontSeeHtml('data-sidebar-drop-placeholder');
+});
+
+test('hides the search box when searchable is disabled', function () {
+    TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    sidebarTree(['searchable' => false])
+        ->assertDontSeeHtml('x-model.debounce.200ms="search"');
+});
+
+test('hides the sort toggle and banner when sortable is disabled', function () {
+    TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    sidebarTree(['sortable' => false])
+        ->assertDontSeeHtml('toggleSortMode()')
+        ->assertDontSeeHtml('exitSortMode()');
+});
+
+// ============ 转义（节点名是用户输入，必须走 {{ }}） ============
+
+test('rows escape node titles', function () {
+    // 侧栏行曾一度用 {!! !!} 直出标签，是真实的存储型 XSS（name 就是普通 input 字段）
+    $payload = '<img src=x onerror=alert(1)>';
+    TestCategory::create(['name' => $payload, 'scope_type' => 'test', 'scope_id' => 0]);
+
+    sidebarTree()
+        ->assertDontSeeHtml($payload)
+        ->assertSeeHtml(e($payload));
 });
 
 // ============ 点击事件（纯前端 $dispatch，与前台 Nestedset 同一契约） ============
@@ -72,10 +114,11 @@ test('rows dispatch leaf-click for leaves and node-click for parents', function 
         ->assertSeeHtml('href=javascript:;');
 });
 
-test('rows render links when getRecordUrl is overridden', function () {
+test('rows render links when getRecordUrl returns an attribute HtmlString', function () {
     TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
 
-    // 返回 HtmlString（同前台 generate_href_html 用法）：{{ }} 不转义，作为真实属性输出
+    // 视图槽位输出的是「一整个属性」，且走 {{ }}（即 e()）；
+    // 只有 Htmlable 才会被原样放行，裸字符串会被转义成一个裸词、不成为 href。
     $withUrl = new class extends TestSidebarTree
     {
         protected function getRecordUrl(Model $record): HtmlString | string | null
@@ -95,14 +138,28 @@ test('highlights the active node and renders children expanded by default', func
     $root = TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
     $child = TestCategory::create(['name' => 'Child A1', 'scope_type' => 'test', 'scope_id' => 0, 'parent_id' => $root->id]);
 
+    // 行高亮 class 序列（pr-2 与高亮相邻，区别于排序按钮 Alpine 表达式里的同类名）
+    $rowHighlight = 'pr-2 bg-primary-50 dark:bg-primary-500/10';
+
     // 选中子节点：子行高亮
     sidebarTree(['activeId' => $child->id])
-        ->assertSeeHtml('bg-primary-50 dark:bg-primary-500/10');
+        ->assertSeeHtml($rowHighlight);
 
     // 默认展开（服务端渲染即可见，规避 morph hidden 死锁）；无选中无高亮
     sidebarTree()
-        ->assertSeeHtml('isExpanded: true')
-        ->assertDontSeeHtml('bg-primary-50 dark:bg-primary-500/10');
+        ->assertSeeHtml('$persist(true).as')
+        ->assertDontSeeHtml($rowHighlight);
+});
+
+test('sort mode swaps row actions for a drag handle', function () {
+    TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
+
+    sidebarTree()
+        // 拖动把手（SortableJS handle，与主树同一契约）默认隐藏，仅排序模式显示
+        ->assertSeeHtml('data-sortable-handle')
+        ->assertSeeHtml(":class=\"sortMode ? '' : 'hidden'\"")
+        // 行操作在排序模式下让位
+        ->assertSeeHtml(":class=\"sortMode ? 'hidden' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'\"");
 });
 
 // ============ 行操作 ============

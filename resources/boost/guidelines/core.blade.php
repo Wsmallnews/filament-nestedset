@@ -110,7 +110,9 @@ public function getTabs(): array
 
 ### 模型要求
 
-模型必须 use `Kalnoy\Nestedset\NodeTrait`，否则 `mount()` / `mountInteractsWithNestedset()` 会抛出 `NestedsetException`。
+模型必须 use `Kalnoy\Nestedset\NodeTrait`，否则 `mountInteractsWithNestedset()` 会抛出 `NestedsetException`。
+
+> **初始化钩子**：`mountInteractsWithNestedset()` 由 Livewire 的 trait 钩子约定自动调用（对每个 trait 调 `mount{TraitBasename}()`），页面 / Widget / Sidebar 三条链路都靠它完成模型守卫与默认 Tab。**不要在子类里再写一个 `mount()` 去调它**——守卫和默认 Tab 会跑两次。子类自己声明 `mount()` 时该钩子依旧自动触发，无需手动转发。
 
 ```php
 use Kalnoy\Nestedset\NodeTrait;
@@ -145,7 +147,9 @@ class Category extends Model
 - 子类必须实现 `schema()`（与 page 同契约——空 schema 的 action 不会以 modal 挂起）。
 - **点击事件**：行是 `<a>`，`wire:click` 纯前端 `$dispatch`（与前台组件同一契约，零服务端请求）：叶子 `sn-filament-nestedset-leaf-click`、非叶子 `sn-filament-nestedset-node-click`，payload `{ recordId, hasChild }`；宿主 `#[On]` 监听筛选。
 - **选中态**：宿主唯一持有，经 `#[Reactive] $activeId` prop 回传，`getHasActive()` 钩子判断高亮（子类可覆写）。
-- **节点链接**：`getRecordUrl()` 默认 null → `href=javascript:;`（仅派发）；返回完整属性 HtmlString（`generate_href_html()`）时点击走链接——普通字符串会被 `{{ }}` 转义，必须 HtmlString。
+- **节点链接**：覆写 `getRecordUrl()`，返回 `null`（默认，仅派发事件）或完整属性 `HtmlString`（`generate_href_html()`）。视图走 `{{ }}`（即 `e()`）：普通字符串会被转义，**裸 URL 字符串无效**（会落成标签里的一个裸词、静默失效），只有 `Htmlable` 原样输出。
+- **视图一律 `{{ }}`**：`{{ }}` = `e()`，对 `Htmlable` 直接返回 `toHtml()` 不转义。所以「普通串转义防 XSS + 返回 `HtmlString` 即富文本」两者兼得，不要再写 `{!! !!}`。
+- **装配属性不可篡改**：`$view` / `$contentComponent` / `$recordView` 是 `#[Locked]`，挂载后无法从客户端改写（否则可被指向别的已注册视图）。
 - **行操作**：`getRowActions()`（HasNestedsetActions）默认收进 ⋯ ActionGroup（`getRowActionsInGroup() ?? true`），平铺时图标态（`getShowRowActionLabels() ?? false`）——基类经 getter 覆写默认值（基类层不能声明与 trait 同名的静态属性，默认值不同会 fatal）；子类可声明属性/覆写 getter/调 setter。
 - **子类默认展开陷阱**：树默认服务端渲染为展开态（`isExpanded: true`）。若改为初始隐藏（x-cloak + 折叠），宿主 reactive 重渲染时 Livewire morph 会对显示分歧加 `hidden` 属性，Alpine（只操作 inline style）无法解除 → 永久卡死。
 - **类名实例化命名**：`@livewire(\App\...\Tree::class)` 的组件在 Livewire 中名为点记法（`app.filament.components.xxx`），浏览器 `Livewire.all()` 按此查找。
@@ -161,19 +165,21 @@ class Category extends Model
 |---|---|---|---|
 | `$model` | `?string` | `null` | 嵌套集模型类名 |
 | `$recordTitleAttribute` | `string` | `'name'` | 节点标题字段名 |
-| `$showLevel` | `?string` | `null` | 显示的层级限制 |
+| `$showLevel` | `?string` | `null` | 显示的层级限制（0-based：`0` = 只显示根级） |
 | `$emptyLabel` | `?string` | `''` | 树为空时的提示文本 |
 | `$view` | `?string` | `'sn-filament-nestedset::livewire.components.nestedset'` | 组件视图 |
 | `$recordView` | `?string` | `'sn-filament-nestedset::components.nestedset-record'` | 节点记录视图 |
+
+`$view` / `$recordView` / `$model` 是 `#[Locked]`：挂载传参、子类覆写 getter 都不受影响，只拦客户端 `wire:model` / `$wire.set()`。注意 PHP attribute **不继承**——子类若重声明同名属性，必须自己再写一遍 `#[Locked]`。
 
 #### 可覆盖方法
 
 @verbatim
 ```php
-// 自定义节点标签
+// 自定义节点标签（视图用 {{ }} 输出：普通串转义，返回 HtmlString 才是富文本）
 public function getRecordLabel(Model $record): HtmlString | string { ... }
 
-// 自定义节点跳转链接
+// 自定义节点跳转链接（null = 仅派发事件；要跳转必须返回属性 HtmlString，裸字符串无效）
 public function getRecordUrl(Model $record): string | HtmlString | null { return null; }
 
 // 自定义节点激活状态
@@ -190,7 +196,9 @@ protected function nestedScoped(): array { return []; }
 ```
 @endverbatim
 
-默认 `getNestedset()` 会执行 `getQuery()->withDepth()->get()`，当 `$showLevel` 非空时保留 `depth <= showLevel` 的记录，然后调用 `toTree()`。
+默认 `getNestedset()` 会执行 `getQuery()->withDepth()->get()`，当 `$showLevel` 非空时保留 `depth <= showLevel` 的记录，然后调用 `toTree()`。**`depth` 是 0-based**：根为 `0`，所以 `showLevel=0` 表示只显示根级。
+
+`$view` / `$recordView` / `$model` 是 `#[Locked]`：它们是装配信息，由放置组件的位置决定，挂载后不可从客户端改写。`$model` 未设置时 `getQuery()` 抛 `NestedsetException`。
 
 #### 事件
 

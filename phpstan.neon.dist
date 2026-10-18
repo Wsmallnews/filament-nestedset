@@ -6,9 +6,49 @@ parameters:
     paths:
         - src
         - config
-        - database
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
-    checkMissingIterableValueType: false
 
+    ignoreErrors:
+        #
+        # kalnoy/nestedset bolts its API (withDepth(), toTree(), isRoot(), $depth,
+        # $children, …) onto the model through NodeTrait at runtime. The nestedset model
+        # only ever reaches this package as a plain Eloquent Model class-string —
+        # validateModel() enforces the trait at runtime — so these members cannot be
+        # expressed as a type without forcing every consumer to declare a generic model.
+        #
+        -
+            message: '#Call to an undefined method Illuminate\\Database\\Eloquent\\Model::#s'
+            path: src/Filament/Pages/Concerns/HasNestedsetActions.php
+        -
+            message: '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$#s'
+            path: src/Filament/Pages/Concerns/HasNestedsetActions.php
+        -
+            message: '#Call to an undefined method Illuminate\\Database\\Eloquent\\Collection<int, Illuminate\\Database\\Eloquent\\Model>#s'
+            path: src/Filament/Pages/Concerns/HasNestedsetActions.php
+        -
+            message: '#Access to an undefined property Illuminate\\Database\\Eloquent\\Collection<int, Illuminate\\Database\\Eloquent\\Model>#s'
+            path: src/Filament/Pages/Concerns/HasNestedsetActions.php
+        -
+            message: '#Call to an undefined method Illuminate\\Database\\Eloquent\\Collection<int, Illuminate\\Database\\Eloquent\\Model>::toTree\(\)#s'
+            path: src/Filament/Pages/Concerns/InteractsWithNestedset.php
+        -
+            message: '#Call to an undefined method Illuminate\\Database\\Eloquent\\Collection<int, Illuminate\\Database\\Eloquent\\Model>::toTree\(\)#s'
+            path: src/Livewire/Components/Nestedset.php
+        -
+            message: '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$depth#s'
+            path: src/Livewire/Components/Nestedset.php
+        -
+            message: '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::(withDepth|whereIsRoot|hasParent|defaultOrder|withTrashed)\(\)#s'
+            path: src/Forms/Fields/KalnoyNestedsetSelectTree.php
+        -
+            message: '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model::\$depth#s'
+            path: src/Forms/Fields/KalnoyNestedsetSelectTree.php
+        #
+        # Filament declares Widget::$view as view-string; the value below is a real,
+        # registered view name but PHPStan has no way to prove it from a plain literal.
+        #
+        -
+            message: '#does not accept default value of type string#s'
+            path: src/Filament/Pages/Widgets/Nestedset.php
