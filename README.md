@@ -19,6 +19,19 @@ Filament nestedset tree build on kalnoy/nestedset, support multi language. suppo
 - Nestedset level is unlimited by default, but you can limit the nestedset levels if you wish
 - Support tabs consistent with the Listing records of the filament panel. You can switch between different nestedset data through tabs on the current page
 
+## Compatibility
+
+The package supports Filament v4 and v5, with one exception:
+
+| Class | Filament v4 | Filament v5 |
+| --- | --- | --- |
+| `Filament\Pages\NestedsetPage` | ✅ | ✅ |
+| `Filament\Pages\Widgets\Nestedset` | ✅ | ✅ |
+| `Livewire\Components\Nestedset` | ✅ | ✅ |
+| `Filament\Components\SidebarNestedset` | ⚠️ renders, but slot content is dropped | ✅ |
+
+`SidebarNestedset` passes content through Livewire slots (`$slot`, named slot `mobileTrigger`), and slots are a **Livewire 4 feature**. Filament v4 pins Livewire v3, so on v4 the component still renders — the view is null-safe — but anything you put inside the component tag is discarded. Override `getContentComponent()` / `getRecordView()` instead if you need custom content there.
+
 ## Architecture
 
 The package uses a **Page + Widget + Sidebar Component + Frontend Component** architecture pattern. All bases must be extended — the package registers nothing by itself:
