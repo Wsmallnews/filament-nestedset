@@ -111,7 +111,7 @@ test('rows dispatch leaf-click for leaves and node-click for parents', function 
         // 有子级的行派发的是 node-click，不是 leaf-click
         ->assertDontSeeHtml("\$dispatch('sn-filament-nestedset-leaf-click', { recordId: '{$root->id}'")
         // 行是 a 标签，默认无链接（仅派发事件）
-        ->assertSeeHtml('href=javascript:;');
+        ->assertSeeHtml('href="javascript:;"');
 });
 
 test('rows render links when getRecordUrl returns an attribute HtmlString', function () {
@@ -129,7 +129,7 @@ test('rows render links when getRecordUrl returns an attribute HtmlString', func
 
     Livewire::test($withUrl)
         ->assertSeeHtml('href="https://example.com/nodes/')
-        ->assertDontSeeHtml('href=javascript:;');
+        ->assertDontSeeHtml('href="javascript:;"');
 });
 
 // ============ 选中态（activeId 回传 + getHasActive 高亮；默认展开） ============
@@ -138,8 +138,8 @@ test('highlights the active node and renders children expanded by default', func
     $root = TestCategory::create(['name' => 'Root A', 'scope_type' => 'test', 'scope_id' => 0]);
     $child = TestCategory::create(['name' => 'Child A1', 'scope_type' => 'test', 'scope_id' => 0, 'parent_id' => $root->id]);
 
-    // 行高亮 class 序列（pr-2 与高亮相邻，区别于排序按钮 Alpine 表达式里的同类名）
-    $rowHighlight = 'pr-2 bg-primary-50 dark:bg-primary-500/10';
+    // 行高亮走包的公共视觉契约：行容器带 is-active（配色在包 CSS 里，不在 blade 的 Tailwind 类上）
+    $rowHighlight = 'sn-nestedset-row is-active';
 
     // 选中子节点：子行高亮
     sidebarTree(['activeId' => $child->id])
