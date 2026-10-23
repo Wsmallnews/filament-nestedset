@@ -6,20 +6,17 @@ use Filament\Support\Icons\Heroicon;
 @endphp
 
 <div class="flex items-center gap-1.5 p-2 pb-1">
-    @if ($this->getSearchable())
-        <div class="min-w-0 flex-1 [&_.fi-icon]:size-3.5 [&_.fi-input-wrp-prefix]:!ps-2 [&_.fi-input-wrp-prefix]:!pe-1">
-            <x-filament::input.wrapper inline-prefix :prefix-icon="Heroicon::OutlinedMagnifyingGlass" class="h-8">
+    <div class="min-w-0 flex-1">
+        @if ($this->getSearchable())
+            <x-filament::input.wrapper inline-prefix :prefix-icon="Heroicon::OutlinedMagnifyingGlass" class="sn-nestedset-input-sm h-8">
                 <x-filament::input
                     type="search"
                     x-model.debounce.200ms="search"
                     :placeholder="__('sn-filament-nestedset::nestedset.sidebar.search_placeholder')"
-                    class="!h-full !px-1.5 !py-1 !text-xs !leading-4"
                 />
             </x-filament::input.wrapper>
-        </div>
-    @else
-        <div class="min-w-0 flex-1"></div>
-    @endif
+        @endif
+    </div>
 
     @if ($this->getSortable())
         <x-filament::icon-button
@@ -73,15 +70,13 @@ use Filament\Support\Icons\Heroicon;
 
     </ul>
 
-    {{-- 搜索无结果提示：仅在搜索中且结果为空时显示（服务端默认隐藏，显隐由 applyVisibility 命令式切换） --}}
+    {{-- Shown by JS only while searching with no matches (hidden on the server). --}}
     <div data-sidebar-no-results style="display: none" class="px-2 py-4 text-center text-xs text-gray-400">
         {{ __('sn-filament-nestedset::nestedset.sidebar.search_no_results') }}
     </div>
 </nav>
 
-{{-- 底部固定创建按钮：sticky 贴滚动容器底（aside / 移动端抽屉都适用），树高度变化（拖拽/展开）
-     时不再跳动；半透明 + 模糊背景让滚动内容从下方经过时被柔和遮住，不产生硬色块 --}}
-<div class="sticky bottom-0 z-10 bg-white/85 px-3 pt-2 pb-1 backdrop-blur-sm dark:bg-gray-900/85">
+<div class="sticky bottom-0 z-10 bg-white/85 px-3 pt-2 pb-3 backdrop-blur-sm dark:bg-gray-900/85">
     {{ $this->createAction()
     ->button()
     ->label(__('sn-filament-nestedset::nestedset.action.create'))

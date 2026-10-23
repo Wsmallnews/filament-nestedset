@@ -22,21 +22,20 @@ $nextLevel = $currentLevel + 1;
     role="menuitem"
 >
     <div
+        @class([
+            'group sn-nestedset-row',
+            'is-active' => $hasActive,
+        ])
         data-sidebar-row
         data-id="{{ $record->getKey() }}"
         data-label="{{ $record->name }}"
-        @class([
-            'group flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2',
-            'hover:bg-gray-100 dark:hover:bg-white/5' => !$hasActive,
-            'bg-primary-50 dark:bg-primary-500/10' => $hasActive,
-        ])
     >
-        @for ($i = 0; $i < ($currentLevel - 1); $i++)
+        @for ($i = 0; $i < $currentLevel - 1; $i++)
             <div class="w-3 shrink-0"></div>
         @endfor
 
         @if ($hasChild)
-            <button type="button" x-on:click="isExpanded = !isExpanded" tabindex="-1" aria-hidden="true"
+            <button type="button" x-on:click.stop="isExpanded = !isExpanded" tabindex="-1" aria-hidden="true"
                 :class="sortMode ? 'hidden' : ''"
                 class="grid size-4 shrink-0 cursor-pointer place-items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <x-filament::icon :icon="Heroicon::ChevronRight" class="size-3.5 transition-transform duration-200" ::class="(isExpanded || isSearching) ? 'rotate-90' : ''" />
@@ -59,14 +58,14 @@ $nextLevel = $currentLevel + 1;
         </button>
 
         <a
+            class="sn-nestedset-row-label"
             wire:click="$dispatch('sn-filament-nestedset-{{ $hasChild ? 'node' : 'leaf' }}-click', { recordId: '{{ $record->getKey() }}', hasChild: {{ $hasChild ? 1 : 0 }} })"
-            {{ $this->getRecordUrl($record) ?? 'href=javascript:;' }}
-            :class="sortMode ? 'pointer-events-none' : ''"
-            @class([
-                'flex min-w-0 flex-1 items-center gap-1.5 text-left select-none',
-                'text-gray-700 dark:text-gray-200 hover:text-primary-500 dark:hover:text-primary-600' => !$hasActive,
-                'text-primary-500 dark:text-primary-600' => $hasActive,
-            ])
+            x-bind:class="sortMode ? 'pointer-events-none' : ''"
+            @if (filled($url = $this->getRecordUrl($record)))
+                {{ $url }}
+            @else
+                href="javascript:;"
+            @endif
         >
             {{ $this->getRecordLabel($record) }}
         </a>

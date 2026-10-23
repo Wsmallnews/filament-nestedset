@@ -27,6 +27,11 @@ class SidebarNestedset extends Component implements HasActions, HasSchemas
 
     public bool $sortable = true;
 
+    /**
+     * Tailwind **container** breakpoint name (3xs–7xl), not a viewport one. 3xl = 48rem container.
+     */
+    public string $breakpoint = '3xl';
+
     #[Locked]
     public ?string $view = 'sn-filament-nestedset::filament.components.sidebar-nestedset';
 
@@ -44,6 +49,11 @@ class SidebarNestedset extends Component implements HasActions, HasSchemas
     public function getSortable(): bool
     {
         return $this->sortable;
+    }
+
+    public function getBreakpoint(): string
+    {
+        return $this->breakpoint;
     }
 
     public function render(): View
@@ -93,5 +103,16 @@ class SidebarNestedset extends Component implements HasActions, HasSchemas
     public static function getShowRowActionLabels(): bool
     {
         return static::$showRowActionLabels ?? false;
+    }
+
+    /**
+     * Keep the row-action dropdown `absolute`: inside an overflow container, Filament's
+     * `teleport` only switches the floating strategy to `fixed` — it never moves the node
+     * to body — so the panel is measured against the scroll container but painted against
+     * the viewport, and lands in the page corner. The host must be a positioning ancestor.
+     */
+    protected function shouldTeleportRowActions(): bool
+    {
+        return false;
     }
 }

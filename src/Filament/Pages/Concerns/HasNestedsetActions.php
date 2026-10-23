@@ -9,6 +9,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Field;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\Width;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
@@ -199,13 +200,41 @@ trait HasNestedsetActions
      */
     protected function wrapRowActionsInGroup(array $actions): ActionGroup
     {
-        return ActionGroup::make($actions)
+        $group = ActionGroup::make($actions)
             ->iconButton()
             ->icon(Heroicon::OutlinedEllipsisVertical)
             ->color('gray')
             ->tooltip(__('sn-filament-nestedset::nestedset.action.more_actions'))
-            ->dropdownTeleport()
+            ->dropdownTeleport($this->shouldTeleportRowActions())
             ->dropdownPlacement('bottom-end');
+
+        if (filled($width = $this->getRowActionsDropdownWidth())) {
+            $group->dropdownWidth($width);
+        }
+
+        return $group;
+    }
+
+    /**
+     * Whether the ⋯ dropdown uses teleport (fixed strategy).
+     *
+     * Filament's `.teleport` only switches the floating strategy to `fixed`; it does not
+     * move the node to body. Inside an overflow container the panel is therefore measured
+     * against that container but painted against the viewport, and drifts away. Menus in
+     * such containers should return false and keep the container a positioning ancestor.
+     */
+    protected function shouldTeleportRowActions(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Dropdown width (null = Filament default). Narrow sidebars must set it, otherwise the
+     * floating middleware pushes the panel outside the container.
+     */
+    protected function getRowActionsDropdownWidth(): string | Width | null
+    {
+        return null;
     }
 
     /**
