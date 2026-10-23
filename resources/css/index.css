@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @source "../views/**/*";
 
@@ -14,15 +14,38 @@
     @apply text-gray-400;
 }
 
-/* Alpine 初始化前隐藏需要 JS 控制显隐的区域（如树节点子级），避免刷新时展开/折叠状态跳动 */
+/* Hide JS-controlled regions before Alpine boots (prevents an expand/collapse flash). */
 [x-cloak] {
     display: none !important;
 }
 
 /*
- * 整树首次加载的入场动画：纯 CSS 关键帧（grid-template-rows 0fr → 1fr 实现高度展开）。
- * 不依赖 transitionend / JS 生命周期：即使动画被中断（后台标签页、渲染节流），
- * 元素也停留在正常可见状态，不会像 x-collapse 那样卡死在 height:0 并阻断模块按需加载。
+ * Sidebar search input. Values are copied from support's `.sn-filament-input-sm`
+ * (this package does not depend on support), so the tree search and the content
+ * toolbar search stay pixel-identical when placed side by side. Keep both in sync.
+ */
+.sn-nestedset-input-sm {
+    & input.fi-input,
+    & select.fi-select-input,
+    & textarea.fi-input {
+        @apply h-full py-1 text-xs leading-5;
+    }
+
+    & .fi-input-wrp-prefix {
+        @apply ps-2 pe-2;
+    }
+
+    & .fi-input-wrp-prefix > .fi-icon,
+    & .fi-input-wrp-suffix > .fi-icon {
+        @apply size-4;
+    }
+}
+
+/*
+ * First-load reveal: pure CSS keyframes (grid-template-rows 0fr → 1fr).
+ * Deliberately not x-collapse — its transitionend dependency can stall at height:0
+ * when the animation is interrupted (background tab, throttling), which blocks the
+ * x-load visible strategy and breaks the tree module.
  */
 .sn-nestedset-enter {
     display: grid;
@@ -50,11 +73,70 @@
     box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-danger-500, #ef4444) 60%, transparent);
 }
 
-/* 树容器宽度不足 sm（24rem）时，行操作按钮只保留图标；sr-only 视觉隐藏保留无障碍可读名称。
- * 常驻隐藏（配置 show_row_action_labels = false）不走 CSS，由 HasNestedsetActions 的
- * hiddenLabel() 在 Action 层渲染为 sr-only + aria-label */
+/* Below a 24rem container the row-action labels collapse to sr-only. A permanently
+ * hidden label (show_row_action_labels = false) is handled in PHP via hiddenLabel(),
+ * not here. */
 @container (width < 24rem) {
     .fi-sn-nestedset-record-rowinfo .fi-ac-link-action > .fi-link-label {
         @apply sr-only;
     }
+}
+
+/*
+ * Row visual contract (public classes, not a component).
+ *
+ *   .sn-nestedset-row         row container (a / button / div)
+ *   .sn-nestedset-row-label   clickable label element
+ *   .is-active                selected state, on the row container
+ *   .is-muted                 de-emphasised row (e.g. "Uncategorised")
+ *   group                     needed on the container for group-hover on trailing actions
+ *
+ * Hosts reuse these for their own entries (media's "All / Uncategorised") so rows match
+ * pixel for pixel. Only pr-2 is applied here — the outer wrapper must supply px-2.
+ * Extra label content (counts, badges) is owned and styled by the host's getRecordLabel().
+ */
+.sn-nestedset-row {
+    @apply flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2;
+
+    &:hover {
+        @apply bg-gray-100 dark:bg-white/5;
+    }
+
+    /* Raw CSS on purpose: the package builds standalone (no panel theme), so
+       `@apply bg-primary-50` is an unknown utility, and only the panel-injected
+       `--primary-*` variables are guaranteed to exist at runtime. */
+    &.is-active {
+        background-color: var(--primary-50, #fffbeb);
+    }
+}
+
+.dark .sn-nestedset-row.is-active {
+    background-color: color-mix(in oklab, var(--primary-500, #f59e0b) 10%, transparent);
+}
+
+.sn-nestedset-row-label {
+    @apply flex min-w-0 flex-1 items-center gap-1.5 text-left text-sm select-none text-gray-700 dark:text-gray-200;
+}
+
+/* Same specificity (0,3,0): order decides. muted < hover < active.
+   Reordering makes hovered/selected muted rows stay grey italic. */
+.sn-nestedset-row.is-muted .sn-nestedset-row-label {
+    @apply text-gray-400 italic dark:text-gray-500;
+}
+
+.sn-nestedset-row:hover .sn-nestedset-row-label {
+    color: var(--primary-500, #f59e0b);
+}
+
+.dark .sn-nestedset-row:hover .sn-nestedset-row-label {
+    color: var(--primary-600, #d97706);
+}
+
+.sn-nestedset-row.is-active .sn-nestedset-row-label {
+    @apply font-medium not-italic;
+    color: var(--primary-500, #f59e0b);
+}
+
+.dark .sn-nestedset-row.is-active .sn-nestedset-row-label {
+    color: var(--primary-600, #d97706);
 }
