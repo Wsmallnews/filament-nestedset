@@ -1,3 +1,8 @@
+@php
+    use Filament\Support\Facades\FilamentAsset;
+    use Filament\Support\Facades\FilamentView;
+@endphp
+
 @props([
     'nestedset',
     'level',
@@ -17,12 +22,12 @@
             class="fi-sn-nestedset @container divide-y divide-gray-200 dark:divide-white/10"
             data-id
             data-sortable-container
-            @if (\Filament\Support\Facades\FilamentView::hasSpaMode())
+            @if (FilamentView::hasSpaMode())
                 x-load="visible || event (ax-modal-opened)"
             @else
                 x-load
             @endif
-            x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-nestedset', 'wsmallnews/filament-nestedset') }}"
+            x-load-src="{{ FilamentAsset::getAlpineComponentSrc('filament-nestedset', 'wsmallnews/filament-nestedset') }}"
             x-data="nestedsetManager({})"
         >
             @forelse($nestedset as $nestedsetKey => $record)
